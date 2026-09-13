@@ -10,15 +10,16 @@ import { Input } from "@/components/ui/input";
 import { repairOperationsService, type RepairOutcome, type RepairWarranty } from "@/services/repairOperationsService";
 import type { RepairApprovalHistory, RepairIntake, RepairQuote } from "@/types/repairPhase4";
 import type { RepairHandover, RepairRepeatLink } from "@/types/repairHandover";
+import RepairInvoiceWorkflow from "@/components/repairs/RepairInvoiceWorkflow";
 
-type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; };
+type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number };
 type CheckKey = "power_test" | "charging_test" | "camera_test" | "speaker_test" | "microphone_test" | "buttons_test" | "biometric_test" | "network_test";
 const checks: { key: CheckKey; label: string }[] = [
   { key: "power_test", label: "Power" }, { key: "charging_test", label: "Charging" }, { key: "camera_test", label: "Camera" }, { key: "speaker_test", label: "Speaker" },
   { key: "microphone_test", label: "Microphone" }, { key: "buttons_test", label: "Buttons" }, { key: "biometric_test", label: "Biometric" }, { key: "network_test", label: "Network" },
 ];
 
-export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate }: Props) {
+export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0 }: Props) {
   const [intake, setIntake] = useState<RepairIntake | null>(null);
   const [quote, setQuote] = useState<RepairQuote | null>(null);
   const [history, setHistory] = useState<RepairApprovalHistory[]>([]);
@@ -134,6 +135,8 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   };
 
   return <section className="space-y-6">
+    <RepairInvoiceWorkflow repairId={repairId} customerId={customerId} repairTotal={repairTotal}/>
+
     <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><ClipboardCheck className="size-5 text-teal-700"/>Repair operations <Badge variant={sla.tone} className="ml-auto">{sla.label}</Badge></CardTitle></CardHeader><CardContent className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3"><Field label="Device condition" value={defaultIntake.device_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, device_condition: v })}/><Field label="Screen condition" value={defaultIntake.screen_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, screen_condition: v })}/><Field label="Body condition" value={defaultIntake.body_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, body_condition: v })}/></div>
       <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Functional intake checks</p><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">{checks.map((check) => <label key={check.key} className="rounded-xl border border-slate-200 p-3 text-sm"><span className="font-medium text-slate-700">{check.label}</span><select value={defaultIntake[check.key] ?? "untested"} onChange={(e) => setIntake({ ...defaultIntake, [check.key]: e.target.value as RepairIntake[CheckKey] })} className="mt-2 h-9 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs"><option value="untested">Untested</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></label>)}</div></div>
