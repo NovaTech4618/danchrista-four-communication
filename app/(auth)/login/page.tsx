@@ -183,6 +183,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (mode === "signup" && password.length < 8) {
+      toast.error("Use at least 8 characters for your password.");
+      return;
+    }
+
     setAuthError("");
     setLoading(true);
 
@@ -305,7 +310,10 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <FieldLabel label="Email"><div className="relative"><Mail className="icon" /><input type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control pl-11" /></div></FieldLabel>
-              <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete={signup ? "new-password" : "current-password"} /></FieldLabel>
+              <FieldLabel label="Password">
+                <PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete={signup ? "new-password" : "current-password"} />
+                {signup && <p className="mt-1.5 text-xs text-slate-400">At least 8 characters.</p>}
+              </FieldLabel>
               {!signup && <div className="flex justify-end"><button type="button" onClick={() => setMode("forgot")} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Forgot password?</button></div>}
               <button type="submit" disabled={loading} className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Please wait…" : signup ? "Create account" : "Sign in"}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></button>
             </form>
