@@ -31,3 +31,4 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      # Keep the quality workflow intentionally strict: npm ci must validate the committed lockfile.
