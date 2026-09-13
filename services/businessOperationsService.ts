@@ -4,6 +4,7 @@ export const businessOperationsService = {
   async getCustomerBalances() { return await supabase.rpc("get_customer_balances"); },
   async getInvoices() { return await supabase.from("invoice_balance_view").select("*").order("issued_at", { ascending: false }); },
   async getInvoice(invoiceId: string) { return await supabase.from("invoice_balance_view").select("*").eq("id", invoiceId).single(); },
+  async getRepairInvoice(repairId: string) { return await supabase.from("invoice_balance_view").select("*").eq("repair_id", repairId).neq("status", "void").order("issued_at", { ascending: true }).maybeSingle(); },
   async getInvoicePayments(invoiceId: string) { return await supabase.from("invoice_payments").select("*").eq("invoice_id", invoiceId).order("payment_date", { ascending: false }); },
   async recordInvoicePayment(input: { invoiceId: string; amount: number; paymentMethod: "cash" | "transfer" | "pos" | "other"; notes?: string | null; idempotencyKey?: string }) {
     const idempotencyKey = input.idempotencyKey ?? crypto.randomUUID();
