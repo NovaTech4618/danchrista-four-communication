@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Activity, AlertTriangle, BarChart3, BellRing, Bot, Building2, ClipboardCheck, FileText,
@@ -66,7 +65,7 @@ export default function AppSidebar() {
 
   function renderItem(item: NavItem) {
     const active = pathname === item.url || (item.url !== "/dashboard" && pathname.startsWith(`${item.url}/`));
-    return <SidebarMenuItem key={item.url}><SidebarMenuButton isActive={active} tooltip={item.title} render={<Link href={item.url} />} className={menuButtonClass()}><item.icon className="size-[17px]" aria-hidden="true" /><span>{item.title}</span></SidebarMenuButton></SidebarMenuItem>;
+    return <SidebarMenuItem key={item.url}><SidebarMenuButton isActive={active} tooltip={item.title} render={<a href={item.url} />} className={menuButtonClass()}><item.icon className="size-[17px]" aria-hidden="true" /><span>{item.title}</span></SidebarMenuButton></SidebarMenuItem>;
   }
 
   function renderGroup(group: NavGroup) {
@@ -88,7 +87,7 @@ export default function AppSidebar() {
   return <Sidebar collapsible="icon" className="border-r border-white/[0.07] bg-[#111111] text-slate-200">
     <SidebarHeader className="border-b border-white/[0.06] bg-[#111111] px-3 py-3"><div className="flex items-center gap-3 px-1 py-1"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12b76a] font-heading text-sm font-black text-white">N</div><div className="min-w-0 group-data-[collapsible=icon]:hidden"><span className="font-heading text-base font-bold tracking-tight text-white">Novatech</span><span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">Repair Suite</span></div></div></SidebarHeader>
     <SidebarContent className="bg-[#111111] px-2 py-2">
-      <SidebarGroup className="px-1.5 py-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard" render={<Link href="/dashboard" />} className={menuButtonClass()}><LayoutDashboard className="size-[17px]" aria-hidden="true" /><span>Dashboard</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/search"} tooltip="Search" render={<Link href="/search" />} className={menuButtonClass()}><Search className="size-[17px]" aria-hidden="true" /><span>Search</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>
+      <SidebarGroup className="px-1.5 py-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard" render={<a href="/dashboard" />} className={menuButtonClass()}><LayoutDashboard className="size-[17px]" aria-hidden="true" /><span>Dashboard</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/search"} tooltip="Search" render={<a href="/search" />} className={menuButtonClass()}><Search className="size-[17px]" aria-hidden="true" /><span>Search</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>
       {renderGroup(operations)}{renderGroup(workshop)}{renderGroup(money)}{renderGroup(communication)}
       {renderGroup({ label: "Management", items: management })}
     </SidebarContent>
@@ -100,7 +99,7 @@ export default function AppSidebar() {
           <p className="truncate text-xs text-slate-500">{profile?.companyName ?? ""}</p>
         </div>
       </div>
-      <SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/help"} tooltip="Help & Support" render={<Link href="/help" />} className={menuButtonClass()}><HelpCircle className="size-[17px]" aria-hidden="true" /><span>Help & Support</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton tooltip="Log out" onClick={handleLogout} className={menuButtonClass()}><LogOut className="size-[17px]" aria-hidden="true" /><span>Log out</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+      <SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/help"} tooltip="Help & Support" render={<a href="/help" />} className={menuButtonClass()}><HelpCircle className="size-[17px]" aria-hidden="true" /><span>Help & Support</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton tooltip="Log out" onClick={handleLogout} className={menuButtonClass()}><LogOut className="size-[17px]" aria-hidden="true" /><span>Log out</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
     </SidebarFooter>
   </Sidebar>;
 }
