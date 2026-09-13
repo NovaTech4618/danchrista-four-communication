@@ -7,7 +7,8 @@ export type PremiumConversationMessage = { role: "user" | "assistant"; content: 
 
 type Row = Record<string, unknown>;
 const MAX_QUESTION_LENGTH = 2000;
-const MAX_CONTEXT_CHARS = 100_000;
+const MAX_CONTEXT_CHARS = 90_000;
+const MAX_ENGINEER_TRANSACTIONS = 500;
 
 function boundedText(value: string, max: number) {
   return value.length <= max ? value : `${value.slice(0, max)}\n[context truncated]`;
@@ -57,19 +58,21 @@ export async function askPremiumAssistant(question: string, conversationId?: str
   const { data: premium, error: premiumError } = await supabase.rpc("has_premium_access");
   if (premiumError || premium !== true) return { ok: false, premium: false, text: "Premium Intelligence is available on a Premium plan." };
 
-  const [{ data: profile }, { data: repairs }, { data: inventory }, { data: customers }, { data: services }, { data: engineers }, { data: sales }, { data: debts }, { data: dashboard }] = await Promise.all([
-    supabase.from("profiles").select("full_name,role,company_id").eq("id", user.id).maybeSingle(),
-    supabase.from("repairs").select("*").order("created_at", { ascending: false }).limit(100),
-    supabase.from("inventory").select("*").order("quantity", { ascending: true }).limit(150),
-    supabase.from("customers").select("*").order("created_at", { ascending: false }).limit(120),
-    supabase.from("technical_services").select("*").order("name").limit(100),
-    supabase.from("engineers").select("*").limit(100),
-    supabase.from("sales").select("*").order("sale_date", { ascending: false }).limit(120),
-    supabase.from("customer_debt_ledger").select("*").order("created_at", { ascending: false }).limit(150),
+  const { data: profile } = await supabase.from("profiles").select("full_name,role,company_id").eq("id", user.id).maybeSingle();
+  if (!profile?.company_id) return { ok: false, premium: true, text: "Your workshop account is not fully configured yet. Please contact an administrator." };
+
+  const companyId = profile.company_id;
+  const [{ data: repairs }, { data: inventory }, { data: customers }, { data: services }, { data: engineers }, { data: sales }, { data: debts }, { data: engineerTransactions }, { data: dashboard }] = await Promise.all([
+    supabase.from("repairs").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(100),
+    supabase.from("inventory").select("*").eq("company_id", companyId).order("quantity", { ascending: true }).limit(150),
+    supabase.from("customers").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(120),
+    supabase.from("technical_services").select("*").eq("company_id", companyId).order("name").limit(100),
+    supabase.from("engineers").select("*").eq("company_id", companyId).limit(100),
+    supabase.from("sales").select("*").eq("company_id", companyId).order("sale_date", { ascending: false }).limit(120),
+    supabase.from("customer_debt_ledger").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(150),
+    supabase.from("engineer_transactions").select("id,engineer_id,transaction_type,description,debit,credit,payment_method,transaction_date,notes,created_at").eq("company_id", companyId).order("transaction_date", { ascending: false }).order("created_at", { ascending: false }).limit(MAX_ENGINEER_TRANSACTIONS),
     supabase.rpc("get_dashboard_summary"),
   ]);
-
-  if (!profile?.company_id) return { ok: false, premium: true, text: "Your workshop account is not fully configured yet. Please contact an administrator." };
 
   const currentDate = todayInLagos();
   const salesRows = rows(sales);
@@ -78,6 +81,7 @@ export async function askPremiumAssistant(question: string, conversationId?: str
   const customerRows = rows(customers);
   const engineerRows = rows(engineers);
   const debtRows = rows(debts);
+  const engineerTransactionRows = rows(engineerTransactions);
   const todaySales = salesRows.filter(r => dateOf(r, "sale_date", "sales_date", "created_at") === currentDate);
   const recentSales = salesRows.filter(r => { const d = dateOf(r, "sale_date", "sales_date", "created_at"); const age = daysAgo(d, currentDate); return age !== null && age >= 0 && age <= 6; });
   const todayRepairs = repairRows.filter(r => dateOf(r, "created_at", "repair_date") === currentDate);
@@ -86,38 +90,58 @@ export async function askPremiumAssistant(question: string, conversationId?: str
   const salesTotal = (list: Row[]) => list.reduce((s, r) => s + num(r, "total", "grand_total", "amount"), 0);
   const customerDebtTotal = debtRows.reduce((s, r) => s + Math.max(0, num(r, "balance", "outstanding", "debit", "amount_due")), 0);
 
+  const engineerById = new Map(engineerRows.map(e => [text(e, "id", "engineer_id"), e]));
   const engineerSignals = engineerRows.map(e => {
     const id = text(e, "id", "engineer_id");
     const name = text(e, "full_name", "name", "engineer_name") || "Unnamed engineer";
-    const related = debtRows.filter(d => text(d, "engineer_id", "technician_id", "user_id") === id || text(d, "engineer_name", "technician_name") === name);
-    return { name, id, balance: related.reduce((s, d) => s + num(d, "balance", "outstanding", "debit", "amount_due"), 0), transactions: related.length };
-  }).filter(e => e.balance > 0 || e.transactions > 0);
+    const related = engineerTransactionRows.filter(t => text(t, "engineer_id") === id);
+    const debit = related.reduce((s, t) => s + Math.max(0, num(t, "debit")), 0);
+    const credit = related.reduce((s, t) => s + Math.max(0, num(t, "credit")), 0);
+    const balance = debit - credit;
+    const payments = related.filter(t => text(t, "transaction_type").toLowerCase() === "payment_in");
+    const partsOut = related.filter(t => text(t, "transaction_type").toLowerCase() === "parts_out");
+    const partsIn = related.filter(t => text(t, "transaction_type").toLowerCase() === "parts_in");
+    const lastTransactionDate = related.map(t => dateOf(t, "transaction_date", "created_at")).filter(Boolean).sort().at(-1) ?? "";
+    const lastPaymentDate = payments.map(t => dateOf(t, "transaction_date", "created_at")).filter(Boolean).sort().at(-1) ?? "";
+    const lastPaymentAgeDays = lastPaymentDate ? daysAgo(lastPaymentDate, currentDate) : null;
+    return { name, id, balance, totalDebit: debit, totalCredit: credit, transactionCount: related.length, paymentCount: payments.length, partsOutCount: partsOut.length, partsInCount: partsIn.length, lastTransactionDate, lastPaymentDate, lastPaymentAgeDays };
+  }).filter(e => e.balance > 0 || e.transactionCount > 0).sort((a, b) => b.balance - a.balance);
+
+  const repairSignals = repairRows.slice(0, 50).map(r => ({
+    id: text(r, "id"),
+    status: text(r, "status"),
+    ageDays: daysAgo(dateOf(r, "created_at", "repair_date"), currentDate),
+    engineerId: text(r, "engineer_id", "technician_id", "assigned_engineer_id"),
+    engineerName: text(r, "engineer_name", "technician_name"),
+    balance: num(r, "balance", "outstanding", "amount_due"),
+    updatedAt: dateOf(r, "updated_at", "created_at"),
+  }));
 
   const intelligence = {
     today: { date: currentDate, salesCount: todaySales.length, salesTotal: salesTotal(todaySales), repairsCreated: todayRepairs.length },
     last7Days: { salesCount: recentSales.length, salesTotal: salesTotal(recentSales), averageDailySales: salesTotal(recentSales) / 7 },
-    repairs: { openCount: openRepairs.length, createdToday: todayRepairs.length },
+    repairs: { openCount: openRepairs.length, createdToday: todayRepairs.length, aging: repairSignals },
     inventory: { itemCount: inventoryRows.length, lowStockCount: lowStock.length, lowStockItems: lowStock.slice(0, 25).map(r => ({ name: text(r, "name", "item_name", "product_name"), quantity: num(r, "quantity", "stock", "current_quantity"), reorderLevel: num(r, "reorder_level", "low_stock_threshold", "minimum_stock") })) },
     customers: { count: customerRows.length },
     debts: { customerDebtRows: debtRows.length, customerDebtTotal },
-    engineers: engineerSignals,
+    engineers: { count: engineerRows.length, ledgerRowsLoaded: engineerTransactionRows.length, balances: engineerSignals },
     dashboard,
   };
 
   let conversation = conversationId;
   if (conversation) {
-    const { data: existing, error } = await supabase.from("assistant_conversations").select("id").eq("id", conversation).eq("created_by", user.id).eq("company_id", profile.company_id).maybeSingle();
+    const { data: existing, error } = await supabase.from("assistant_conversations").select("id").eq("id", conversation).eq("created_by", user.id).eq("company_id", companyId).maybeSingle();
     if (error || !existing) conversation = undefined;
   }
   if (!conversation) {
-    const { data: created, error } = await supabase.from("assistant_conversations").insert({ company_id: profile.company_id, created_by: user.id, title: cleanQuestion.slice(0, 80) }).select("id").single();
+    const { data: created, error } = await supabase.from("assistant_conversations").insert({ company_id: companyId, created_by: user.id, title: cleanQuestion.slice(0, 80) }).select("id").single();
     if (error || !created) return { ok: false, premium: true, text: "I couldn't start this conversation. Please try again." };
     conversation = created.id;
   }
-  const { error: userMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: user.id, role: "user", content: cleanQuestion });
+  const { error: userMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: companyId, user_id: user.id, role: "user", content: cleanQuestion });
   if (userMessageError) return { ok: false, premium: true, text: "I couldn't save your message. Please try again.", conversationId: conversation };
 
-  const context = boundedText(JSON.stringify({ currentDate, profile, intelligence, records: { repairs: repairRows, inventory: inventoryRows, customers: customerRows, services: rows(services), engineers: engineerRows, sales: salesRows, customerDebtLedger: debtRows } }), MAX_CONTEXT_CHARS);
+  const context = boundedText(JSON.stringify({ currentDate, profile, intelligence, records: { repairs: repairRows, inventory: inventoryRows, customers: customerRows, services: rows(services), engineers: engineerRows, sales: salesRows, customerDebtLedger: debtRows, engineerTransactions: engineerTransactionRows } }), MAX_CONTEXT_CHARS);
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL || "gpt-5.6-luna";
   if (!apiKey) return { ok: false, premium: true, text: "Premium Intelligence is not connected yet. Add OPENAI_API_KEY to the server environment, then restart the app.", conversationId: conversation };
@@ -135,17 +159,18 @@ REASONING RULES:
 2. Use deterministic signals first, then reason over them.
 3. Separate FACT from INFERENCE. Never invent a cause.
 4. For "why" questions, investigate several relevant signals before answering.
-5. Rank likely explanations when the evidence supports them.
+5. Rank likely explanations only when the evidence supports them.
 6. If the records cannot establish the cause, say exactly what is missing and ask one focused question.
 7. Use concrete naira amounts, counts, dates and names when useful.
-8. Keep customer debt and engineer debt completely separate.
+8. Keep customer debt and engineer debt completely separate. Engineer debt is ledger balance = total debit - total credit from engineer_transactions.
 9. Never infer a person's motive from a user's wording. "He doesn't want to pay" is a claim, not evidence.
-10. For low sales, compare today with the 7-day window and inspect customer/repair/inventory signals before concluding.
-11. For delayed repairs, inspect status, age, assigned engineer, balance and recent activity.
-12. For engineer debt, inspect balance, transactions and payments if present; never accuse anyone of dishonesty without evidence.
+10. For low sales, compare today with the 7-day average and inspect customer/repair/inventory signals before concluding.
+11. For delayed repairs, inspect status, age, assigned engineer, balance and recent activity. Do not invent an expected completion date.
+12. For engineer debt, inspect ledger balance, parts_out, parts_in and payment_in activity. Use last payment date/age when available. Never accuse anyone of dishonesty without evidence.
 13. For stock questions, inspect quantity and reorder thresholds and connect stock to relevant sales/repair activity where available.
-14. When asked a follow-up like "yes", "check him", "which one?", use the conversation context and continue the investigation.
+14. When asked a follow-up like "yes", "check him", "which one?", use the conversation context and continue the investigation instead of restarting.
 15. Never claim you sent a message, changed a record, collected money, contacted an engineer or performed an action unless an actual tool confirms it.
+16. If a dataset is limited by a retrieval cap, say so when that limitation could affect the answer.
 
 RESPONSE STYLE: Usually 2–5 short paragraphs. Simple lookup: 1–2 sentences. Investigation: finding → evidence → what it means → next useful check. Calm, direct, conversational. Avoid "Based on the records provided", "As an AI", "I understand your concern", long headings, tables, generic advice and repeated summaries.
 
@@ -166,8 +191,8 @@ ${context}`;
   const payload = await response.json() as { output_text?: string; output?: Array<{ content?: Array<{ type?: string; text?: string }> }> };
   const answer = payload.output_text?.trim() || payload.output?.flatMap(item => item.content ?? []).map(part => part.text ?? "").join("\n").trim();
   const resultText = answer || "I couldn't produce a response from the available workshop data.";
-  const { error: assistantMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: user.id, role: "assistant", content: resultText });
+  const { error: assistantMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: companyId, user_id: user.id, role: "assistant", content: resultText });
   if (assistantMessageError) console.error("Premium Assistant save error", assistantMessageError);
-  await supabase.from("assistant_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversation).eq("company_id", profile.company_id);
+  await supabase.from("assistant_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversation).eq("company_id", companyId);
   return { ok: true, premium: true, text: resultText, conversationId: conversation };
 }
