@@ -32,3 +32,4 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       # Keep the quality workflow intentionally strict: npm ci must validate the committed lockfile.
+      # Run the full gate after the cookie-session and server-action audit changes.
