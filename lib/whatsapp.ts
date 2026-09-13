@@ -11,7 +11,7 @@ export function openWhatsApp(phone: string, message: string) {
   const normalized = normalizeWhatsAppPhone(phone);
   if (!normalized) return false;
   const url = `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+  window.location.assign(url);
   return true;
 }
 
