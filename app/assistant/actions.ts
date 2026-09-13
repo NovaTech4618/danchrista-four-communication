@@ -70,6 +70,21 @@ export async function askPremiumAssistant(question: string, conversationId?: str
 
   if (!profile?.company_id) return { ok: false, premium: true, text: "Your workshop account is not fully configured yet. Please contact an administrator." };
 
+  const now = new Date();
+  const currentDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(now);
+  const salesRows = (sales ?? []) as Array<Record<string, unknown>>;
+  const repairsRows = (repairs ?? []) as Array<Record<string, unknown>>;
+  const todaySales = salesRows.filter((sale) => String(sale.sales_date ?? sale.created_at ?? "").slice(0, 10) === currentDate);
+  const todaySalesTotal = todaySales.reduce((sum, sale) => sum + Number(sale.total ?? 0), 0);
+  const todayRepairs = repairsRows.filter((repair) => String(repair.created_at ?? "").slice(0, 10) === currentDate);
+  const recentSales = salesRows.filter((sale) => {
+    const value = String(sale.sales_date ?? sale.created_at ?? "").slice(0, 10);
+    const parsed = Date.parse(`${value}T00:00:00Z`);
+    const current = Date.parse(`${currentDate}T00:00:00Z`);
+    return Number.isFinite(parsed) && current - parsed >= 0 && current - parsed <= 7 * 86400000;
+  });
+  const recentSalesTotal = recentSales.reduce((sum, sale) => sum + Number(sale.total ?? 0), 0);
+
   let conversation = conversationId;
   if (conversation) {
     const { data: existing, error: existingError } = await supabase.from("assistant_conversations").select("id").eq("id", conversation).eq("created_by", user.id).eq("company_id", profile.company_id).maybeSingle();
@@ -85,7 +100,25 @@ export async function askPremiumAssistant(question: string, conversationId?: str
   const { error: userMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: user.id, role: "user", content: cleanQuestion });
   if (userMessageError) return { ok: false, premium: true, text: "I couldn't save your message. Please try again.", conversationId: conversation };
 
-  const context = boundedText(JSON.stringify({ profile, dashboard, repairs, inventory, customers, services, engineers, sales, debts }), MAX_CONTEXT_CHARS);
+  const context = boundedText(JSON.stringify({
+    currentDate,
+    profile,
+    dashboard,
+    derivedSignals: {
+      todaySalesCount: todaySales.length,
+      todaySalesTotal,
+      todayRepairCount: todayRepairs.length,
+      last7DaysSalesCount: recentSales.length,
+      last7DaysSalesTotal: recentSalesTotal,
+    },
+    repairs,
+    inventory,
+    customers,
+    services,
+    engineers,
+    sales,
+    debts,
+  }), MAX_CONTEXT_CHARS);
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL || "gpt-5.6-luna";
   if (!apiKey) return { ok: false, premium: true, text: "Premium Intelligence is not connected yet. Add OPENAI_API_KEY to the server environment, then restart the app.", conversationId: conversation };
@@ -97,9 +130,15 @@ export async function askPremiumAssistant(question: string, conversationId?: str
 
 CORE RULE: Answer like a very good human assistant, not like an AI product demo. The owner should feel that you understood the question, checked the relevant shop records, and are talking directly to them.
 
+TIME: The workshop's current date is ${currentDate} in Africa/Lagos. Treat that as TODAY. Never call an older record today. Use the record's own date when correcting or explaining a previous answer.
+
+EVIDENCE FIRST: The live context contains records you are allowed to use. If a relevant fact is present, use it confidently and do not say the information is unavailable. Never contradict a fact you already have in the live context. If a list is available, do not ask the owner to confirm that same list. Only say that data is unavailable when the relevant query/result genuinely failed or the supplied context does not contain it.
+
 RESPONSE METHOD: Start with the answer or the most important fact. Then give only the evidence needed to understand it. If there is a likely explanation, say "The main thing I can see is..." or similar natural language. If there are several possible causes, rank them. Clearly separate what the records prove from what they only suggest. Never invent a cause.
 
-WHY QUESTIONS: When asked why something happened, investigate it before answering. Use the relevant records and comparisons available in the live context. For low sales, examine today's sales value and count, recent comparable sales, customer activity, repairs and payment activity. For delayed repairs, examine status, age, assigned engineer, balance and recent activity. For engineer debt, examine the person's balance, debit or parts transactions, payments, dates and repayment pattern. For stock, examine quantity and available sales or repair usage. For unusual activity, identify concrete amounts, dates, changes or patterns. If the supplied data cannot establish the cause, say exactly what is missing and ask one focused follow-up question.
+WHY QUESTIONS: When asked why something happened, investigate it before answering. Use the relevant records and comparisons available in the live context. For low sales, use the supplied today's sales count/value, recent sales totals, customer activity, repairs and payment activity. For delayed repairs, examine status, age, assigned engineer, balance and recent activity. For engineer debt, examine the person's balance, debit or parts transactions, payments, dates and repayment pattern. For stock, examine quantity and available sales or repair usage. For unusual activity, identify concrete amounts, dates, changes or patterns. If the supplied data cannot establish the cause, say exactly what is missing and ask one focused follow-up question.
+
+LOW SALES: Do not stop at "there are not enough sales." State today's recorded sales count and value, compare with the available recent period, then identify whether customer activity, repairs, payment activity or stock availability gives evidence for a cause. If the records only support "low activity" rather than a specific cause, say that plainly.
 
 PEOPLE AND MOTIVES: Never treat the user's description of a person's motive as a fact. If the user says an engineer "doesn't want to pay", do not agree with that motive. Say what the records show: amount owed, parts/debits, payments, last payment and how long the balance has been outstanding. You can say "I can't tell why he hasn't paid from the records" and then investigate the payment pattern. Never accuse someone of dishonesty without concrete evidence.
 
