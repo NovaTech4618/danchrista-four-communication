@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { NovatechLogo } from "@/components/brand/NovatechLogo";
 
-type AuthMode = "login" | "signup" | "setup" | "verify" | "forgot" | "reset";
+type AuthMode = "login" | "signup" | "setup" | "verify" | "forgot" | "reset" | "mfa";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaFactorId, setMfaFactorId] = useState("");
 
   function getAuthRedirectUrl() {
     return `${window.location.origin}/login`;
@@ -228,7 +230,70 @@ export default function LoginPage() {
       return;
     }
 
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel) {
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const factor = factors?.totp.find((f) => f.status === "verified");
+      if (factor) {
+        setMfaFactorId(factor.id);
+        setLoading(false);
+        setMode("mfa");
+        return;
+      }
+    }
+
     await ensureCompanyThenRedirect();
+  }
+
+  async function handleMfaVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (mfaCode.trim().length < 6) {
+      toast.error("Enter the 6-digit code from your authenticator app.");
+      return;
+    }
+    setLoading(true);
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+    if (challengeError) {
+      setLoading(false);
+      toast.error(challengeError.message);
+      return;
+    }
+    const { error: verifyError } = await supabase.auth.mfa.verify({
+      factorId: mfaFactorId,
+      challengeId: challenge.id,
+      code: mfaCode.trim(),
+    });
+    if (verifyError) {
+      setLoading(false);
+      toast.error("That code didn't match. Try again.");
+      return;
+    }
+    await ensureCompanyThenRedirect();
+  }
+
+  if (mode === "mfa") {
+    return (
+      <AuthShell>
+        <NovatechLogo />
+        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700"><ShieldCheck className="size-6" /></div>
+        <h1 className="mt-6 text-center font-heading text-3xl font-bold tracking-tight">Enter your code</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-slate-500">Open your authenticator app and enter the 6-digit code for this account.</p>
+        <form onSubmit={handleMfaVerify} className="mt-7 space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            autoFocus
+            maxLength={6}
+            placeholder="123456"
+            value={mfaCode}
+            onChange={(e) => setMfaCode(e.target.value)}
+            className="control text-center text-lg tracking-[0.4em]"
+          />
+          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Verifying…" : "Verify"}<ArrowRight className="size-4" /></button>
+        </form>
+        <button type="button" onClick={() => { setMode("login"); setMfaCode(""); }} className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Back to sign in</button>
+      </AuthShell>
+    );
   }
 
   if (mode === "verify") {

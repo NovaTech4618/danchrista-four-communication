@@ -6,6 +6,7 @@ import { Building2, CircleHelp, ImagePlus, MessageCircle, ShieldCheck, Sparkles,
 import { toast } from "sonner";
 import AppLayout from "@/components/layout/AppLayout";
 import { settingsService } from "@/services/settingsService";
+import TwoFactorAuthCard from "@/components/settings/TwoFactorAuthCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -182,6 +183,7 @@ export default function SettingsPage() {
             <CardHeader><CardTitle>Business Details</CardTitle></CardHeader>
             <CardContent><form onSubmit={handleSaveCompany} className="space-y-4"><div><label className="mb-1 block text-xs text-muted-foreground">Business / Shop Name</label><Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Your business name" /></div><Button type="submit" disabled={savingCompany}>{savingCompany ? "Saving…" : "Save Business Details"}</Button></form></CardContent>
           </Card>
+          <TwoFactorAuthCard />
         </div>
 
         <section>
