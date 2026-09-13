@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 export type PremiumAssistantResult = { ok: boolean; premium: boolean; text: string; conversationId?: string };
 export type PremiumConversationMessage = { role: "user" | "assistant"; content: string };
@@ -8,22 +8,21 @@ export type PremiumConversationMessage = { role: "user" | "assistant"; content: 
 const MAX_QUESTION_LENGTH = 2000;
 const MAX_CONTEXT_CHARS = 120_000;
 
-function clientForToken(accessToken: string) {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
-    global: { headers: { Authorization: `Bearer ${accessToken}` } },
-  });
-}
-
 function boundedText(value: string, max: number) {
   return value.length <= max ? value : `${value.slice(0, max)}\n[context truncated]`;
 }
 
-export async function checkPremiumAccess(accessToken: string): Promise<{ ok: boolean; premium: boolean }> {
-  if (!accessToken) return { ok: false, premium: false };
+async function authenticatedClient() {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return { supabase, user: null };
+  return { supabase, user };
+}
+
+export async function checkPremiumAccess(): Promise<{ ok: boolean; premium: boolean }> {
   try {
-    const supabase = clientForToken(accessToken);
-    const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
-    if (userError || !userData.user) return { ok: false, premium: false };
+    const { supabase, user } = await authenticatedClient();
+    if (!user) return { ok: false, premium: false };
     const { data, error } = await supabase.rpc("has_premium_access");
     if (error) {
       console.error("Premium access check error", error);
@@ -36,31 +35,29 @@ export async function checkPremiumAccess(accessToken: string): Promise<{ ok: boo
   }
 }
 
-export async function getPremiumConversation(accessToken: string, conversationId?: string): Promise<{ ok: boolean; messages: PremiumConversationMessage[] }> {
-  if (!accessToken || !conversationId) return { ok: true, messages: [] };
-  const supabase = clientForToken(accessToken);
-  const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
-  if (userError || !userData.user) return { ok: false, messages: [] };
-  const { data: conversation, error: conversationError } = await supabase.from("assistant_conversations").select("id").eq("id", conversationId).eq("created_by", userData.user.id).maybeSingle();
+export async function getPremiumConversation(conversationId?: string): Promise<{ ok: boolean; messages: PremiumConversationMessage[] }> {
+  if (!conversationId) return { ok: true, messages: [] };
+  const { supabase, user } = await authenticatedClient();
+  if (!user) return { ok: false, messages: [] };
+  const { data: conversation, error: conversationError } = await supabase.from("assistant_conversations").select("id").eq("id", conversationId).eq("created_by", user.id).maybeSingle();
   if (conversationError || !conversation) return { ok: false, messages: [] };
   const { data, error } = await supabase.from("assistant_messages").select("role,content").eq("conversation_id", conversation.id).order("created_at", { ascending: true }).limit(100);
   if (error) return { ok: false, messages: [] };
   return { ok: true, messages: (data ?? []).filter((message): message is PremiumConversationMessage => (message.role === "user" || message.role === "assistant") && typeof message.content === "string") };
 }
 
-export async function askPremiumAssistant(accessToken: string, question: string, conversationId?: string): Promise<PremiumAssistantResult> {
+export async function askPremiumAssistant(question: string, conversationId?: string): Promise<PremiumAssistantResult> {
   const cleanQuestion = question.trim();
-  if (!accessToken || !cleanQuestion) return { ok: false, premium: false, text: "Please sign in and ask a question." };
+  if (!cleanQuestion) return { ok: false, premium: false, text: "Please ask a question." };
   if (cleanQuestion.length > MAX_QUESTION_LENGTH) return { ok: false, premium: true, text: `Please keep your question under ${MAX_QUESTION_LENGTH.toLocaleString()} characters.` };
 
-  const supabase = clientForToken(accessToken);
-  const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
-  if (userError || !userData.user) return { ok: false, premium: false, text: "Your session has expired. Please sign in again." };
+  const { supabase, user } = await authenticatedClient();
+  if (!user) return { ok: false, premium: false, text: "Your session has expired. Please sign in again." };
   const { data: premium, error: premiumError } = await supabase.rpc("has_premium_access");
   if (premiumError || premium !== true) return { ok: false, premium: false, text: "Premium Intelligence is available on a Premium plan." };
 
   const [{ data: profile }, { data: repairs }, { data: inventory }, { data: customers }, { data: services }, { data: engineers }, { data: sales }, { data: debts }, { data: dashboard }] = await Promise.all([
-    supabase.from("profiles").select("full_name,role,company_id").eq("id", userData.user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name,role,company_id").eq("id", user.id).maybeSingle(),
     supabase.from("repairs").select("*").order("created_at", { ascending: false }).limit(80),
     supabase.from("inventory").select("*").order("quantity", { ascending: true }).limit(120),
     supabase.from("customers").select("*").order("created_at", { ascending: false }).limit(100),
@@ -75,17 +72,17 @@ export async function askPremiumAssistant(accessToken: string, question: string,
 
   let conversation = conversationId;
   if (conversation) {
-    const { data: existing, error: existingError } = await supabase.from("assistant_conversations").select("id").eq("id", conversation).eq("created_by", userData.user.id).eq("company_id", profile.company_id).maybeSingle();
+    const { data: existing, error: existingError } = await supabase.from("assistant_conversations").select("id").eq("id", conversation).eq("created_by", user.id).eq("company_id", profile.company_id).maybeSingle();
     if (existingError) return { ok: false, premium: true, text: "I couldn't verify this conversation. Please start a new chat.", conversationId };
     if (!existing) conversation = undefined;
   }
   if (!conversation) {
-    const { data: created, error } = await supabase.from("assistant_conversations").insert({ company_id: profile.company_id, created_by: userData.user.id, title: cleanQuestion.slice(0, 80) }).select("id").single();
+    const { data: created, error } = await supabase.from("assistant_conversations").insert({ company_id: profile.company_id, created_by: user.id, title: cleanQuestion.slice(0, 80) }).select("id").single();
     if (error || !created) return { ok: false, premium: true, text: "I couldn't start this conversation. Please try again." };
     conversation = created.id;
   }
 
-  const { error: userMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: userData.user.id, role: "user", content: cleanQuestion });
+  const { error: userMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: user.id, role: "user", content: cleanQuestion });
   if (userMessageError) return { ok: false, premium: true, text: "I couldn't save your message. Please try again.", conversationId: conversation };
 
   const context = boundedText(JSON.stringify({ profile, dashboard, repairs, inventory, customers, services, engineers, sales, debts }), MAX_CONTEXT_CHARS);
@@ -138,7 +135,7 @@ Live company context: ${context}`;
   const payload = await response.json() as { output_text?: string; output?: Array<{ content?: Array<{ type?: string; text?: string }> }> };
   const answer = payload.output_text?.trim() || payload.output?.flatMap((item) => item.content ?? []).map((part) => part.text ?? "").join("\n").trim();
   const text = answer || "I couldn't produce a response from the available workshop data.";
-  const { error: assistantMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: userData.user.id, role: "assistant", content: text });
+  const { error: assistantMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: profile.company_id, user_id: user.id, role: "assistant", content: text });
   if (assistantMessageError) console.error("Premium Assistant save error", assistantMessageError);
   await supabase.from("assistant_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversation).eq("company_id", profile.company_id);
   return { ok: true, premium: true, text, conversationId: conversation };
