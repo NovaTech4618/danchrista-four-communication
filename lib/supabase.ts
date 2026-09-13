@@ -1,14 +1,17 @@
-import { createClient, type Session } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { Session } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Keep the existing singleton export so the current Client Components do not
+// need a risky auth-wide rewrite. @supabase/ssr makes this browser client
+// cookie-backed instead of localStorage-backed and uses PKCE for auth flows.
+export const supabase = createBrowserClient(supabaseUrl, supabasePublishableKey);
 
-// getSession() can briefly return null on a fresh page load (e.g. typing
-// a URL directly or hard-refreshing), because the client hasn't finished
-// restoring the session from storage yet. This waits for that to happen
-// instead of giving up immediately.
+// getSession() can briefly return null while the browser client restores the
+// cookie-backed session after navigation or a hard refresh. Wait briefly for
+// the auth event before treating the user as signed out.
 export async function getCurrentSession(): Promise<Session | null> {
   const {
     data: { session },
@@ -17,16 +20,21 @@ export async function getCurrentSession(): Promise<Session | null> {
   if (session) return session;
 
   return new Promise<Session | null>((resolve) => {
+    let settled = false;
+
+    const finish = (nextSession: Session | null) => {
+      if (settled) return;
+      settled = true;
+      subscription.unsubscribe();
+      resolve(nextSession);
+    };
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      subscription.unsubscribe();
-      resolve(newSession);
+      finish(newSession);
     });
 
-    setTimeout(() => {
-      subscription.unsubscribe();
-      resolve(null);
-    }, 3000);
+    setTimeout(() => finish(null), 3000);
   });
 }
