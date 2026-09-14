@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { NovatechLogo } from "@/components/brand/NovatechLogo";
 
-type AuthMode = "login" | "signup" | "setup" | "verify" | "forgot" | "reset" | "mfa";
+type AuthMode = "login" | "verify" | "reset" | "forgot" | "mfa";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -57,11 +56,11 @@ export default function LoginPage() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("company_id")
+      .select("company_id, is_active")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile?.company_id) {
+    if (profile?.company_id && profile.is_active !== false) {
       setLoading(false);
       router.replace("/dashboard");
       return;
@@ -76,16 +75,14 @@ export default function LoginPage() {
       return;
     }
 
-    setMode("setup");
+    await supabase.auth.signOut();
+    setAuthError("This account is not linked to Danchrista. Ask Ame3ing to add you as staff.");
   }
 
   useEffect(() => {
     showCallbackError();
     if (hasRecoverySignal()) setMode("reset");
 
-    // A visit to /login must remain a login page. Do not redirect because a
-    // previous browser session already exists. Redirect only after an explicit
-    // sign-in, sign-up, or password recovery action.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setAuthError("");
@@ -95,26 +92,6 @@ export default function LoginPage() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  async function handleCreateCompany(e: React.FormEvent) {
-    e.preventDefault();
-    if (!companyName.trim()) {
-      toast.error("Business name is required.");
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await supabase.rpc("create_company_for_new_user", { company_name: companyName.trim() });
-    setLoading(false);
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("Welcome to NOVATECH!");
-    router.replace("/dashboard");
-  }
 
   async function resendVerification() {
     if (!email.trim()) {
@@ -141,7 +118,7 @@ export default function LoginPage() {
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) {
-      toast.error("Enter your email first.");
+      toast.error("Enter your account email first.");
       return;
     }
 
@@ -185,36 +162,8 @@ export default function LoginPage() {
       return;
     }
 
-    if (mode === "signup" && password.length < 8) {
-      toast.error("Use at least 8 characters for your password.");
-      return;
-    }
-
     setAuthError("");
     setLoading(true);
-
-    if (mode === "signup") {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: { emailRedirectTo: getAuthRedirectUrl() },
-      });
-
-      if (error) {
-        toast.error(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data.session) {
-        setLoading(false);
-        setMode("verify");
-        return;
-      }
-
-      await ensureCompanyThenRedirect();
-      return;
-    }
 
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
 
@@ -279,16 +228,7 @@ export default function LoginPage() {
         <h1 className="mt-6 text-center font-heading text-3xl font-bold tracking-tight">Enter your code</h1>
         <p className="mt-3 text-center text-sm leading-6 text-slate-500">Open your authenticator app and enter the 6-digit code for this account.</p>
         <form onSubmit={handleMfaVerify} className="mt-7 space-y-4">
-          <input
-            type="text"
-            inputMode="numeric"
-            autoFocus
-            maxLength={6}
-            placeholder="123456"
-            value={mfaCode}
-            onChange={(e) => setMfaCode(e.target.value)}
-            className="control text-center text-lg tracking-[0.4em]"
-          />
+          <input type="text" inputMode="numeric" autoFocus maxLength={6} placeholder="123456" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} className="control text-center text-lg tracking-[0.4em]" />
           <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Verifying…" : "Verify"}<ArrowRight className="size-4" /></button>
         </form>
         <button type="button" onClick={() => { setMode("login"); setMfaCode(""); }} className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Back to sign in</button>
@@ -306,20 +246,6 @@ export default function LoginPage() {
         {authError && <ErrorMessage>{authError}</ErrorMessage>}
         <button type="button" onClick={resendVerification} disabled={loading} className="mt-7 w-full rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Sending…" : "Resend verification email"}</button>
         <button type="button" onClick={() => { setAuthError(""); setMode("login"); }} className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Back to sign in</button>
-        <p className="mt-6 text-center text-xs text-slate-400">Check spam or promotions if it doesn’t arrive.</p>
-      </AuthShell>
-    );
-  }
-
-  if (mode === "setup") {
-    return (
-      <AuthShell>
-        <NovatechLogo />
-        <div className="mt-8"><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">First step</p><h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">Set up your workshop</h1><p className="mt-3 text-sm leading-6 text-slate-500">Your account is ready. Give the business a name and NOVATECH will create the workspace.</p></div>
-        <form onSubmit={handleCreateCompany} className="mt-7 space-y-4">
-          <FieldLabel label="Business / shop name"><input type="text" autoFocus placeholder="e.g. Danchrista Four Communications" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="control" /></FieldLabel>
-          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Creating workspace…" : "Create my workspace"}<ArrowRight className="size-4" /></button>
-        </form>
       </AuthShell>
     );
   }
@@ -354,8 +280,6 @@ export default function LoginPage() {
     );
   }
 
-  const signup = mode === "signup";
-
   return (
     <main className="min-h-screen bg-[#f5f7f6] text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[1.1fr_0.9fr]">
@@ -363,30 +287,25 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_90%_75%,rgba(20,184,166,0.12),transparent_34%)]" />
           <div className="relative">
             <NovatechLogo dark />
-            <div className="mt-20 max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-300">The calmer repair desk</p><h2 className="mt-5 font-heading text-5xl font-bold leading-[1.02] tracking-[-0.04em] xl:text-6xl">Run the shop without the notebook-and-WhatsApp chaos.</h2><p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">Keep customers, devices, repairs, engineers, stock and payments connected from intake to pickup.</p></div>
+            <div className="mt-20 max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-300">Danchrista Four Communication</p><h2 className="mt-5 font-heading text-5xl font-bold leading-[1.02] tracking-[-0.04em] xl:text-6xl">Run the shop with one clear record.</h2><p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">Sales, phone parts, repairs, engineers, payments, expenses and daily closing—kept connected for Ame3ing.</p></div>
           </div>
-          <div className="relative grid max-w-xl gap-3 sm:grid-cols-2"><Benefit text="Track every repair" /><Benefit text="Know every part" /><Benefit text="See what customers owe" /><Benefit text="Keep engineers accountable" /></div>
+          <div className="relative grid max-w-xl gap-3 sm:grid-cols-2"><Benefit text="Know what sold" /><Benefit text="Know every part" /><Benefit text="See who owes" /><Benefit text="Close the day clearly" /></div>
         </section>
 
         <section className="flex items-center px-5 py-8 sm:px-8 lg:px-14 xl:px-20">
           <div className="mx-auto w-full max-w-md">
-            <div className="mb-8"><div className="mb-8 lg:hidden"><NovatechLogo /></div><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{signup ? "Create your workspace" : "Welcome back"}</p><h1 className="mt-2 font-heading text-4xl font-bold tracking-tight">{signup ? "Start with NOVATECH." : "Sign in to your workshop."}</h1><p className="mt-3 text-sm leading-6 text-slate-500">{signup ? "Create your account, then set up the business workspace." : "Everything you need to run the repair desk is here."}</p></div>
+            <div className="mb-8"><div className="mb-8 lg:hidden"><NovatechLogo /></div><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Private business system</p><h1 className="mt-2 font-heading text-4xl font-bold tracking-tight">Sign in to Danchrista.</h1><p className="mt-3 text-sm leading-6 text-slate-500">Only Ame3ing and approved staff can enter the business workspace.</p></div>
             {authError && <ErrorMessage>{authError}</ErrorMessage>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <FieldLabel label="Email"><div className="relative"><Mail className="icon" /><input type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control pl-11" /></div></FieldLabel>
-              <FieldLabel label="Password">
-                <PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete={signup ? "new-password" : "current-password"} />
-                {signup && <p className="mt-1.5 text-xs text-slate-400">At least 8 characters.</p>}
-              </FieldLabel>
-              {!signup && <div className="flex justify-end"><button type="button" onClick={() => setMode("forgot")} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Forgot password?</button></div>}
-              <button type="submit" disabled={loading} className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Please wait…" : signup ? "Create account" : "Sign in"}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></button>
+              <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="current-password" /></FieldLabel>
+              <div className="flex justify-end"><button type="button" onClick={() => setMode("forgot")} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Forgot password?</button></div>
+              <button type="submit" disabled={loading} className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Signing in…" : "Sign in"}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></button>
             </form>
 
             <div className="mt-7 flex items-center gap-3 text-[11px] font-medium text-slate-400"><div className="h-px flex-1 bg-slate-200" />SECURE WORKSPACE<div className="h-px flex-1 bg-slate-200" /></div>
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500"><ShieldCheck className="size-4 text-teal-700" />Your workspace is protected by your account permissions.</div>
-            <button type="button" onClick={() => { setAuthError(""); setMode(signup ? "login" : "signup"); }} className="mt-7 w-full text-center text-sm font-semibold text-teal-700 hover:text-teal-800">{signup ? "Already have an account? Sign in" : "New to NOVATECH? Create an account"}</button>
-            {signup && <p className="mt-5 text-center text-xs leading-5 text-slate-400">You’ll verify your email before entering the workshop.</p>}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500"><ShieldCheck className="size-4 text-teal-700" />Access is controlled by your Danchrista role.</div>
           </div>
         </section>
       </div>
