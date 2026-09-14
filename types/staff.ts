@@ -33,7 +33,7 @@ export type StaffMember = {
   branches: Pick<Branch, "id" | "name">[];
 };
 
-export type InvitationStatus = "pending" | "accepted" | "revoked";
+export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
 
 export type StaffInvitation = {
   id: string;
@@ -44,10 +44,11 @@ export type StaffInvitation = {
   status: InvitationStatus;
   created_at: string;
   accepted_at: string | null;
+  expires_at: string;
 };
 
 export type StaffInvitationInput = {
   email: string;
-  role: StaffRole;
+  role: Exclude<StaffRole, "owner">;
   branch_ids: string[];
 };
