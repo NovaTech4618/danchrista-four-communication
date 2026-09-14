@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { NovatechLogo } from "@/components/brand/NovatechLogo";
 
-type AuthMode = "login" | "verify" | "reset" | "forgot" | "mfa";
+type AuthMode = "login" | "verify" | "reset" | "forgot" | "mfa" | "staff_signup";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -70,13 +70,13 @@ export default function LoginPage() {
     setLoading(false);
 
     if (!inviteError && joinedCompanyId) {
-      toast.success("Welcome to the team!");
+      toast.success("Welcome to the Danchrista team!");
       router.replace("/dashboard");
       return;
     }
 
     await supabase.auth.signOut();
-    setAuthError("This account is not linked to Danchrista. Ask Ame3ing to add you as staff.");
+    setAuthError("This email does not have a valid Danchrista staff invitation. Ask Ame3ing or your branch manager to add you first.");
   }
 
   useEffect(() => {
@@ -113,6 +113,42 @@ export default function LoginPage() {
     }
 
     toast.success("Verification email sent again.");
+  }
+
+  async function handleStaffSignup(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      toast.error("Email and password are required.");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Use at least 8 characters for your password.");
+      return;
+    }
+
+    setAuthError("");
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: { emailRedirectTo: getAuthRedirectUrl() },
+    });
+
+    if (error) {
+      setLoading(false);
+      toast.error(error.message);
+      return;
+    }
+
+    if (!data.session) {
+      setLoading(false);
+      setMode("verify");
+      toast.success("Check your email to verify the staff account, then return here to sign in.");
+      return;
+    }
+
+    await ensureCompanyThenRedirect();
   }
 
   async function handleForgotPassword(e: React.FormEvent) {
@@ -280,15 +316,28 @@ export default function LoginPage() {
     );
   }
 
+  if (mode === "staff_signup") {
+    return (
+      <AuthShell>
+        <NovatechLogo />
+        <div className="mt-8"><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Staff invitation</p><h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">Create your Danchrista access.</h1><p className="mt-3 text-sm leading-6 text-slate-500">Use the same email Ame3ing or your branch manager added. You can only enter the shop after the invitation is accepted.</p></div>
+        {authError && <ErrorMessage>{authError}</ErrorMessage>}
+        <form onSubmit={handleStaffSignup} className="mt-7 space-y-4">
+          <FieldLabel label="Email"><input type="email" autoFocus autoComplete="email" placeholder="staff@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control" /></FieldLabel>
+          <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" /></FieldLabel>
+          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Creating access…" : "Create staff access"}<ArrowRight className="size-4" /></button>
+        </form>
+        <button type="button" onClick={() => { setAuthError(""); setMode("login"); }} className="mt-5 w-full text-center text-sm font-semibold text-slate-500 hover:text-slate-900">Back to sign in</button>
+      </AuthShell>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f7f6] text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[1.1fr_0.9fr]">
         <section className="relative hidden overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_90%_75%,rgba(20,184,166,0.12),transparent_34%)]" />
-          <div className="relative">
-            <NovatechLogo dark />
-            <div className="mt-20 max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-300">Danchrista Four Communication</p><h2 className="mt-5 font-heading text-5xl font-bold leading-[1.02] tracking-[-0.04em] xl:text-6xl">Run the shop with one clear record.</h2><p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">Sales, phone parts, repairs, engineers, payments, expenses and daily closing—kept connected for Ame3ing.</p></div>
-          </div>
+          <div className="relative"><NovatechLogo dark /><div className="mt-20 max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-300">Danchrista Four Communication</p><h2 className="mt-5 font-heading text-5xl font-bold leading-[1.02] tracking-[-0.04em] xl:text-6xl">Run the shop with one clear record.</h2><p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">Sales, phone parts, repairs, engineers, payments, expenses and daily closing—kept connected for Ame3ing.</p></div></div>
           <div className="relative grid max-w-xl gap-3 sm:grid-cols-2"><Benefit text="Know what sold" /><Benefit text="Know every part" /><Benefit text="See who owes" /><Benefit text="Close the day clearly" /></div>
         </section>
 
@@ -296,14 +345,13 @@ export default function LoginPage() {
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8"><div className="mb-8 lg:hidden"><NovatechLogo /></div><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Private business system</p><h1 className="mt-2 font-heading text-4xl font-bold tracking-tight">Sign in to Danchrista.</h1><p className="mt-3 text-sm leading-6 text-slate-500">Only Ame3ing and approved staff can enter the business workspace.</p></div>
             {authError && <ErrorMessage>{authError}</ErrorMessage>}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <FieldLabel label="Email"><div className="relative"><Mail className="icon" /><input type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control pl-11" /></div></FieldLabel>
               <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="current-password" /></FieldLabel>
               <div className="flex justify-end"><button type="button" onClick={() => setMode("forgot")} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Forgot password?</button></div>
               <button type="submit" disabled={loading} className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Signing in…" : "Sign in"}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></button>
             </form>
-
+            <button type="button" onClick={() => { setAuthError(""); setMode("staff_signup"); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"><UserPlus className="size-4 text-teal-700" />Have a staff invitation?</button>
             <div className="mt-7 flex items-center gap-3 text-[11px] font-medium text-slate-400"><div className="h-px flex-1 bg-slate-200" />SECURE WORKSPACE<div className="h-px flex-1 bg-slate-200" /></div>
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500"><ShieldCheck className="size-4 text-teal-700" />Access is controlled by your Danchrista role.</div>
           </div>
@@ -313,34 +361,8 @@ export default function LoginPage() {
   );
 }
 
-function AuthShell({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-screen bg-[#f5f7f6] px-5 py-6 text-slate-950 sm:px-8">
-      <div className="mx-auto flex min-h-[92vh] max-w-md items-center justify-center">
-        <div className="w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.25)] sm:p-10">{children}</div>
-      </div>
-    </main>
-  );
-}
-
-function ErrorMessage({ children }: { children: React.ReactNode }) {
-  return <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-xs leading-5 text-red-700">{children}</p>;
-}
-
-function PasswordField({ value, onChange, show, onToggle, autoComplete }: { value: string; onChange: (value: string) => void; show: boolean; onToggle: () => void; autoComplete: string }) {
-  return (
-    <div className="relative">
-      <LockKeyhole className="icon" />
-      <input type={show ? "text" : "password"} autoComplete={autoComplete} placeholder="Your password" value={value} onChange={(e) => onChange(e.target.value)} className="control pl-11 pr-11" />
-      <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label={show ? "Hide password" : "Show password"}>{show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
-    </div>
-  );
-}
-
-function Benefit({ text }: { text: string }) {
-  return <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"><span className="grid size-7 place-items-center rounded-full bg-teal-400/10 text-teal-300"><Check className="size-4" /></span>{text}</div>;
-}
-
-function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="block text-sm font-semibold text-slate-800">{label}{children}</label>;
-}
+function AuthShell({ children }: { children: React.ReactNode }) { return <main className="min-h-screen bg-[#f5f7f6] px-5 py-6 text-slate-950"><div className="mx-auto flex min-h-[92vh] max-w-md items-center justify-center"><div className="w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.25)] sm:p-10">{children}</div></div></main>; }
+function ErrorMessage({ children }: { children: React.ReactNode }) { return <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-xs leading-5 text-red-700">{children}</p>; }
+function PasswordField({ value, onChange, show, onToggle, autoComplete }: { value: string; onChange: (value: string) => void; show: boolean; onToggle: () => void; autoComplete: string }) { return <div className="relative"><LockKeyhole className="icon" /><input type={show ? "text" : "password"} autoComplete={autoComplete} placeholder="Your password" value={value} onChange={(e) => onChange(e.target.value)} className="control pl-11 pr-11" /><button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label={show ? "Hide password" : "Show password"}>{show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div>; }
+function Benefit({ text }: { text: string }) { return <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"><span className="grid size-7 place-items-center rounded-full bg-teal-400/10 text-teal-300"><Check className="size-4" /></span>{text}</div>; }
+function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block text-sm font-semibold text-slate-800">{label}{children}</label>; }
