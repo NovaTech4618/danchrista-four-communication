@@ -115,7 +115,7 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   body { @apply bg-background text-foreground; font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
-  html { @apply font-sans; }
+  html { @apply font-sans; scroll-behavior: smooth; }
   ::selection { background: #d1fae5; color: #064e3b; }
   button:disabled { cursor: not-allowed; }
 }
@@ -132,16 +132,43 @@
 .nova-gradient-text { color: var(--novatech-primary-dark); }
 .nova-gradient-border { border: 1px solid var(--novatech-border); background: var(--card); }
 .nova-soft-shadow { box-shadow: var(--novatech-shadow-card); }
-.nova-lift { transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease; }
-.nova-lift:hover { transform: none; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.06); }
-.nova-fade-up { animation: nova-fade-up 350ms ease-out both; }
+.nova-lift { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease; }
+.nova-lift:hover { transform: translateY(-3px); box-shadow: 8px 10px 24px rgba(71,85,80,.10), -5px -5px 18px rgba(255,255,255,.9); }
+.nova-fade-up { animation: nova-fade-up 450ms ease-out both; }
 .nova-delay-1 { animation-delay: 60ms; }
 .nova-delay-2 { animation-delay: 120ms; }
 .nova-delay-3 { animation-delay: 180ms; }
 .nova-wave { clip-path: none; }
 
+/* Premium soft-neomorphic language for the marketing surface. */
+.neo-page {
+  background: #e9efec;
+  background-image: radial-gradient(circle at 15% 10%, rgba(52,211,153,.12), transparent 28%), radial-gradient(circle at 85% 70%, rgba(255,255,255,.75), transparent 32%);
+}
+.neo-card {
+  border: 1px solid rgba(255,255,255,.72);
+  background: rgba(239,244,241,.88);
+  box-shadow: 12px 12px 28px rgba(84,101,94,.12), -10px -10px 28px rgba(255,255,255,.92);
+}
+.neo-card-inset {
+  border: 1px solid rgba(255,255,255,.7);
+  background: rgba(230,237,233,.72);
+  box-shadow: inset 5px 5px 13px rgba(101,117,109,.10), inset -5px -5px 13px rgba(255,255,255,.86);
+}
+.neo-pill {
+  border: 1px solid rgba(255,255,255,.8);
+  background: rgba(239,244,241,.86);
+  box-shadow: 5px 5px 12px rgba(84,101,94,.10), -4px -4px 10px rgba(255,255,255,.92);
+}
+.neo-button {
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 7px 7px 16px rgba(15,23,42,.12), -4px -4px 12px rgba(255,255,255,.9);
+}
+.neo-button:hover { transform: translateY(-2px); box-shadow: 9px 11px 22px rgba(15,23,42,.15), -5px -5px 14px rgba(255,255,255,.95); }
+.neo-button:active { transform: translateY(0); box-shadow: inset 3px 3px 8px rgba(15,23,42,.16), inset -3px -3px 8px rgba(255,255,255,.55); }
+
 @keyframes nova-fade-up {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
