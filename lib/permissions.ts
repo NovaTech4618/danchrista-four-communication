@@ -8,7 +8,7 @@ export type Permission =
 const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
   owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings"],
   branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search"],
-  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","payments","outstanding","whatsapp","search"],
+  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","outstanding","whatsapp","search"],
   technician: ["dashboard","repairs","customers"],
 };
 
