@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import { RoleRouteGuard } from "@/components/auth/RoleRouteGuard";
 
 // Danchrista Four Communication business system typography.
 const sora = Sora({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${sora.variable} ${manrope.variable} ${spaceMono.variable}`}>
       <body className="min-w-0 overflow-x-hidden">
         <TooltipProvider>
-          {children}
+          <RoleRouteGuard>{children}</RoleRouteGuard>
           <Toaster richColors position="top-right" />
         </TooltipProvider>
       </body>
