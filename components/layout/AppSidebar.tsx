@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Activity, AlertTriangle, BarChart3, BellRing, Bot, Building2, ClipboardCheck, FileText,
-  Globe2, HandCoins, HelpCircle, LayoutDashboard, LogOut, MessageCircle, Package, Search,
-  Settings, ShieldCheck, ShoppingCart, Smartphone, UserCog, Users, WalletCards, Wrench, Truck,
+  BarChart3, Bot, ClipboardList, ContactRound, FileText, HandCoins, HelpCircle,
+  LayoutDashboard, LogOut, MessageCircle, Package, Receipt, Search, Settings,
+  ShoppingCart, Smartphone, Truck, UserCog, Users, WalletCards, Wrench,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -21,22 +21,32 @@ type NavItem = { title: string; url: string; icon: Icon };
 type NavGroup = { label: string; items: NavItem[] };
 
 const operations: NavGroup = { label: "Operations", items: [
-  { title: "Repairs", url: "/repairs", icon: Wrench }, { title: "Customers", url: "/customers", icon: Users },
-  { title: "Devices", url: "/devices", icon: Smartphone }, { title: "Sales / POS", url: "/sales", icon: ShoppingCart },
+  { title: "Repairs", url: "/repairs", icon: Wrench },
+  { title: "Sales", url: "/sales", icon: ShoppingCart },
+  { title: "Mobile Sales", url: "/sales/mobile", icon: Smartphone },
+  { title: "Invoices", url: "/invoices", icon: FileText },
+  { title: "Expenses", url: "/expenses", icon: Receipt },
+] };
+
+const business: NavGroup = { label: "Business", items: [
   { title: "Inventory", url: "/inventory", icon: Package },
+  { title: "Customers", url: "/customers", icon: ContactRound },
+  { title: "Suppliers", url: "/suppliers", icon: Truck },
+  { title: "Engineers", url: "/engineers", icon: UserCog },
 ] };
-const workshop: NavGroup = { label: "Workshop", items: [
-  { title: "Engineer Workflow", url: "/engineer-workflow", icon: UserCog }, { title: "Parts Ledger", url: "/technician-ledger", icon: ClipboardCheck },
-  { title: "Suppliers & Purchases", url: "/inventory/purchases", icon: Truck },
+
+const money: NavGroup = { label: "Money & Reports", items: [
+  { title: "Payments & Credit", url: "/finance", icon: WalletCards },
+  { title: "Outstanding", url: "/outstanding", icon: HandCoins },
+  { title: "Daily Profit", url: "/reports", icon: BarChart3 },
+  { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList },
 ] };
-const money: NavGroup = { label: "Sales & Finance", items: [
-  { title: "Invoices", url: "/invoices", icon: FileText }, { title: "Outstanding", url: "/outstanding", icon: HandCoins },
-  { title: "Finance", url: "/finance", icon: WalletCards }, { title: "Reports", url: "/reports", icon: BarChart3 },
-] };
+
 const communication: NavGroup = { label: "Communication", items: [
-  { title: "WhatsApp Center", url: "/whatsapp", icon: MessageCircle }, { title: "Customer Requests", url: "/customer-requests", icon: BellRing },
+  { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle },
   { title: "Assistant", url: "/assistant", icon: Bot },
 ] };
+
 const manageRoles: StaffRole[] = ["owner", "branch_manager"];
 
 function menuButtonClass() {
@@ -56,7 +66,7 @@ export default function AppSidebar() {
       if (!active || !data) return;
       const record = data as unknown as { full_name?: string; companies?: { name?: string } | { name?: string }[] };
       const companyRecord = Array.isArray(record.companies) ? record.companies[0] : record.companies;
-      setProfile({ fullName: record.full_name ?? "Account", companyName: companyRecord?.name ?? "NOVATECH" });
+      setProfile({ fullName: record.full_name ?? "Account", companyName: companyRecord?.name ?? "Danchrista Four Communication" });
     });
     return () => { active = false; };
   }, []);
@@ -73,33 +83,19 @@ export default function AppSidebar() {
   }
 
   const canManageStaff = myRole !== null && manageRoles.includes(myRole);
-  const initial = profile?.fullName?.trim()?.[0]?.toUpperCase() ?? "N";
+  const initial = profile?.fullName?.trim()?.[0]?.toUpperCase() ?? "D";
   const management: NavItem[] = [
-    ...(canManageStaff ? [
-      { title: "Staff & Branches", url: "/staff", icon: Building2 },
-      { title: "Public Showcase", url: "/settings/showcase", icon: Globe2 },
-      { title: "Audit Log", url: "/audit", icon: ShieldCheck },
-    ] : []),
-    { title: "Activity", url: "/activity", icon: Activity }, { title: "Alerts", url: "/alerts", icon: AlertTriangle },
+    ...(canManageStaff ? [{ title: "Staff", url: "/staff", icon: Users }] : []),
+    { title: "Search", url: "/search", icon: Search },
     { title: "Settings", url: "/settings", icon: Settings },
   ];
 
   return <Sidebar collapsible="icon" className="border-r border-white/[0.07] bg-[#111111] text-slate-200">
-    <SidebarHeader className="border-b border-white/[0.06] bg-[#111111] px-3 py-3"><div className="flex items-center gap-3 px-1 py-1"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12b76a] font-heading text-sm font-black text-white">N</div><div className="min-w-0 group-data-[collapsible=icon]:hidden"><span className="font-heading text-base font-bold tracking-tight text-white">Novatech</span><span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">Repair Suite</span></div></div></SidebarHeader>
+    <SidebarHeader className="border-b border-white/[0.06] bg-[#111111] px-3 py-3"><div className="flex items-center gap-3 px-1 py-1"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#12b76a] font-heading text-sm font-black text-white">D</div><div className="min-w-0 group-data-[collapsible=icon]:hidden"><span className="font-heading text-base font-bold tracking-tight text-white">Danchrista</span><span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">Four Communication</span></div></div></SidebarHeader>
     <SidebarContent className="bg-[#111111] px-2 py-2">
-      <SidebarGroup className="px-1.5 py-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard" render={<a href="/dashboard" />} className={menuButtonClass()}><LayoutDashboard className="size-[17px]" aria-hidden="true" /><span>Dashboard</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/search"} tooltip="Search" render={<a href="/search" />} className={menuButtonClass()}><Search className="size-[17px]" aria-hidden="true" /><span>Search</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>
-      {renderGroup(operations)}{renderGroup(workshop)}{renderGroup(money)}{renderGroup(communication)}
-      {renderGroup({ label: "Management", items: management })}
+      <SidebarGroup className="px-1.5 py-2"><SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard" render={<a href="/dashboard" />} className={menuButtonClass()}><LayoutDashboard className="size-[17px]" aria-hidden="true" /><span>Dashboard</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>
+      {renderGroup(operations)}{renderGroup(business)}{renderGroup(money)}{renderGroup(communication)}{renderGroup({ label: "Manage", items: management })}
     </SidebarContent>
-    <SidebarFooter className="border-t border-white/[0.06] bg-[#111111] p-2">
-      <div className="mb-2 flex items-center gap-3 rounded-lg bg-white/[0.04] px-3 py-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#12b76a] text-sm font-black text-white">{initial}</div>
-        <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-          <p className="truncate text-sm font-semibold text-white">{profile?.fullName ?? "Loading…"}</p>
-          <p className="truncate text-xs text-slate-500">{profile?.companyName ?? ""}</p>
-        </div>
-      </div>
-      <SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={pathname === "/help"} tooltip="Help & Support" render={<a href="/help" />} className={menuButtonClass()}><HelpCircle className="size-[17px]" aria-hidden="true" /><span>Help & Support</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton tooltip="Log out" onClick={handleLogout} className={menuButtonClass()}><LogOut className="size-[17px]" aria-hidden="true" /><span>Log out</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
-    </SidebarFooter>
+    <SidebarFooter className="border-t border-white/[0.06] bg-[#111111] p-2"><div className="mb-2 flex items-center gap-3 rounded-lg bg-white/[0.04] px-3 py-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#12b76a] text-sm font-black text-white">{initial}</div><div className="min-w-0 group-data-[collapsible=icon]:hidden"><p className="truncate text-sm font-semibold text-white">{profile?.fullName ?? "Loading…"}</p><p className="truncate text-xs text-slate-500">{profile?.companyName ?? "Danchrista Four Communication"}</p></div></div><SidebarMenu><SidebarMenuItem><SidebarMenuButton tooltip="Help & Support" render={<a href="/help" />} className={menuButtonClass()}><HelpCircle className="size-[17px]" aria-hidden="true" /><span>Help & Support</span></SidebarMenuButton></SidebarMenuItem><SidebarMenuItem><SidebarMenuButton tooltip="Log out" onClick={handleLogout} className={menuButtonClass()}><LogOut className="size-[17px]" aria-hidden="true" /><span>Log out</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarFooter>
   </Sidebar>;
 }
