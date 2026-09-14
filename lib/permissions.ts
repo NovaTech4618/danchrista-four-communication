@@ -2,13 +2,13 @@ import type { StaffRole } from "@/types/staff";
 
 export type Permission =
   | "dashboard" | "repairs" | "sales" | "mobile_sales" | "invoices" | "expenses"
-  | "inventory" | "customers" | "suppliers" | "engineers" | "payments" | "outstanding"
+  | "inventory" | "customers" | "suppliers" | "engineers" | "engineer_work" | "payments" | "outstanding"
   | "profit" | "daily_closing" | "whatsapp" | "assistant" | "staff" | "search" | "settings";
 
 const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
-  owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings"],
-  branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search"],
-  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","payments","outstanding","whatsapp","search"],
+  owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings"],
+  branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search"],
+  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","payments","outstanding","whatsapp","search"],
   technician: ["dashboard","repairs","customers"],
 };
 
@@ -26,7 +26,7 @@ export function permissionForPath(pathname: string): Permission | null {
     ["/tickets", "repairs"], ["/devices", "repairs"], ["/customer-requests", "customers"],
     ["/sales/mobile", "mobile_sales"], ["/sales", "sales"], ["/invoices", "invoices"],
     ["/expenses", "expenses"], ["/inventory", "inventory"], ["/customers", "customers"],
-    ["/suppliers", "suppliers"], ["/engineer-workflow", "engineers"], ["/engineers", "engineers"],
+    ["/suppliers", "suppliers"], ["/engineer-workflow", "engineer_work"], ["/engineers", "engineers"],
     ["/technician-ledger", "engineers"], ["/finance", "payments"], ["/parts-credit", "payments"],
     ["/outstanding", "outstanding"], ["/reports/daily-closing", "daily_closing"], ["/reports", "profit"],
     ["/audit", "staff"], ["/activity", "staff"], ["/alerts", "profit"], ["/whatsapp", "whatsapp"],
@@ -37,5 +37,5 @@ export function permissionForPath(pathname: string): Permission | null {
 }
 
 export const DEFAULT_ROLE_PATH: Record<StaffRole, string> = {
-  owner: "/dashboard", branch_manager: "/dashboard", front_desk: "/repairs", technician: "/repairs",
+  owner: "/dashboard", branch_manager: "/dashboard", front_desk: "/engineer-workflow", technician: "/repairs",
 };
