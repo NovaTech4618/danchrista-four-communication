@@ -1,44 +1,87 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
-import { businessOperationsService } from "@/services/businessOperationsService";
 import { engineerService } from "@/services/engineerService";
+import { supabase } from "@/lib/supabase";
 
 type Engineer = { id: string; name: string; status: string };
-type Perf = Engineer & { engineer_id: string; total_repairs: number; completed_repairs: number; active_repairs: number; repair_revenue: number };
+type InventoryItem = { id: string; item_name: string; quantity: number; selling_price: number };
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 
 export default function EngineerWorkflowPage() {
   const [engineers, setEngineers] = useState<Engineer[]>([]);
-  const [perf, setPerf] = useState<Perf[]>([]);
-  const [repairId, setRepairId] = useState("");
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const [engineerId, setEngineerId] = useState("");
+  const [inventoryId, setInventoryId] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [partPrice, setPartPrice] = useState("");
+  const [workAmount, setWorkAmount] = useState("");
+  const [workDescription, setWorkDescription] = useState("");
+  const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
-  const [query, setQuery] = useState("");
+  const [busy, setBusy] = useState(false);
 
   async function load() {
-    const [people, performance] = await Promise.all([engineerService.getEngineers(), businessOperationsService.getEngineerPerformance()]);
-    setEngineers((people.data ?? []) as Engineer[]);
-    setPerf((performance.data ?? []) as Perf[]);
+    const [people, stock] = await Promise.all([
+      engineerService.getEngineers(),
+      supabase.from("inventory").select("id,item_name,quantity,selling_price").gt("quantity", 0).order("item_name"),
+    ]);
+    setEngineers((people.data ?? []).filter((e) => e.status === "active") as Engineer[]);
+    setItems((stock.data ?? []) as InventoryItem[]);
   }
   useEffect(() => { void load(); }, []);
 
-  async function assign() {
-    if (!repairId.trim() || !engineerId) { setMessage("Select an engineer and enter the repair ID."); return; }
-    const result = await businessOperationsService.assignRepair(repairId.trim(), engineerId);
-    setMessage(result.error ? result.error.message : "Repair ownership assigned.");
-    if (!result.error) { setRepairId(""); await load(); }
+  async function run(action: () => Promise<{ error: { message?: string } | null }>) {
+    setBusy(true); setMessage("");
+    const result = await action();
+    setMessage(result.error ? result.error.message || "Could not save this record." : "Recorded successfully. The original record remains in the ledger.");
+    if (!result.error) { setNotes(""); setQuantity("1"); setPartPrice(""); setWorkAmount(""); setWorkDescription(""); await load(); }
+    setBusy(false);
   }
 
-  const visible = useMemo(() => perf.filter((e) => e.name.toLowerCase().includes(query.toLowerCase())), [perf, query]);
-  const activeJobs = perf.reduce((sum, e) => sum + Number(e.active_repairs || 0), 0);
+  const selectedItem = items.find((i) => i.id === inventoryId);
 
-  return <AppLayout><div className="space-y-6">
-    <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Workshop operations</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Engineer Workflow</h1><p className="mt-1 max-w-2xl text-sm text-slate-500">Assign repairs, see who is carrying the workload and keep ownership visible from intake to completion.</p></div><div className="text-sm text-slate-500">{engineers.length} engineers · {activeJobs} active jobs</div></header>
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto]"><label className="text-sm font-medium text-slate-700">Repair ID<input value={repairId} onChange={(e) => setRepairId(e.target.value)} placeholder="Enter repair/job ID" className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500" /></label><label className="text-sm font-medium text-slate-700">Assign to engineer<select value={engineerId} onChange={(e) => setEngineerId(e.target.value)} className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"><option value="">Select engineer</option>{engineers.map((e) => <option key={e.id} value={e.id}>{e.name} · {e.status}</option>)}</select></label><button onClick={assign} className="h-10 self-end rounded-xl bg-teal-700 px-6 text-sm font-semibold text-white hover:bg-teal-800">Assign repair</button></div>{message && <p className="mt-3 text-sm text-slate-600">{message}</p>}</section>
-    <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"><div className="flex flex-wrap gap-6 text-sm text-slate-500"><span><strong className="text-slate-950">{engineers.length}</strong> engineers</span><span><strong className="text-teal-700">{activeJobs}</strong> active jobs</span><span><strong className="text-slate-950">{perf.reduce((s, e) => s + Number(e.completed_repairs || 0), 0)}</strong> completed</span></div><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find engineer..." className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500 sm:w-56" /></section>
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="border-b border-slate-200 px-5 py-4"><h2 className="font-semibold text-slate-950">Workshop workload</h2><p className="mt-1 text-sm text-slate-500">The queue should make it obvious who can take the next job.</p></div><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3">Engineer</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Active</th><th className="px-5 py-3">Completed</th><th className="px-5 py-3">Total jobs</th><th className="px-5 py-3 text-right">Repair value</th></tr></thead><tbody>{visible.map((e) => <tr key={e.engineer_id} className="border-t border-slate-100 hover:bg-slate-50/70"><td className="px-5 py-4 font-semibold text-slate-900">{e.name}</td><td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold">{e.status}</span></td><td className="px-5 py-4 font-semibold text-teal-700">{e.active_repairs}</td><td className="px-5 py-4">{e.completed_repairs}</td><td className="px-5 py-4">{e.total_repairs}</td><td className="px-5 py-4 text-right font-semibold">{money(e.repair_revenue)}</td></tr>)}</tbody></table>{visible.length === 0 && <div className="py-12 text-center text-sm text-slate-500">No engineers match this search.</div>}</div></section>
-    <p className="text-xs text-slate-400">Next accountability layer: parts issued to a technician should be attached to the repair, with returns and consumed parts recorded against the same job.</p>
+  return <AppLayout><div className="mx-auto max-w-5xl space-y-6">
+    <header><p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Workshop records</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Engineer Work</h1><p className="mt-1 max-w-2xl text-sm text-slate-500">Record parts collected and work done. Nothing here can delete an engineer record; returned parts are recorded as returns.</p></header>
+
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="font-semibold text-slate-950">Who is this for?</h2>
+      <select value={engineerId} onChange={(e) => setEngineerId(e.target.value)} className="mt-3 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"><option value="">Select engineer</option>{engineers.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select>
+    </section>
+
+    <div className="grid gap-5 lg:grid-cols-2">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div><h2 className="font-semibold text-slate-950">Part collected</h2><p className="mt-1 text-sm text-slate-500">Stock leaves the shop and becomes part of the engineer’s outstanding record.</p></div>
+        <div className="mt-4 space-y-3">
+          <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = items.find((i) => i.id === e.target.value); setPartPrice(item ? String(item.selling_price ?? 0) : ""); }} className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"><option value="">Select part</option>{items.map((i) => <option key={i.id} value={i.id}>{i.item_name} · {i.quantity} in stock</option>)}</select>
+          <div className="grid grid-cols-2 gap-3"><input type="number" min="1" max={selectedItem?.quantity ?? undefined} value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="Qty" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /><input type="number" min="0" value={partPrice} onChange={(e) => setPartPrice(e.target.value)} placeholder="Price" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /></div>
+          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm" />
+          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsOut(engineerId, inventoryId, Number(quantity), Number(partPrice), notes))} className="h-11 w-full rounded-xl bg-teal-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Record part collected</button>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div><h2 className="font-semibold text-slate-950">Part returned</h2><p className="mt-1 text-sm text-slate-500">Never delete the original collection. Record the quantity that came back.</p></div>
+        <div className="mt-4 space-y-3">
+          <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = items.find((i) => i.id === e.target.value); setPartPrice(item ? String(item.selling_price ?? 0) : ""); }} className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"><option value="">Select returned part</option>{items.map((i) => <option key={i.id} value={i.id}>{i.item_name}</option>)}</select>
+          <div className="grid grid-cols-2 gap-3"><input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="Qty returned" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /><input type="number" min="0" value={partPrice} onChange={(e) => setPartPrice(e.target.value)} placeholder="Return value" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /></div>
+          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsIn(engineerId, inventoryId, Number(quantity), Number(partPrice), notes))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Record returned part</button>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+        <div><h2 className="font-semibold text-slate-950">Work done</h2><p className="mt-1 text-sm text-slate-500">Record the service/work completed for the engineer. This adds to the engineer’s outstanding debit; it does not record a payment.</p></div>
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+          <input value={workDescription} onChange={(e) => setWorkDescription(e.target.value)} placeholder="e.g. Screen replacement" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" />
+          <input type="number" min="0" value={workAmount} onChange={(e) => setWorkAmount(e.target.value)} placeholder="Amount" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" />
+          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" />
+          <button disabled={busy || !engineerId || !workDescription.trim() || Number(workAmount) <= 0} onClick={() => run(() => engineerService.recordWork(engineerId, Number(workAmount), workDescription, notes))} className="h-11 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Record work</button>
+        </div>
+      </section>
+    </div>
+
+    {message && <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">{message}</div>}
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><strong>Record rule:</strong> staff can add collections, returns and work. They cannot delete, edit, receive engineer payments, change opening balances, or manage engineer accounts.</div>
   </div></AppLayout>;
 }
