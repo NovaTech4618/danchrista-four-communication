@@ -7,40 +7,73 @@ import AppSidebar from "./AppSidebar";
 import Header from "./Header";
 import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
+import { DEFAULT_ROLE_PATH, hasPermission, permissionForPath } from "@/lib/permissions";
+import { staffService } from "@/services/staffService";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [checkingAccess, setCheckingAccess] = useState(true);
 
   useEffect(() => {
     let mounted = true;
-    const checkAuth = async () => {
+
+    const checkWorkspaceAccess = async () => {
+      setCheckingAuth(true);
+      setCheckingAccess(true);
+
       const session = await getCurrentSession();
       if (!mounted) return;
+
       if (!session?.user) {
         router.replace("/login");
         return;
       }
+
       setCheckingAuth(false);
+
+      const requiredPermission = permissionForPath(pathname);
+      if (!requiredPermission) {
+        setCheckingAccess(false);
+        return;
+      }
+
+      const roleResult = await staffService.getMyRole();
+      if (!mounted) return;
+
+      if (roleResult.error || !roleResult.data) {
+        await supabase.auth.signOut();
+        router.replace("/login");
+        return;
+      }
+
+      if (!hasPermission(roleResult.data, requiredPermission)) {
+        router.replace(DEFAULT_ROLE_PATH[roleResult.data]);
+        return;
+      }
+
+      setCheckingAccess(false);
     };
 
-    void checkAuth();
+    void checkWorkspaceAccess();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       if (event === "SIGNED_OUT" || !session?.user) {
         router.replace("/login");
         return;
       }
-      setCheckingAuth(false);
+      void checkWorkspaceAccess();
     });
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
   }, [pathname, router]);
 
-  if (checkingAuth) {
+  if (checkingAuth || checkingAccess) {
     return (
       <div className="min-h-screen bg-[var(--background)]" aria-busy="true" aria-label="Loading workspace">
         <div className="flex min-h-screen items-center justify-center px-6">
