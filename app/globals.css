@@ -4,9 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* NOVATECH shared design system.
-   Calm business software: one green accent, neutral workspace, restrained
-   borders/shadows, and consistent control geometry. */
+/* Danchrista shared design system. */
 :root {
   --novatech-primary: #12b76a;
   --novatech-primary-light: #34d399;
@@ -52,8 +50,6 @@
 }
 
 @theme inline {
-  /* Existing teal utility classes intentionally resolve to NOVATECH green so
-     older screens stay visually consistent without a risky page-by-page rewrite. */
   --color-teal-600: #12b76a;
   --color-teal-700: #087443;
   --color-teal-800: #06633a;
@@ -133,17 +129,8 @@
   overflow: hidden;
 }
 
-/* Legacy helpers are intentionally restrained rather than deleted so pages
-   using them do not break. They now reinforce the shared visual system. */
-.nova-gradient-text {
-  color: var(--novatech-primary-dark);
-}
-
-.nova-gradient-border {
-  border: 1px solid var(--novatech-border);
-  background: var(--card);
-}
-
+.nova-gradient-text { color: var(--novatech-primary-dark); }
+.nova-gradient-border { border: 1px solid var(--novatech-border); background: var(--card); }
 .nova-soft-shadow { box-shadow: var(--novatech-shadow-card); }
 .nova-lift { transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease; }
 .nova-lift:hover { transform: none; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.06); }
@@ -159,26 +146,17 @@
 }
 
 .control {
-  width: 100%;
-  min-width: 0;
-  margin-top: 0.5rem;
-  border-radius: var(--novatech-radius-md);
-  border: 1px solid #d6dde3;
-  background: #fff;
-  padding: 0.72rem 0.9rem;
-  color: #0f172a;
-  box-shadow: none;
+  width: 100%; min-width: 0; margin-top: 0.5rem;
+  border-radius: var(--novatech-radius-md); border: 1px solid #d6dde3;
+  background: #fff; padding: 0.72rem 0.9rem; color: #0f172a; box-shadow: none;
   transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out;
 }
 .control::placeholder { color: #94a3b8; }
 .control:hover { border-color: #c4ced6; }
 .control:focus { border-color: var(--novatech-primary); background: #fff; box-shadow: 0 0 0 3px rgba(18, 183, 106, 0.12); outline: none; }
-
 .icon + .control { padding-left: 3rem !important; }
 .icon { pointer-events: none; position: absolute; left: 0.9rem; top: calc(50% + 0.25rem); width: 1rem; height: 1rem; transform: translateY(-50%); color: #94a3b8; z-index: 1; }
-button[aria-label="Show password"],
-button[aria-label="Hide password"] { top: calc(50% + 0.25rem) !important; }
-
+button[aria-label="Show password"], button[aria-label="Hide password"] { top: calc(50% + 0.25rem) !important; }
 input, textarea, select { color-scheme: light; min-width: 0; }
 button, a, input, textarea, select { transition-property: color, background-color, border-color, box-shadow, opacity, transform; transition-duration: 150ms; transition-timing-function: ease-out; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--novatech-primary); outline-offset: 2px; }
@@ -193,9 +171,9 @@ button:disabled { opacity: 0.55; }
 @media print {
   body { background: #fff !important; color: #000 !important; }
   body * { box-shadow: none !important; }
-  .print\\:hidden { display: none !important; }
-  .print\\:border-0 { border: 0 !important; }
-  .print\\:shadow-none { box-shadow: none !important; }
+  .print\:hidden { display: none !important; }
+  .print\:border-0 { border: 0 !important; }
+  .print\:shadow-none { box-shadow: none !important; }
   @page { margin: 12mm; }
 }
 
