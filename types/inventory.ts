@@ -26,6 +26,7 @@ export type InventoryItemInput = {
   item_name: string;
   category: string | null;
   subcategory: string | null;
+  item_type?: "part" | "accessory" | "gadget";
   brand: string | null;
   compatible_models: string | null;
   sku: string | null;
