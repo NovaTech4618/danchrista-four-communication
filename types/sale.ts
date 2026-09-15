@@ -17,6 +17,7 @@ export type Sale = {
   staff_name: string | null;
   notes: string | null;
   customers?: { full_name: string } | { full_name: string }[] | null;
+  sale_items?: SaleItem[];
 };
 
 export type SaleItem = {
