@@ -1,6 +1,22 @@
 import { supabase } from "@/lib/supabase";
 
-export type BusinessReport = { sales_revenue:number; repair_revenue:number; cash_received:number; inventory_cogs:number; gross_profit:number; repairs_received:number; repairs_completed:number; customer_outstanding:number; low_stock_items:number };
+export type BusinessReport = {
+  sales_revenue:number;
+  repair_revenue:number;
+  engineer_revenue:number;
+  standalone_invoice_revenue:number;
+  cash_received:number;
+  inventory_cogs:number;
+  gross_profit:number;
+  operating_expenses:number;
+  engineer_cost:number;
+  net_profit:number;
+  repairs_received:number;
+  repairs_completed:number;
+  customer_outstanding:number;
+  engineer_outstanding:number;
+  low_stock_items:number;
+};
 export type RepairReportRow = { id:string; status:string|null; final_cost:number|null; created_at:string; received_at:string|null; completed_at:string|null; expected_completion_date:string|null; technician:string|null };
 export type CustomerAnalyticsRow = { id:string; full_name:string; phone:string; created_at:string };
 export type CustomerSaleRow = { customer_id:string|null; total:number|null; sale_date:string };
