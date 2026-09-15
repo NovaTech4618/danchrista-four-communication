@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
@@ -11,18 +11,18 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 
 type InventoryTableProps = { refreshKey: number; onEdit: (item: InventoryItem) => void; itemsOverride?: InventoryItem[]; embedded?: boolean };
 
-const FALLBACK_CATEGORY = "Accessories";
-const CATEGORY_ORDER = ["Phone Parts", "Laptop Parts", "Chargers & Power", "Displays", "Batteries", "Accessories", "Tools", "Devices"];
+function groupLabel(item: InventoryItem) {
+  return item.item_type === "part" || item.category === "Phone Parts" ? "Phone Parts" : "Gadgets & Accessories";
+}
 
-function labelize(value: string) {
-  return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+function stockLabel(item: InventoryItem) {
+  if (item.quantity === 0) return "Out of stock";
+  if (item.quantity <= item.minimum_stock) return "Low stock";
+  return "In stock";
 }
 
 export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embedded = false }: InventoryTableProps) {
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [brand, setBrand] = useState("all");
 
   useEffect(() => {
     if (!itemsOverride) {
@@ -34,136 +34,46 @@ export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embe
   }, [refreshKey, itemsOverride]);
 
   const source = itemsOverride ?? items;
-  const categories = useMemo(() => {
-    const counts = new Map<string, number>();
-    source.forEach((item) => {
-      const value = item.category || FALLBACK_CATEGORY;
-      counts.set(value, (counts.get(value) || 0) + 1);
-    });
-    return [...counts.entries()].sort((a, b) => {
-      const ai = CATEGORY_ORDER.indexOf(a[0]);
-      const bi = CATEGORY_ORDER.indexOf(b[0]);
-      if (ai !== -1 && bi !== -1) return ai - bi;
-      if (ai !== -1) return -1;
-      if (bi !== -1) return 1;
-      return a[0].localeCompare(b[0]);
-    });
-  }, [source]);
-
-  const brands = useMemo(() => {
-    const values = new Set<string>();
-    source.forEach((item) => {
-      if (item.brand?.trim()) values.add(item.brand.trim());
-    });
-    return [...values].sort((a, b) => a.localeCompare(b));
-  }, [source]);
-
-  const filtered = useMemo(() => {
-    const needle = search.toLowerCase().trim();
-    return source.filter((item) => {
-      const itemCategory = item.category || FALLBACK_CATEGORY;
-      const text = `${item.item_name} ${item.sku || ""} ${item.brand || ""} ${item.compatible_models || ""} ${item.shelf_location || ""}`.toLowerCase();
-      return (!needle || text.includes(needle)) &&
-        (category === "all" || itemCategory === category) &&
-        (brand === "all" || item.brand === brand);
-    });
-  }, [source, search, category, brand]);
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this item?")) return;
+    if (!confirm("Delete this inventory item? This cannot be undone.")) return;
     const { error } = await inventoryService.deleteInventoryItem(id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Item deleted.");
-      const result = await inventoryService.getInventory();
-      setItems((result.data || []) as InventoryItem[]);
-    }
+    if (error) return toast.error(error.message);
+    toast.success("Item deleted.");
+    const result = await inventoryService.getInventory();
+    setItems((result.data || []) as InventoryItem[]);
   }
 
   return (
     <div className={embedded ? "" : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"}>
       {!embedded && <h2 className="mb-4 text-xl font-bold">Inventory</h2>}
-
-      <div className="border-b border-slate-100 p-4">
-        <div className="flex flex-col gap-3 lg:flex-row">
-          <input
-            placeholder="Search item, SKU, brand, model or shelf..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"
-          />
-          <select value={category} onChange={(e) => { setCategory(e.target.value); setBrand("all"); }} className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm">
-            <option value="all">All categories</option>
-            {categories.map(([value]) => <option key={value} value={value}>{labelize(value)}</option>)}
-          </select>
-          <select value={brand} onChange={(e) => setBrand(e.target.value)} className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm">
-            <option value="all">All brands</option>
-            {brands.map((value) => <option key={value} value={value}>{value}</option>)}
-          </select>
-        </div>
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-500">{filtered.length} item{filtered.length === 1 ? "" : "s"} shown</p>
-          {(category !== "all" || brand !== "all" || search) && (
-            <button type="button" onClick={() => { setCategory("all"); setBrand("all"); setSearch(""); }} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Clear filters</button>
-          )}
-        </div>
-      </div>
-
-      {category === "all" && !search && brand === "all" ? (
-        <div className="p-4 sm:p-5">
-          <div className="mb-4">
-            <h3 className="font-semibold text-slate-950">Browse your stockroom</h3>
-            <p className="mt-1 text-sm text-slate-500">Start with a category instead of scanning every product at once.</p>
-          </div>
-          {categories.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 px-5 py-12 text-center text-sm text-slate-500">No inventory items found.</div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {categories.map(([value, count]) => {
-                const categoryItems = source.filter((item) => (item.category || FALLBACK_CATEGORY) === value);
-                const low = categoryItems.filter((item) => item.quantity <= item.minimum_stock).length;
-                const categoryBrands = new Set(categoryItems.map((item) => item.brand).filter(Boolean));
-                return (
-                  <button key={value} type="button" onClick={() => setCategory(value)} className="group rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Category</p>
-                        <h4 className="mt-2 text-xl font-bold text-slate-950">{labelize(value)}</h4>
-                      </div>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{count}</span>
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-500">
-                      <span>{categoryBrands.size} brand{categoryBrands.size === 1 ? "" : "s"}</span>
-                      <span>•</span>
-                      <span>{low ? `${low} need attention` : "Stock healthy"}</span>
-                    </div>
-                    <p className="mt-5 text-sm font-semibold text-slate-600 transition group-hover:text-teal-700">Open category →</p>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+      {source.length === 0 ? (
+        <div className="px-5 py-14 text-center"><p className="font-semibold text-slate-900">No stock matches this view</p><p className="mt-1 text-sm text-slate-500">Try another category, search term, or stock filter.</p></div>
       ) : (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Brand</TableHead><TableHead>Shelf</TableHead><TableHead>Stock</TableHead><TableHead>Price</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? <TableRow><TableCell colSpan={7} className="py-10 text-center text-slate-500">No inventory items found.</TableCell></TableRow> : filtered.map((item) => {
-                const low = item.quantity <= item.minimum_stock;
-                return <TableRow key={item.id}>
-                  <TableCell><div className="flex items-center gap-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div><div className="font-medium">{item.item_name}</div>{item.sku && <div className="text-xs text-muted-foreground">SKU: {item.sku}</div>}</div></div></TableCell>
-                  <TableCell><Badge variant="secondary">{item.category || FALLBACK_CATEGORY}</Badge></TableCell>
-                  <TableCell>{item.brand || "—"}</TableCell>
+        <>
+          <div className="hidden overflow-x-auto md:block">
+            <Table>
+              <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Brand / model</TableHead><TableHead>Location</TableHead><TableHead>Stock</TableHead><TableHead>Price</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {source.map(item => <TableRow key={item.id}>
+                  <TableCell><div className="flex items-center gap-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0"><div className="font-semibold text-slate-900">{item.item_name}</div><div className="mt-0.5 text-xs text-slate-500">{item.subcategory || "Uncategorized"}{item.sku ? ` · ${item.sku}` : ""}</div></div></div></TableCell>
+                  <TableCell><div className="space-y-1"><Badge variant="secondary">{groupLabel(item)}</Badge><div className="text-xs text-slate-500">{item.subcategory || "—"}</div></div></TableCell>
+                  <TableCell><div className="font-medium text-slate-800">{item.brand || "—"}</div><div className="text-xs text-slate-500">{item.compatible_models || "No model specified"}</div></TableCell>
                   <TableCell>{item.shelf_location || "—"}</TableCell>
-                  <TableCell><div className="flex items-center gap-2"><span className="font-semibold">{item.quantity}</span>{low && <Badge variant="destructive">{item.quantity === 0 ? "Out" : "Low"}</Badge>}</div></TableCell>
-                  <TableCell>₦{Number(item.selling_price).toLocaleString()}</TableCell>
+                  <TableCell><div className="font-semibold text-slate-900">{item.quantity} units</div><div className={`text-xs ${item.quantity === 0 ? "text-red-700" : item.quantity <= item.minimum_stock ? "text-amber-700" : "text-slate-500"}`}>{stockLabel(item)}</div></TableCell>
+                  <TableCell className="font-semibold">₦{Number(item.selling_price).toLocaleString()}</TableCell>
                   <TableCell><div className="flex gap-2"><Button size="sm" onClick={() => onEdit(item)}>Edit</Button><Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>Delete</Button></div></TableCell>
-                </TableRow>;
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                </TableRow>)}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="divide-y divide-slate-100 md:hidden">
+            {source.map(item => <article key={item.id} className="p-4">
+              <div className="flex gap-3"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-slate-950">{item.item_name}</h3><p className="mt-0.5 text-xs text-slate-500">{item.brand || "Unknown brand"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p></div><span className="shrink-0 text-sm font-bold text-slate-900">₦{Number(item.selling_price).toLocaleString()}</span></div><div className="mt-3 flex flex-wrap gap-2"><Badge variant="secondary">{groupLabel(item)}</Badge><Badge variant="secondary">{item.subcategory || "Uncategorized"}</Badge><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.quantity === 0 ? "bg-red-50 text-red-700" : item.quantity <= item.minimum_stock ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}>{item.quantity} units · {stockLabel(item)}</span></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-500"><span>Location <strong className="block text-slate-800">{item.shelf_location || "Not set"}</strong></span><span>SKU <strong className="block text-slate-800">{item.sku || "Not set"}</strong></span></div><div className="mt-3 flex gap-2"><Button size="sm" onClick={() => onEdit(item)} className="flex-1">Edit</Button><Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>Delete</Button></div></div></div>
+            </article>)}
+          </div>
+        </>
       )}
     </div>
   );
