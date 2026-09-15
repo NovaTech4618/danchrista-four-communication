@@ -11,15 +11,108 @@ import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
 
+const PART_SUBCATEGORIES = ["Displays", "Charging", "Power", "Audio", "Back Glass / Housing", "Camera", "Other Phone Parts"];
+const GOODS_SUBCATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Phone Accessories", "Other Gadgets & Accessories"];
+
+function groupFor(item: InventoryItem) {
+  return item.item_type === "part" || item.category === "Phone Parts" ? "parts" : "goods";
+}
+
+function stockState(item: InventoryItem) {
+  if (item.quantity === 0) return "out";
+  if (item.quantity <= item.minimum_stock) return "low";
+  return "in";
+}
+
 export default function InventoryPage() {
-  const [refreshKey,setRefreshKey]=useState(0); const [editingItem,setEditingItem]=useState<InventoryItem|null>(null); const [items,setItems]=useState<InventoryItem[]>([]); const [query,setQuery]=useState(""); const [stockFilter,setStockFilter]=useState("all"); const [typeFilter,setTypeFilter]=useState("all");
-  useEffect(()=>{inventoryService.getInventory().then(r=>{if(!r.error)setItems((r.data??[]) as InventoryItem[])})},[refreshKey]);
-  const filtered=useMemo(()=>items.filter(item=>{const text=`${item.item_name} ${item.brand??""} ${item.sku??""} ${item.compatible_models??""} ${item.shelf_location??""}`.toLowerCase(); const typeOk=typeFilter==="all"||String(item.category||"Part").toLowerCase()===typeFilter; return text.includes(query.toLowerCase())&&typeOk&&(stockFilter==="all"||(stockFilter==="low"?item.quantity<=item.minimum_stock:item.quantity===0))}),[items,query,stockFilter,typeFilter]);
-  const lowStock=items.filter(i=>i.quantity<=i.minimum_stock),parts=items.filter(i=>String(i.category||"Part").toLowerCase()==="part"),accessories=items.filter(i=>String(i.category||"").toLowerCase()==="accessory"),gadgets=items.filter(i=>String(i.category||"").toLowerCase()==="gadget"),saveRefresh=()=>setRefreshKey(v=>v+1);
-  return <AppLayout><main className="mx-auto w-full max-w-[1500px] space-y-5 p-4 sm:p-6 lg:p-8"><header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--novatech-primary)]">Workshop stockroom</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Inventory</h1><p className="mt-1 max-w-2xl text-sm text-slate-500">Manage repair parts and retail goods with clear stock levels and movement controls.</p></div><div className="flex flex-col gap-2 sm:flex-row"><Link href="/inventory/import" className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--novatech-primary)] focus-visible:ring-offset-2">Import catalog</Link><Link href="/inventory/movements" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--novatech-primary)] focus-visible:ring-offset-2">Stock movements & transfers</Link></div></header>
-  <section className="grid gap-3 sm:grid-cols-3"><div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Parts</p><p className="mt-1 text-2xl font-bold text-slate-950">{parts.length}</p><p className="text-xs text-slate-500">Engineer-eligible repair stock</p></div><div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Accessories</p><p className="mt-1 text-2xl font-bold text-slate-950">{accessories.length}</p><p className="text-xs text-slate-500">Retail stock only</p></div><div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Gadgets</p><p className="mt-1 text-2xl font-bold text-slate-950">{gadgets.length}</p><p className="text-xs text-slate-500">Retail devices & electronics</p></div></section>
-  <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex flex-col gap-3 md:flex-row"><input aria-label="Search inventory" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search item, SKU, brand, model or shelf..." className="h-11 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--novatech-primary)] focus:ring-2 focus:ring-[var(--novatech-primary)]/15"/><select aria-label="Filter inventory by type" value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} className="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--novatech-primary)] sm:w-44"><option value="all">All types</option><option value="part">Parts</option><option value="accessory">Accessories</option><option value="gadget">Gadgets</option></select><select aria-label="Filter inventory by stock" value={stockFilter} onChange={e=>setStockFilter(e.target.value)} className="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--novatech-primary)] sm:w-44"><option value="all">All stock</option><option value="low">Low stock</option><option value="empty">Out of stock</option></select></div><div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500"><span><strong className="text-slate-900">{items.length}</strong> total items</span><span><strong className="text-amber-700">{lowStock.length}</strong> need attention</span><span><strong className="text-slate-900">{filtered.length}</strong> shown</span></div></section>
-  {lowStock.length>0&&<section className="rounded-xl border border-amber-200 bg-amber-50/60 p-4"><h2 className="font-semibold text-amber-950">Stock needs attention</h2><p className="mt-1 text-sm text-amber-800">These items are at or below their minimum stock level.</p><div className="mt-3 flex flex-wrap gap-2">{lowStock.slice(0,8).map(i=><span key={i.id} className="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-medium text-slate-700">{i.item_name} · {i.quantity} left</span>)}</div></section>}
-  <section className="grid gap-6 xl:grid-cols-4"><InventoryForm editingItem={editingItem} onSaved={()=>{setEditingItem(null);saveRefresh()}} onCancelEdit={()=>setEditingItem(null)}/><ReceiveStockPanel refreshKey={refreshKey} onReceived={saveRefresh}/><PurchaseStockPanel items={items} onSaved={saveRefresh}/><TransferStockPanel items={items} onTransferred={saveRefresh}/></section>
-  <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"><div className="border-b border-slate-200 px-4 py-4 sm:px-5"><h2 className="font-semibold text-slate-950">Inventory on hand</h2><p className="mt-1 text-sm text-slate-500">Photos, type, stock and pricing stay visible together as the catalog grows.</p></div><InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={filtered} embedded/></section></main></AppLayout>;
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [query, setQuery] = useState("");
+  const [group, setGroup] = useState<"all" | "parts" | "goods">("all");
+  const [subcategory, setSubcategory] = useState("all");
+  const [stockFilter, setStockFilter] = useState<"all" | "in" | "low" | "out">("all");
+
+  useEffect(() => {
+    inventoryService.getInventory().then(({ data, error }) => {
+      if (error) return;
+      setItems((data || []) as InventoryItem[]);
+    });
+  }, [refreshKey]);
+
+  const subcategories = useMemo(() => {
+    if (group === "parts") return PART_SUBCATEGORIES;
+    if (group === "goods") return GOODS_SUBCATEGORIES;
+    return [...new Set(items.map(i => i.subcategory).filter(Boolean) as string[])].sort();
+  }, [group, items]);
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return items.filter(item => {
+      const itemGroup = groupFor(item);
+      const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${item.subcategory || ""} ${item.shelf_location || ""}`.toLowerCase();
+      return (!needle || text.includes(needle)) &&
+        (group === "all" || itemGroup === group) &&
+        (subcategory === "all" || item.subcategory === subcategory) &&
+        (stockFilter === "all" || stockState(item) === stockFilter);
+    });
+  }, [items, query, group, subcategory, stockFilter]);
+
+  const parts = items.filter(i => groupFor(i) === "parts");
+  const goods = items.filter(i => groupFor(i) === "goods");
+  const low = items.filter(i => stockState(i) === "low");
+  const out = items.filter(i => stockState(i) === "out");
+  const saveRefresh = () => setRefreshKey(v => v + 1);
+
+  function changeGroup(value: "all" | "parts" | "goods") {
+    setGroup(value);
+    setSubcategory("all");
+  }
+
+  return (
+    <AppLayout>
+      <main className="mx-auto w-full max-w-[1500px] space-y-5 p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--novatech-primary)]">Workshop stockroom</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Inventory</h1>
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">Find a part quickly, know where it is, and see what needs restocking.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white">Import catalog</Link>
+            <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700">Stock movements</Link>
+          </div>
+        </header>
+
+        <section className="grid gap-3 sm:grid-cols-4">
+          <button onClick={() => changeGroup("parts")} className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone parts</p><p className="mt-1 text-2xl font-bold text-slate-950">{parts.length}</p><p className="text-xs text-slate-500">Displays, charging, power, audio and more</p></button>
+          <button onClick={() => changeGroup("goods")} className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Gadgets & accessories</p><p className="mt-1 text-2xl font-bold text-slate-950">{goods.length}</p><p className="text-xs text-slate-500">Retail goods and devices</p></button>
+          <button onClick={() => setStockFilter("low")} className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Low stock</p><p className="mt-1 text-2xl font-bold text-amber-700">{low.length}</p><p className="text-xs text-slate-500">At or below threshold</p></button>
+          <button onClick={() => setStockFilter("out")} className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Out of stock</p><p className="mt-1 text-2xl font-bold text-red-700">{out.length}</p><p className="text-xs text-slate-500">Nothing available now</p></button>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row">
+            <div className="min-w-0 flex-1"><input aria-label="Search inventory" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search name, model, brand, part type, SKU or shelf..." className="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--novatech-primary)] focus:ring-2 focus:ring-[var(--novatech-primary)]/15" /></div>
+            <select aria-label="Inventory group" value={group} onChange={e => changeGroup(e.target.value as typeof group)} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm"><option value="all">All inventory</option><option value="parts">Phone parts</option><option value="goods">Gadgets & accessories</option></select>
+            <select aria-label="Inventory subcategory" value={subcategory} onChange={e => setSubcategory(e.target.value)} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm"><option value="all">All subcategories</option>{subcategories.map(value => <option key={value} value={value}>{value}</option>)}</select>
+            <select aria-label="Inventory stock status" value={stockFilter} onChange={e => setStockFilter(e.target.value as typeof stockFilter)} className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm"><option value="all">All stock</option><option value="in">In stock</option><option value="low">Low stock</option><option value="out">Out of stock</option></select>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500"><span><strong className="text-slate-900">{filtered.length}</strong> shown</span><span><strong className="text-slate-900">{items.length}</strong> total items</span>{(query || group !== "all" || subcategory !== "all" || stockFilter !== "all") && <button type="button" onClick={() => { setQuery(""); setGroup("all"); setSubcategory("all"); setStockFilter("all"); }} className="font-semibold text-teal-700">Clear filters</button>}</div>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-4">
+          <InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); saveRefresh(); }} onCancelEdit={() => setEditingItem(null)} />
+          <ReceiveStockPanel refreshKey={refreshKey} onReceived={saveRefresh} />
+          <PurchaseStockPanel items={items} onSaved={saveRefresh} />
+          <TransferStockPanel items={items} onTransferred={saveRefresh} />
+        </section>
+
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-4 py-4 sm:px-5"><h2 className="font-semibold text-slate-950">Stock on hand</h2><p className="mt-1 text-sm text-slate-500">{filtered.length} item{filtered.length === 1 ? "" : "s"} match the current view.</p></div>
+          <InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={filtered} embedded />
+        </section>
+      </main>
+    </AppLayout>
+  );
 }
