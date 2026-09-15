@@ -59,8 +59,14 @@ export const inventoryService = {
   async deleteInventoryItem(id: string) {
     const existing = await supabase.from("inventory").select("image_path").eq("id", id).single();
     if (existing.error) return existing;
-    if (existing.data?.image_path) await supabase.storage.from(BUCKET).remove([existing.data.image_path]);
-    return await supabase.from("inventory").delete().eq("id", id);
+    const imagePath = existing.data?.image_path || null;
+    const deleted = await supabase.from("inventory").delete().eq("id", id);
+    if (deleted.error) return deleted;
+    if (imagePath) {
+      const { error } = await supabase.storage.from(BUCKET).remove([imagePath]);
+      if (error) return { data: null, error };
+    }
+    return deleted;
   },
   async uploadItemImage(itemId: string, file: File) {
     const validationError = validateImage(file);
@@ -69,24 +75,34 @@ export const inventoryService = {
     if (companyError || !companyId) return { data: null, error: companyError || new Error("Company not found.") };
     const current = await supabase.from("inventory").select("image_path").eq("id", itemId).single();
     if (current.error) return { data: null, error: current.error };
+    const oldPath = current.data?.image_path || null;
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const path = `${companyId}/${itemId}.${extension}`;
     const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
     if (error) return { data: null, error };
-    if (current.data?.image_path && current.data.image_path !== path) await supabase.storage.from(BUCKET).remove([current.data.image_path]);
     const { error: updateError } = await supabase.from("inventory").update({ image_path: path, image_url: null, updated_at: new Date().toISOString() }).eq("id", itemId);
-    if (updateError) return { data: null, error: updateError };
+    if (updateError) {
+      if (path !== oldPath) await supabase.storage.from(BUCKET).remove([path]);
+      return { data: null, error: updateError };
+    }
+    if (oldPath && oldPath !== path) {
+      const { error: removeOldError } = await supabase.storage.from(BUCKET).remove([oldPath]);
+      if (removeOldError) return { data: null, error: removeOldError };
+    }
     const signed = await supabase.storage.from(BUCKET).createSignedUrl(path, IMAGE_EXPIRY_SECONDS);
     return { data: signed.data?.signedUrl || null, error: signed.error };
   },
   async removeItemImage(itemId: string) {
     const current = await supabase.from("inventory").select("image_path").eq("id", itemId).single();
     if (current.error) return current;
-    if (current.data?.image_path) {
-      const { error } = await supabase.storage.from(BUCKET).remove([current.data.image_path]);
+    const oldPath = current.data?.image_path || null;
+    const updated = await supabase.from("inventory").update({ image_path: null, image_url: null, updated_at: new Date().toISOString() }).eq("id", itemId);
+    if (updated.error) return updated;
+    if (oldPath) {
+      const { error } = await supabase.storage.from(BUCKET).remove([oldPath]);
       if (error) return { data: null, error };
     }
-    return await supabase.from("inventory").update({ image_path: null, image_url: null, updated_at: new Date().toISOString() }).eq("id", itemId);
+    return updated;
   },
   async createInventoryTransfer(inventoryId: string, toBranchId: string, quantity: number, notes?: string | null) {
     return await supabase.rpc("create_inventory_transfer", { p_inventory_id: inventoryId, p_to_branch_id: toBranchId, p_quantity: quantity, p_notes: notes?.trim() || null });
