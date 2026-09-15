@@ -1,0 +1,22 @@
+-- Repair revenue in the business report must use the same recognition rule as profit reporting.
+-- Repairs received/completed remain operational counts; only completed/collected repairs contribute revenue.
+create or replace function public.get_business_report(p_from timestamptz default date_trunc('month',now()),p_to timestamptz default now())
+returns table(sales_revenue numeric,repair_revenue numeric,engineer_revenue numeric,standalone_invoice_revenue numeric,cash_received numeric,inventory_cogs numeric,gross_profit numeric,operating_expenses numeric,engineer_cost numeric,net_profit numeric,repairs_received bigint,repairs_completed bigint,customer_outstanding numeric,engineer_outstanding numeric,low_stock_items bigint)
+language sql stable security definer set search_path=public
+as $$
+with company as(select id from public.companies where id=public.get_my_company_id()),
+s as(select coalesce(sum(total),0) value from public.sales where company_id=(select id from company) and sale_date>=p_from and sale_date<p_to and (branch_id is null or public.user_has_branch_access(branch_id))),
+r as(select coalesce(sum(coalesce(final_cost,estimated_cost,0)) filter(where completed_at>=p_from and completed_at<p_to and status in('Completed','Collected')),0) value,count(*) filter(where created_at>=p_from and created_at<p_to and status not in('Cancelled','Returned Unrepaired')) received,count(*) filter(where completed_at>=p_from and completed_at<p_to and status in('Completed','Collected')) completed from public.repairs where company_id=(select id from company) and (branch_id is null or public.user_has_branch_access(branch_id))),
+er as(select coalesce(sum(debit-credit),0) value from public.engineer_transactions where company_id=(select id from company) and transaction_type in('parts_out','service_charge','parts_in') and created_at>=p_from and created_at<p_to),
+i as(select coalesce(sum(total),0) value from public.invoices where company_id=(select id from company) and sale_id is null and repair_id is null and status<>'void' and issued_at>=p_from and issued_at<p_to and (branch_id is null or public.user_has_branch_access(branch_id))),
+p as(select coalesce(sum(amount),0) value from public.financial_transactions where company_id=(select id from company) and direction='in' and occurred_at>=p_from and occurred_at<p_to and (branch_id is null or public.user_has_branch_access(branch_id))),
+c as(select coalesce(sum(case when movement_type in('sale','repair_use','engineer_out') then total_cost when movement_type in('repair_return','engineer_return') then -total_cost else 0 end),0) value from public.inventory_stock_movements m join public.inventory inv on inv.id=m.inventory_id where m.company_id=(select id from company) and m.created_at>=p_from and m.created_at<p_to and (inv.branch_id is null or public.user_has_branch_access(inv.branch_id))),
+o as(select coalesce(sum(amount),0) value from public.financial_transactions where company_id=(select id from company) and direction='out' and category in('salary','rent','utility','other') and occurred_at>=p_from and occurred_at<p_to and (branch_id is null or public.user_has_branch_access(branch_id))),
+ec as(select coalesce(sum(amount),0) value from public.financial_transactions where company_id=(select id from company) and direction='out' and category='engineer_payment' and occurred_at>=p_from and occurred_at<p_to and (branch_id is null or public.user_has_branch_access(branch_id))),
+cu as(select coalesce(sum(balance),0) value from(select greatest(coalesce(sum(d.debit),0)-coalesce(sum(d.credit),0),0) balance from public.customer_debt_ledger d where d.company_id=(select id from company) and (d.branch_id is null or public.user_has_branch_access(d.branch_id)) group by d.customer_id)x),
+eng as(select coalesce(sum(balance),0) value from public.get_engineer_balances()),
+ls as(select count(*) value from public.inventory where company_id=(select id from company) and coalesce(quantity,0)<=coalesce(minimum_stock,0) and (branch_id is null or public.user_has_branch_access(branch_id)))
+select s.value,r.value,er.value,i.value,p.value,c.value,(s.value+r.value+er.value+i.value-c.value),o.value,ec.value,(s.value+r.value+er.value+i.value-c.value-o.value-ec.value),r.received,r.completed,cu.value,eng.value,ls.value from s,r,er,i,p,c,o,ec,cu,eng,ls where public.has_permission('reports.view');
+$$;
+revoke all on function public.get_business_report(timestamptz,timestamptz) from public,anon;
+grant execute on function public.get_business_report(timestamptz,timestamptz) to authenticated;
