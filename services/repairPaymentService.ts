@@ -30,6 +30,7 @@ export const repairPaymentService = {
       p_payment_method: paymentMethod,
       p_payment_date: paymentDate || new Date().toISOString(),
       p_notes: notes?.trim() || null,
+      p_idempotency_key: crypto.randomUUID(),
     });
   },
 };
