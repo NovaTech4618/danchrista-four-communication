@@ -26,6 +26,14 @@ function validateImage(file: File) {
   return null;
 }
 
+async function getCompanyId() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { companyId: null, error: new Error("You must be signed in.") };
+  const { data, error } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+  if (error || !data?.company_id) return { companyId: null, error: error || new Error("Your account is not linked to a company.") };
+  return { companyId: data.company_id as string, error: null };
+}
+
 export const inventoryService = {
   async getInventory() {
     const result = await supabase.from("inventory").select("*").order("item_name", { ascending: true });
@@ -60,9 +68,11 @@ export const inventoryService = {
     return await supabase.from("inventory").delete().eq("id", id);
   },
 
-  async uploadItemImage(companyId: string, itemId: string, file: File) {
+  async uploadItemImage(itemId: string, file: File) {
     const validationError = validateImage(file);
     if (validationError) return { data: null, error: validationError };
+    const { companyId, error: companyError } = await getCompanyId();
+    if (companyError || !companyId) return { data: null, error: companyError || new Error("Company not found.") };
     const current = await supabase.from("inventory").select("image_path").eq("id", itemId).single();
     if (current.error) return { data: null, error: current.error };
 
@@ -94,6 +104,6 @@ export const inventoryService = {
   },
 
   async getTransferHistory(limit = 50) {
-    return await supabase.from("inventory_transfers").select("id, inventory_id, from_branch_id, to_branch_id, quantity, status, notes, created_at").order("created_at", { ascending: false }).limit(limit);
+    return await supabase.from("inventory_transfers").select("id, inventory_id, from_branch_id, to_branch_id, quantity, status, notes").order("created_at", { ascending: false }).limit(limit);
   },
 };
