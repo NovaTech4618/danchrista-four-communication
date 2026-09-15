@@ -40,34 +40,28 @@ export const inventoryService = {
     if (result.error) return result;
     return { ...result, data: await withSignedImages((result.data || []) as InventoryItem[]) };
   },
-
   async getInventoryById(id: string) {
     const result = await supabase.from("inventory").select("*").eq("id", id).single();
     if (result.error || !result.data) return result;
     return { ...result, data: await withSignedImage(result.data as InventoryItem) };
   },
-
   async getLowStock() {
     const { data, error } = await supabase.from("inventory").select("id,item_name,quantity,minimum_stock").order("quantity", { ascending: true });
     if (error) return { data: null, error };
     return { data: (data || []).filter((i) => i.quantity <= i.minimum_stock).slice(0, 5), error: null };
   },
-
   async addInventoryItem(item: InventoryItemInput) {
     return await supabase.from("inventory").insert([item]).select("*").single();
   },
-
   async updateInventoryItem(id: string, item: InventoryItemInput) {
     return await supabase.from("inventory").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id);
   },
-
   async deleteInventoryItem(id: string) {
     const existing = await supabase.from("inventory").select("image_path").eq("id", id).single();
     if (existing.error) return existing;
     if (existing.data?.image_path) await supabase.storage.from(BUCKET).remove([existing.data.image_path]);
     return await supabase.from("inventory").delete().eq("id", id);
   },
-
   async uploadItemImage(itemId: string, file: File) {
     const validationError = validateImage(file);
     if (validationError) return { data: null, error: validationError };
@@ -75,20 +69,16 @@ export const inventoryService = {
     if (companyError || !companyId) return { data: null, error: companyError || new Error("Company not found.") };
     const current = await supabase.from("inventory").select("image_path").eq("id", itemId).single();
     if (current.error) return { data: null, error: current.error };
-
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const path = `${companyId}/${itemId}.${extension}`;
     const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
     if (error) return { data: null, error };
-
     if (current.data?.image_path && current.data.image_path !== path) await supabase.storage.from(BUCKET).remove([current.data.image_path]);
-
     const { error: updateError } = await supabase.from("inventory").update({ image_path: path, image_url: null, updated_at: new Date().toISOString() }).eq("id", itemId);
     if (updateError) return { data: null, error: updateError };
     const signed = await supabase.storage.from(BUCKET).createSignedUrl(path, IMAGE_EXPIRY_SECONDS);
     return { data: signed.data?.signedUrl || null, error: signed.error };
   },
-
   async removeItemImage(itemId: string) {
     const current = await supabase.from("inventory").select("image_path").eq("id", itemId).single();
     if (current.error) return current;
@@ -98,12 +88,10 @@ export const inventoryService = {
     }
     return await supabase.from("inventory").update({ image_path: null, image_url: null, updated_at: new Date().toISOString() }).eq("id", itemId);
   },
-
   async createInventoryTransfer(inventoryId: string, toBranchId: string, quantity: number, notes?: string | null) {
     return await supabase.rpc("create_inventory_transfer", { p_inventory_id: inventoryId, p_to_branch_id: toBranchId, p_quantity: quantity, p_notes: notes?.trim() || null });
   },
-
   async getTransferHistory(limit = 50) {
-    return await supabase.from("inventory_transfers").select("id, inventory_id, from_branch_id, to_branch_id, quantity, status, notes").order("created_at", { ascending: false }).limit(limit);
+    return await supabase.from("inventory_transfers").select("id, inventory_id, from_branch_id, to_branch_id, quantity, status, notes, created_at").order("created_at", { ascending: false }).limit(limit);
   },
 };
