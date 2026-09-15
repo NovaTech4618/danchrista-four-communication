@@ -3,28 +3,15 @@ import { supabase } from "@/lib/supabase";
 const FALLBACK_TIMEZONE = "Africa/Lagos";
 
 type Parts = { year: string; month: string; day: string };
+export type BusinessPeriod = "today" | "week" | "month" | "all";
 
 function datePartsInZone(date: Date, timeZone: string): Parts {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  return {
-    year: parts.find((p) => p.type === "year")?.value ?? "1970",
-    month: parts.find((p) => p.type === "month")?.value ?? "01",
-    day: parts.find((p) => p.type === "day")?.value ?? "01",
-  };
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+  return { year: parts.find((p) => p.type === "year")?.value ?? "1970", month: parts.find((p) => p.type === "month")?.value ?? "01", day: parts.find((p) => p.type === "day")?.value ?? "01" };
 }
 
 function offsetForZone(date: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "shortOffset",
-  }).formatToParts(date);
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone, hour: "2-digit", minute: "2-digit", timeZoneName: "shortOffset" }).formatToParts(date);
   const raw = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT";
   if (raw === "GMT" || raw === "UTC") return "+00:00";
   const match = raw.match(/^GMT([+-])(\d{1,2})(?::(\d{2}))?$/);
@@ -35,8 +22,7 @@ function offsetForZone(date: Date, timeZone: string): string {
 function zonedMidnight(date: Date, timeZone: string): Date {
   const { year, month, day } = datePartsInZone(date, timeZone);
   const localMidnightLabel = `${year}-${month}-${day}T00:00:00`;
-  const offset = offsetForZone(new Date(`${localMidnightLabel}Z`), timeZone);
-  return new Date(`${localMidnightLabel}${offset}`);
+  return new Date(`${localMidnightLabel}${offsetForZone(new Date(`${localMidnightLabel}Z`), timeZone)}`);
 }
 
 export async function getCompanyTimezone(): Promise<string> {
@@ -51,7 +37,17 @@ export async function getCompanyTimezone(): Promise<string> {
 export async function getBusinessDayRange(reference = new Date()): Promise<{ start: string; end: string; timezone: string }> {
   const timezone = await getCompanyTimezone();
   const startDate = zonedMidnight(reference, timezone);
-  const nextDayReference = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-  const endDate = zonedMidnight(nextDayReference, timezone);
+  const endDate = zonedMidnight(new Date(startDate.getTime() + 24 * 60 * 60 * 1000), timezone);
+  return { start: startDate.toISOString(), end: endDate.toISOString(), timezone };
+}
+
+export async function getBusinessPeriodRange(period: BusinessPeriod, reference = new Date()): Promise<{ start: string; end: string; timezone: string }> {
+  const timezone = await getCompanyTimezone();
+  const endDate = zonedMidnight(new Date(reference.getTime() + 24 * 60 * 60 * 1000), timezone);
+  const currentDay = zonedMidnight(reference, timezone);
+  const startDate = new Date(currentDay);
+  if (period === "week") startDate.setUTCDate(startDate.getUTCDate() - 6);
+  if (period === "month") startDate.setUTCDate(startDate.getUTCDate() - 29);
+  if (period === "all") startDate.setUTCFullYear(2000);
   return { start: startDate.toISOString(), end: endDate.toISOString(), timezone };
 }
