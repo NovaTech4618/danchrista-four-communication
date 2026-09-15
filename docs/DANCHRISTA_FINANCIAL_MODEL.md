@@ -10,12 +10,12 @@ Danchrista separates economic performance from cash movement. A payment is not n
 
 | Business event | Revenue | Cash movement | Receivable | COGS / cost |
 |---|---|---|---|---|
-| Sale | Yes, `sales.total` at sale date | Only when paid through the sale's payment method | Yes when customer is charged on credit | Inventory stock movement of type `sale` at recorded historical `unit_cost` |
-| Sale payment / settlement | No | Yes | Reduces customer receivable | No |
+| Sale | Yes, `sales.total` at sale date | Sale payment event | Sale/customer charge is immediately settled in the current model | Inventory stock movement of type `sale` at recorded historical `unit_cost` |
+| Sale payment / settlement | No | Yes | Reduces customer receivable where a receivable exists | No |
 | Repair recognized | Yes when the repair reaches a chargeable completed/collected state and has a recognized charge | Only when payment is recorded | Yes when unpaid | `repair_use` stock movements, less valid repair returns |
 | Repair payment | No | Yes | Reduces repair/customer receivable | No |
-| Invoice linked to sale | No additional revenue | Payment creates cash | Represents/settles the sale receivable | No additional COGS |
-| Invoice linked to repair | No additional revenue | Payment creates cash | Represents/settles repair receivable | No additional COGS |
+| Invoice linked to sale | No additional revenue | Payment creates cash | Billing document only; does not create another customer charge | No additional COGS |
+| Invoice linked to repair | No additional revenue | Payment creates cash | Billing document settles the repair receivable; does not create another charge | No additional COGS |
 | Standalone invoice | Yes only when it represents a standalone charge not already represented by sale/repair | Payment creates cash | Creates/settles its own receivable | Only if a traceable cost source exists |
 | Engineer parts out | Yes: parts are transferred/sold to engineer on credit | No immediate cash unless separately paid | Increases engineer receivable | `engineer_out` stock movement at recorded historical cost |
 | Engineer parts in / return | Reverses the corresponding engineer charge | No | Reduces engineer receivable | Reverses corresponding `engineer_out` cost |
@@ -28,18 +28,62 @@ Danchrista separates economic performance from cash movement. A payment is not n
 ## Recognition decisions
 
 ### Sales
-A completed sale row is the revenue event. Its payment method describes how the sale was settled, but reporting must not use the payment ledger as additional revenue.
+A completed sale row is the revenue event. Its payment method describes how the sale was settled. The current Danchrista model treats sales as immediately settled; a future true customer-credit sale workflow must introduce an explicit receivable/payment event rather than reusing the current cash semantics.
 
 ### Repairs
 The current workflow has `Completed` and `Collected` terminal chargeable states and stores `final_cost` or `estimated_cost`. Repair revenue is recognized from the chargeable repair event, not from repair payments. Cancelled/Returned Unrepaired repairs are not revenue events.
 
 Where a repair is completed but not yet collected, the system can show revenue and a receivable separately.
 
+Repair charge history is anchored in `customer_debt_ledger`. If an unrecognized repair amount changes, the difference is recorded as a ledger adjustment rather than silently replacing the original charge. Once a repair has reached `Completed` or `Collected`, its financial amount is immutable because changing it would otherwise retroactively alter recognized revenue. An explicit revenue-adjustment workflow would be required for a post-recognition correction.
+
 ### Engineers
 `engineer_parts_out` and `engineer_work_charge` are charge events. `engineer_payment_in` is settlement cash only. `engineer_parts_in` reverses a parts charge. `opening_balance` is brought-forward receivable, not current revenue. `payment_out` is a cash cost and must not inflate the engineer receivable.
 
 ### Invoices
-Invoices are representation/billing documents, not automatically new revenue. A linked sale or repair remains the underlying economic event. A standalone invoice can be a revenue event only when it represents a standalone charge that has no other underlying sale/repair event.
+Invoices are representation/billing documents, not automatically new revenue. A linked sale or repair remains the underlying economic event. Linked invoice totals must equal the source sale/repair total. A standalone invoice can be a revenue event only when it represents a standalone charge that has no other underlying sale/repair event.
+
+Invoice payments are settlement events only. Linked-sale invoice payments do not create a second customer receivable because the sale is already the economic event. Linked-repair invoice payments settle the repair receivable. Standalone invoice payments settle the standalone invoice receivable.
+
+## Customer receivables — authoritative model
+
+`customer_debt_ledger` is the authoritative customer receivable ledger.
+
+For each customer:
+
+**valid charges + valid adjustments − valid payment credits = outstanding**
+
+The ledger is the source of truth. Repair and invoice balance projections must reconcile back to it; they must not invent a competing customer balance calculation.
+
+- A repair creates one customer charge in the ledger.
+- A repair payment creates one customer credit.
+- A linked repair invoice creates no second charge; its payment credits the same repair receivable.
+- A linked sale invoice creates no charge and its payment does not create a customer credit in the current immediately-settled sale model.
+- A standalone invoice creates one charge; its payments create credits.
+- Repair amount changes before recognition are represented by adjustment entries.
+- A repair with financial history cannot be moved to another customer/device.
+- Customer balances are not permitted to become negative through the supported payment flows.
+
+`customer_financial_reconciliation` compares the authoritative ledger balance against source-derived repair and standalone-invoice balances. A discrepancy is a data/reporting integrity issue and must be investigated rather than hidden.
+
+## Returns and refunds
+
+Inventory returns are supported for repair/engineer stock movements and reverse the corresponding historical COGS. A customer sale/repair cash-refund workflow is **not** currently modeled as a first-class financial event. Therefore the system must not fake a refund by deleting or editing a payment. If a genuine customer refund is required, a dedicated refund/reversal event must be introduced first so revenue, cash, receivable, inventory, and COGS can all be adjusted together.
+
+A repair marked returned/cancelled after payment therefore requires an explicit refund workflow; it must not silently turn a paid customer balance into an unexplained credit.
+
+## Historical edits and deletion safety
+
+Finalized financial events are append-only in practice:
+
+- sales do not expose destructive financial editing;
+- invoice/payment records are not directly editable/deletable through the supported workflow;
+- repair payments are recorded through an idempotent RPC and are not edited in place;
+- recognized repair amounts are immutable;
+- pre-recognition repair amount changes create adjustment ledger entries;
+- retries with the same payment idempotency key return the original payment instead of creating a second financial event.
+
+Corrections should be represented by a reversal/adjustment event where the business model supports it, not by rewriting history.
 
 ## Cash
 
@@ -47,7 +91,7 @@ Cash received is derived from actual payment/money-in events, classified by paym
 
 ## Receivables
 
-Customer balances are derived from the customer debt ledger, whose entries are linked to source records. Repair balance reporting must use the same underlying ledger relationship rather than independently calculating a conflicting balance.
+Customer balances are derived from the customer debt ledger, whose entries are linked to source records. Repair and invoice balance reporting now follows the same underlying customer receivable model.
 
 Engineer balances are derived from `engineer_transactions`, excluding `payment_out` from the receivable balance because that event is a cash cost rather than an amount owed by the engineer. Engineer payment-in and part-return operations reject amounts that would create a negative receivable; prepayment is not currently a supported engineer-account state.
 
