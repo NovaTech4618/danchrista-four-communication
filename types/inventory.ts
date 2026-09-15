@@ -4,6 +4,8 @@ export type InventoryItem = {
   branch_id: string | null;
   item_name: string;
   category: string | null;
+  subcategory: string | null;
+  item_type?: "part" | "accessory" | "gadget" | string | null;
   brand: string | null;
   compatible_models: string | null;
   sku: string | null;
@@ -15,6 +17,7 @@ export type InventoryItem = {
   shelf_location: string | null;
   notes: string | null;
   image_url: string | null;
+  image_path?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -22,6 +25,7 @@ export type InventoryItem = {
 export type InventoryItemInput = {
   item_name: string;
   category: string | null;
+  subcategory: string | null;
   brand: string | null;
   compatible_models: string | null;
   sku: string | null;
