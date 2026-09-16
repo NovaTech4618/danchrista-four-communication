@@ -31,11 +31,25 @@ export type DailyClosing = {
   created_at: string;
   updated_at: string;
   closed_by: string | null;
+  closed_by_name?: string | null;
   closed_at: string | null;
   reopened_by: string | null;
   reopened_at: string | null;
   reopen_reason: string | null;
 };
+
+export type DailyClosingPaymentMethod = {
+  id: string;
+  daily_closing_id: string;
+  payment_method: "cash" | "transfer" | "pos" | "other";
+  expected_amount: number;
+  actual_amount: number | null;
+  discrepancy: number | null;
+  transaction_count: number;
+  notes: string | null;
+};
+
+export type PaymentMethodActuals = Record<DailyClosingPaymentMethod["payment_method"], number>;
 
 export type DailyClosingServiceResult<T = DailyClosing> = {
   data: T | null;
@@ -51,7 +65,7 @@ export class DailyClosingValidationError extends Error {
   }
 }
 
-function validation(message: string): DailyClosingServiceResult {
+function validation<T = DailyClosing>(message: string): DailyClosingServiceResult<T> {
   return { data: null, error: new DailyClosingValidationError(message) };
 }
 
@@ -64,7 +78,7 @@ function normalizeError(error: unknown, fallback: string): Error {
   return new Error(fallback);
 }
 
-async function authorize() : Promise<Error | null> {
+async function authorize(): Promise<Error | null> {
   const session = await getCurrentSession();
   if (!session?.user) return new Error("You must be signed in.");
 
@@ -94,6 +108,14 @@ function validateNonNegativeAmount(value: number, label: string): Error | null {
   return null;
 }
 
+function validatePaymentMethodActuals(actuals: PaymentMethodActuals): Error | null {
+  for (const method of ["cash", "transfer", "pos", "other"] as const) {
+    const error = validateNonNegativeAmount(actuals[method], `${method.toUpperCase()} actual amount`);
+    if (error) return error;
+  }
+  return null;
+}
+
 async function callRpc<T>(
   operation: string,
   rpc: () => Promise<{ data: T | null; error: unknown }>,
@@ -111,6 +133,53 @@ async function callRpc<T>(
 }
 
 export const dailyClosingService = {
+  async getByDate(businessDate: string): Promise<DailyClosingServiceResult> {
+    const dateError = validateBusinessDate(businessDate);
+    if (dateError) return { data: null, error: dateError };
+
+    try {
+      const authError = await authorize();
+      if (authError) return { data: null, error: authError };
+
+      const result = await supabase
+        .from("daily_closings")
+        .select("*")
+        .eq("business_date", businessDate)
+        .maybeSingle();
+      if (result.error) return { data: null, error: normalizeError(result.error, "Unable to load daily closing.") };
+      if (!result.data) return { data: null, error: null };
+
+      let closedByName: string | null = null;
+      if (result.data.closed_by) {
+        const profile = await supabase.from("profiles").select("full_name").eq("id", result.data.closed_by).maybeSingle();
+        if (!profile.error) closedByName = profile.data?.full_name ?? null;
+      }
+
+      return { data: { ...result.data, closed_by_name: closedByName } as DailyClosing, error: null };
+    } catch (error) {
+      return { data: null, error: normalizeError(error, "Unable to load daily closing.") };
+    }
+  },
+
+  async getPaymentMethods(dailyClosingId: string): Promise<DailyClosingServiceResult<DailyClosingPaymentMethod[]>> {
+    if (!dailyClosingId.trim()) return validation<DailyClosingPaymentMethod[]>("Daily closing ID is required.");
+
+    try {
+      const authError = await authorize();
+      if (authError) return { data: null, error: authError };
+
+      const result = await supabase
+        .from("daily_closing_payment_methods")
+        .select("id,daily_closing_id,payment_method,expected_amount,actual_amount,discrepancy,transaction_count,notes")
+        .eq("daily_closing_id", dailyClosingId)
+        .order("payment_method");
+      if (result.error) return { data: null, error: normalizeError(result.error, "Unable to load payment methods.") };
+      return { data: (result.data ?? []) as DailyClosingPaymentMethod[], error: null };
+    } catch (error) {
+      return { data: null, error: normalizeError(error, "Unable to load payment methods.") };
+    }
+  },
+
   async open(businessDate: string, initialOpeningCash?: number | null): Promise<DailyClosingServiceResult> {
     const dateError = validateBusinessDate(businessDate);
     if (dateError) return { data: null, error: dateError };
@@ -140,17 +209,33 @@ export const dailyClosingService = {
     });
   },
 
-  async close(dailyClosingId: string, actualCash: number, notes?: string | null): Promise<DailyClosingServiceResult> {
+  async close(
+    dailyClosingId: string,
+    actualCash: number,
+    notes?: string | null,
+    paymentMethodActuals?: PaymentMethodActuals,
+  ): Promise<DailyClosingServiceResult> {
     if (!dailyClosingId.trim()) return validation("Daily closing ID is required.");
     const amountError = validateNonNegativeAmount(actualCash, "Actual cash");
     if (amountError) return { data: null, error: amountError };
+    if (paymentMethodActuals) {
+      const methodsError = validatePaymentMethodActuals(paymentMethodActuals);
+      if (methodsError) return { data: null, error: methodsError };
+    }
 
     return callRpc("close daily closing", async () => {
-      const result = await supabase.rpc("close_daily_closing", {
-        p_daily_closing_id: dailyClosingId,
-        p_actual_cash: actualCash,
-        p_notes: notes?.trim() || null,
-      });
+      const result = paymentMethodActuals
+        ? await supabase.rpc("close_daily_closing_with_payment_methods", {
+            p_daily_closing_id: dailyClosingId,
+            p_actual_cash: actualCash,
+            p_notes: notes?.trim() || null,
+            p_payment_methods: paymentMethodActuals,
+          })
+        : await supabase.rpc("close_daily_closing", {
+            p_daily_closing_id: dailyClosingId,
+            p_actual_cash: actualCash,
+            p_notes: notes?.trim() || null,
+          });
       return { data: Array.isArray(result.data) ? result.data[0] ?? null : result.data, error: result.error };
     });
   },
