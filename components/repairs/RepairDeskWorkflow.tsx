@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { CheckCircle2, Circle, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { businessOperationsService } from "@/services/businessOperationsService";
 import { repairService } from "@/services/repairService";
 
-const steps = [
-  ["01", "Intake", "Customer + device + complaint"], ["02", "Engineer", "Assign ownership"], ["03", "Work", "Status + diagnosis + solution"], ["04", "Parts", "Issue parts through inventory"],
-  ["05", "Payment", "Paid vs outstanding"], ["06", "Completion", "Finish when status allows"], ["07", "Invoice", "Linked repair invoice"], ["08", "Collection", "Payment + handover"],
-] as const;
-
+const steps = [["01", "Intake", "Customer + device + complaint"], ["02", "Engineer", "Assign ownership"], ["03", "Work", "Status + diagnosis + solution"], ["04", "Parts", "Issue parts through inventory"], ["05", "Payment", "Paid vs outstanding"], ["06", "Completion", "Finish when status allows"], ["07", "Invoice", "Linked repair invoice"], ["08", "Collection", "Payment + handover"]] as const;
 type Props = { repairId?: string; status: string; engineerAssigned: boolean; hasHandover: boolean };
 type ProfitRow = { amount_paid?: number | null; outstanding?: number | null };
 
-export default function RepairDeskWorkflow({ repairId, status, engineerAssigned, hasHandover }: Props) {
+export default function RepairDeskWorkflow({ repairId: suppliedRepairId, status, engineerAssigned, hasHandover }: Props) {
+  const params = useParams<{ id?: string }>();
+  const repairId = suppliedRepairId ?? params?.id;
   const [paid, setPaid] = useState(0);
   const [outstanding, setOutstanding] = useState(0);
   const [hasInvoice, setHasInvoice] = useState(false);
