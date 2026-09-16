@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { repairOperationsService, type RepairOutcome, type RepairWarranty } from "@/services/repairOperationsService";
+import { repairService } from "@/services/repairService";
 import type { RepairApprovalHistory, RepairIntake, RepairQuote } from "@/types/repairPhase4";
 import type { RepairHandover, RepairRepeatLink } from "@/types/repairHandover";
 import RepairInvoiceWorkflow from "@/components/repairs/RepairInvoiceWorkflow";
@@ -28,12 +29,14 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   const [warranty, setWarranty] = useState<RepairWarranty | null>(null);
   const [handover, setHandover] = useState<RepairHandover | null>(null);
   const [repeatLinks, setRepeatLinks] = useState<RepairRepeatLink[]>([]);
+  const [engineerAssigned, setEngineerAssigned] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const [i, q, h, o, w, ho, rl] = await Promise.all([
+    const [i, q, h, o, w, ho, rl, repair] = await Promise.all([
       repairOperationsService.getIntake(repairId), repairOperationsService.getQuote(repairId), repairOperationsService.getApprovalHistory(repairId),
       repairOperationsService.getOutcome(repairId), repairOperationsService.getWarranty(repairId), repairOperationsService.getHandover(repairId), repairOperationsService.getRepeatLinks(repairId),
+      repairService.getRepairById(repairId),
     ]);
     if (!i.error) setIntake(i.data);
     if (!q.error) setQuote(q.data);
@@ -42,6 +45,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     if (!w.error) setWarranty(w.data);
     if (!ho.error) setHandover(ho.data);
     if (!rl.error) setRepeatLinks(rl.data ?? []);
+    if (!repair.error) setEngineerAssigned(Boolean((repair.data as { engineer_id?: string | null } | null)?.engineer_id));
   }
   useEffect(() => { void load(); }, [repairId]);
 
@@ -135,12 +139,8 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     customer_acknowledged: intake?.customer_acknowledged ?? false, acknowledged_at: intake?.acknowledged_at ?? null, acknowledged_by: intake?.acknowledged_by ?? null, created_at: intake?.created_at ?? "", updated_at: intake?.updated_at ?? "",
   };
 
-  const workStarted = ["Repairing", "Testing", "Completed", "Ready for Collection", "Collected"].includes(status);
-  const completed = ["Completed", "Ready for Collection", "Collected"].includes(status);
-  const paidAmount = Number(repairTotal || 0);
-
   return <section className="space-y-6">
-    <RepairDeskWorkflow status={status} engineerAssigned={Boolean(customerId && workStarted)} total={paidAmount} paid={0} balance={paidAmount} hasTicket={Boolean(handover)} hasInvoice={false}/>
+    <RepairDeskWorkflow status={status} engineerAssigned={engineerAssigned} hasHandover={Boolean(handover)}/>
 
     <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><ClipboardCheck className="size-5 text-teal-700"/>01 · Intake <Badge variant={sla.tone} className="ml-auto">{sla.label}</Badge></CardTitle></CardHeader><CardContent className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3"><Field label="Device condition" value={defaultIntake.device_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, device_condition: v })}/><Field label="Screen condition" value={defaultIntake.screen_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, screen_condition: v })}/><Field label="Body condition" value={defaultIntake.body_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, body_condition: v })}/></div>
@@ -158,7 +158,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
 
     <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><HandCoins className="size-5 text-teal-700"/>08 · Collection & handover</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Device handover</p>{handover ? <p className="text-sm text-slate-500">Collected by {handover.recipient_name} · {new Date(handover.handed_over_at).toLocaleString("en-NG")}</p> : <p className="text-sm text-slate-500">Customer confirmation is required before collection.</p>}</div>{["Completed", "Ready for Collection", "Collected"].includes(status) && <Button onClick={collect} disabled={busy}>{handover ? "Update handover" : "Collect device"}</Button>}</div><RepeatLinkForm repairId={repairId} warrantyId={warranty?.id ?? null} existing={repeatLinks} busy={busy} reload={load}/></CardContent></Card>
 
-    <div className="sr-only">{customerId}{completed ? " completed" : " in progress"}</div>
+    <div className="sr-only">{customerId}</div>
   </section>;
 }
 
