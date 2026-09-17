@@ -16,11 +16,10 @@ const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.verc
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
-  description:
-    "Business management system for Danchrista Four Communication — repairs, inventory, sales, engineers, payments and daily operations.",
+  description: "Daily sales, inventory, repairs, debit, credit and money records for Danchrista Four Communication.",
   applicationName: "Danchrista Four Communication",
   category: "business",
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -35,7 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-w-0 overflow-x-hidden">
         <a
           href="#main-content"
-          className="sr-only fixed left-3 top-3 z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--novatech-primary)]"
+          className="sr-only fixed left-3 top-3 z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--danchrista-primary)]"
         >
           Skip to main content
         </a>
