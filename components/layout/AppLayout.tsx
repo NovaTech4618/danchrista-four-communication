@@ -23,57 +23,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const checkWorkspaceAccess = async () => {
       setCheckingAuth(true);
       setCheckingAccess(true);
-
       const session = await getCurrentSession();
       if (!mounted) return;
-
-      if (!session?.user) {
-        router.replace("/login");
-        return;
-      }
-
+      if (!session?.user) { router.replace("/login"); return; }
       setCheckingAuth(false);
-
       const requiredPermission = permissionForPath(pathname);
-      if (!requiredPermission) {
-        setCheckingAccess(false);
-        return;
-      }
-
+      if (!requiredPermission) { setCheckingAccess(false); return; }
       const roleResult = await staffService.getMyRole();
       if (!mounted) return;
-
-      if (roleResult.error || !roleResult.data) {
-        await supabase.auth.signOut();
-        router.replace("/login");
-        return;
-      }
-
-      if (!hasPermission(roleResult.data, requiredPermission)) {
-        router.replace(DEFAULT_ROLE_PATH[roleResult.data]);
-        return;
-      }
-
+      if (roleResult.error || !roleResult.data) { await supabase.auth.signOut(); router.replace("/login"); return; }
+      if (!hasPermission(roleResult.data, requiredPermission)) { router.replace(DEFAULT_ROLE_PATH[roleResult.data]); return; }
       setCheckingAccess(false);
     };
 
     void checkWorkspaceAccess();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-      if (event === "SIGNED_OUT" || !session?.user) {
-        router.replace("/login");
-        return;
-      }
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-        void checkWorkspaceAccess();
-      }
+      if (event === "SIGNED_OUT" || !session?.user) { router.replace("/login"); return; }
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") void checkWorkspaceAccess();
     });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, [pathname, router]);
 
   if (checkingAuth || checkingAccess) {
@@ -82,7 +51,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(18,59,52,0.10)]">
           <DanchristaLogo />
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-            <span className="size-2 animate-pulse rounded-full bg-[var(--danchrista-primary)]" aria-hidden="true" />
+            <span className="size-2 animate-pulse rounded-full bg-[var(--novatech-primary)]" aria-hidden="true" />
             Securing your workspace…
           </div>
           <p className="text-xs leading-5 text-slate-400">Checking your session and workspace access.</p>
@@ -97,9 +66,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset className="min-h-screen bg-[var(--background)]">
         <Header />
         <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {children}
-          </div>
+          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">{children}</div>
         </main>
       </SidebarInset>
       <FloatingAssistant />
