@@ -69,14 +69,11 @@ export const repairService = {
     solution: string | null;
     priority: string;
     expected_completion_date: string | null;
-    // Legacy callers may still provide these fields; they are intentionally ignored.
     deposit?: number;
     estimated_cost?: number | null;
     final_cost?: number | null;
     status?: string;
   }) {
-    // Gate D boundary: only operational, non-financial columns are writable directly.
-    // Financial identity, status, ownership, branch and completion fields use dedicated RPCs.
     const { data, error } = await supabase
       .from("repairs")
       .update({
