@@ -107,7 +107,7 @@ export default function AppSidebar() {
       if (data) {
         setProfile({
           fullName: data.full_name ?? "Danchrista",
-          companyName: data.company_name ?? "Danchrista Four Communication",
+          companyName: data.companies?.[0]?.name ?? "Danchrista Four Communication",
         });
       }
     });
