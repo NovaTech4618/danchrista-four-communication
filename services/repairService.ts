@@ -61,18 +61,25 @@ export const repairService = {
     return result;
   },
 
-  async updateRepair(id: string, repair: { technician: string | null; issue: string; diagnosis: string | null; repair_notes: string | null; solution: string | null; priority: string; deposit: number; expected_completion_date: string | null; estimated_cost: number | null; final_cost: number | null; status: string; }) {
-    const { data: current, error: readError } = await supabase.from("repairs").select("status").eq("id", id).single<{ status: string }>();
-    if (readError) return { data: null, error: readError };
-    const { status: nextStatus, ...editableFields } = repair;
-    const { data, error } = await supabase.from("repairs").update(editableFields).eq("id", id).select("*").single();
-    if (error) return { data: null, error };
-    if (nextStatus && nextStatus !== current.status) {
-      const transition = await this.changeStatus(id, nextStatus);
-      if (transition.error) return { data: null, error: transition.error };
-      return transition;
-    }
-    return { data, error: null };
+  async updateRepair(id: string, repair: { technician: string | null; issue: string; diagnosis: string | null; repair_notes: string | null; solution: string | null; priority: string; expected_completion_date: string | null; }) {
+    // Financial identity (deposit, estimated/final cost), ownership, branch,
+    // timestamps and status are deliberately excluded from direct client updates.
+    // Those mutations must use their dedicated authorized RPC boundaries.
+    const { data, error } = await supabase
+      .from("repairs")
+      .update({
+        technician: repair.technician,
+        issue: repair.issue,
+        diagnosis: repair.diagnosis,
+        repair_notes: repair.repair_notes,
+        solution: repair.solution,
+        priority: repair.priority,
+        expected_completion_date: repair.expected_completion_date,
+      })
+      .eq("id", id)
+      .select("*")
+      .single();
+    return { data, error };
   },
 
   async changeStatus(id: string, status: string, note?: string | null) {
