@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, UserPlus } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { NovatechLogo } from "@/components/brand/NovatechLogo";
@@ -259,15 +259,28 @@ export default function LoginPage() {
   if (mode === "mfa") {
     return (
       <AuthShell>
-        <NovatechLogo />
-        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700"><ShieldCheck className="size-6" /></div>
-        <h1 className="mt-6 text-center font-heading text-3xl font-bold tracking-tight">Enter your code</h1>
-        <p className="mt-3 text-center text-sm leading-6 text-slate-500">Open your authenticator app and enter the 6-digit code for this account.</p>
+        <NovatechLogo dark />
+        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-[#c98a4f]/10 text-[#e7b784]">
+          <ShieldCheck className="size-6" />
+        </div>
+        <h1 className="mt-6 text-center font-heading text-2xl font-bold tracking-tight">Enter your code</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-[#93a69c]">
+          Open your authenticator app and enter the 6-digit code for this account.
+        </p>
         <form onSubmit={handleMfaVerify} className="mt-7 space-y-4">
-          <input type="text" inputMode="numeric" autoFocus maxLength={6} placeholder="123456" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} className="control text-center text-lg tracking-[0.4em]" />
-          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Verifying…" : "Verify"}<ArrowRight className="size-4" /></button>
+          <input
+            type="text"
+            inputMode="numeric"
+            autoFocus
+            maxLength={6}
+            placeholder="123456"
+            value={mfaCode}
+            onChange={(e) => setMfaCode(e.target.value)}
+            className="w-full rounded-lg border border-white/10 bg-white/5 py-3 text-center text-lg tracking-[0.4em] text-[#f4f1ea] focus:border-[#c98a4f]/60 focus:outline-none focus:ring-2 focus:ring-[#c98a4f]/20"
+          />
+          <Submit loading={loading} label="Verify" loadingLabel="Verifying…" />
         </form>
-        <button type="button" onClick={() => { setMode("login"); setMfaCode(""); }} className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Back to sign in</button>
+        <BackButton onClick={() => { setMode("login"); setMfaCode(""); }} />
       </AuthShell>
     );
   }
@@ -275,13 +288,24 @@ export default function LoginPage() {
   if (mode === "verify") {
     return (
       <AuthShell>
-        <NovatechLogo />
-        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700"><Mail className="size-6" /></div>
-        <h1 className="mt-6 text-center font-heading text-3xl font-bold tracking-tight">Check your email</h1>
-        <p className="mt-3 text-center text-sm leading-6 text-slate-500">We sent a verification link to <strong className="font-semibold text-slate-800">{email}</strong>.</p>
+        <NovatechLogo dark />
+        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-[#c98a4f]/10 text-[#e7b784]">
+          <Mail className="size-6" />
+        </div>
+        <h1 className="mt-6 text-center font-heading text-2xl font-bold tracking-tight">Check your email</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-[#93a69c]">
+          We sent a verification link to <strong className="font-semibold text-[#f4f1ea]">{email}</strong>.
+        </p>
         {authError && <ErrorMessage>{authError}</ErrorMessage>}
-        <button type="button" onClick={resendVerification} disabled={loading} className="mt-7 w-full rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Sending…" : "Resend verification email"}</button>
-        <button type="button" onClick={() => { setAuthError(""); setMode("login"); }} className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Back to sign in</button>
+        <button
+          type="button"
+          onClick={resendVerification}
+          disabled={loading}
+          className="mt-7 w-full rounded-lg bg-[#c98a4f] px-5 py-3.5 text-sm font-semibold text-[#1a1008] transition hover:bg-[#d69a61] disabled:opacity-50"
+        >
+          {loading ? "Sending…" : "Resend verification email"}
+        </button>
+        <BackButton onClick={() => { setAuthError(""); setMode("login"); }} />
       </AuthShell>
     );
   }
@@ -289,14 +313,26 @@ export default function LoginPage() {
   if (mode === "forgot") {
     return (
       <AuthShell>
-        <NovatechLogo />
-        <div className="mt-8"><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Account recovery</p><h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">Reset your password</h1><p className="mt-3 text-sm leading-6 text-slate-500">Enter your account email and we’ll send a secure reset link.</p></div>
+        <NovatechLogo dark />
+        <div className="mt-8">
+          <p className="font-mono text-[11px] text-[#e7b784]">Account recovery</p>
+          <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight">Reset your password</h1>
+          <p className="mt-3 text-sm leading-6 text-[#93a69c]">Enter your account email and we&apos;ll send a secure reset link.</p>
+        </div>
         {authError && <ErrorMessage>{authError}</ErrorMessage>}
         <form onSubmit={handleForgotPassword} className="mt-7 space-y-4">
-          <FieldLabel label="Email"><input type="email" autoFocus autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control" /></FieldLabel>
-          <button type="submit" disabled={loading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Sending reset link…" : "Send reset link"}</button>
+          <FieldLabel label="Email">
+            <EmailField value={email} onChange={setEmail} autoFocus />
+          </FieldLabel>
+          <Submit loading={loading} label="Send reset link" loadingLabel="Sending reset link…" noArrow />
         </form>
-        <button type="button" onClick={() => { setAuthError(""); setMode("login"); }} className="mt-5 w-full text-center text-sm font-semibold text-slate-500 hover:text-slate-900">Back to sign in</button>
+        <button
+          type="button"
+          onClick={() => { setAuthError(""); setMode("login"); }}
+          className="mt-5 w-full text-center text-sm font-medium text-[#93a69c] hover:text-[#f4f1ea]"
+        >
+          Back to sign in
+        </button>
       </AuthShell>
     );
   }
@@ -304,13 +340,25 @@ export default function LoginPage() {
   if (mode === "reset") {
     return (
       <AuthShell>
-        <NovatechLogo />
-        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700"><LockKeyhole className="size-6" /></div>
-        <h1 className="mt-6 text-center font-heading text-3xl font-bold tracking-tight">Choose a new password</h1>
-        <p className="mt-3 text-center text-sm leading-6 text-slate-500">Use at least 8 characters, then you’ll go straight back to your workshop.</p>
+        <NovatechLogo dark />
+        <div className="mx-auto mt-8 grid size-14 place-items-center rounded-2xl bg-[#c98a4f]/10 text-[#e7b784]">
+          <LockKeyhole className="size-6" />
+        </div>
+        <h1 className="mt-6 text-center font-heading text-2xl font-bold tracking-tight">Choose a new password</h1>
+        <p className="mt-3 text-center text-sm leading-6 text-[#93a69c]">
+          Use at least 8 characters, then you&apos;ll go straight back to your workshop.
+        </p>
         <form onSubmit={handleResetPassword} className="mt-7 space-y-4">
-          <FieldLabel label="New password"><PasswordField value={newPassword} onChange={setNewPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" /></FieldLabel>
-          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Updating password…" : "Update password"}<ArrowRight className="size-4" /></button>
+          <FieldLabel label="New password">
+            <PasswordField
+              value={newPassword}
+              onChange={setNewPassword}
+              show={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
+              autoComplete="new-password"
+            />
+          </FieldLabel>
+          <Submit loading={loading} label="Update password" loadingLabel="Updating password…" />
         </form>
       </AuthShell>
     );
@@ -319,50 +367,193 @@ export default function LoginPage() {
   if (mode === "staff_signup") {
     return (
       <AuthShell>
-        <NovatechLogo />
-        <div className="mt-8"><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Staff invitation</p><h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">Create your Danchrista access.</h1><p className="mt-3 text-sm leading-6 text-slate-500">Use the same email Ame3ing or your branch manager added. You can only enter the shop after the invitation is accepted.</p></div>
+        <NovatechLogo dark />
+        <div className="mt-8">
+          <p className="font-mono text-[11px] text-[#e7b784]">Staff invitation</p>
+          <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight">Create your Danchrista access.</h1>
+          <p className="mt-3 text-sm leading-6 text-[#93a69c]">
+            Use the same email Ame3ing or your branch manager added. You can only enter the shop after the invitation is
+            accepted.
+          </p>
+        </div>
         {authError && <ErrorMessage>{authError}</ErrorMessage>}
         <form onSubmit={handleStaffSignup} className="mt-7 space-y-4">
-          <FieldLabel label="Email"><input type="email" autoFocus autoComplete="email" placeholder="staff@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control" /></FieldLabel>
-          <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" /></FieldLabel>
-          <button type="submit" disabled={loading} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Creating access…" : "Create staff access"}<ArrowRight className="size-4" /></button>
+          <FieldLabel label="Email">
+            <EmailField value={email} onChange={setEmail} autoFocus />
+          </FieldLabel>
+          <FieldLabel label="Password">
+            <PasswordField
+              value={password}
+              onChange={setPassword}
+              show={showPassword}
+              onToggle={() => setShowPassword((value) => !value)}
+              autoComplete="new-password"
+            />
+          </FieldLabel>
+          <Submit loading={loading} label="Create staff access" loadingLabel="Creating access…" />
         </form>
-        <button type="button" onClick={() => { setAuthError(""); setMode("login"); }} className="mt-5 w-full text-center text-sm font-semibold text-slate-500 hover:text-slate-900">Back to sign in</button>
+        <button
+          type="button"
+          onClick={() => { setAuthError(""); setMode("login"); }}
+          className="mt-5 w-full text-center text-sm font-medium text-[#93a69c] hover:text-[#f4f1ea]"
+        >
+          Back to sign in
+        </button>
       </AuthShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f6] text-slate-950">
-      <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="relative hidden overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(45,212,191,0.18),transparent_30%),radial-gradient(circle_at_90%_75%,rgba(20,184,166,0.12),transparent_34%)]" />
-          <div className="relative"><NovatechLogo dark /><div className="mt-20 max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.18em] text-teal-300">Danchrista Four Communication</p><h2 className="mt-5 font-heading text-5xl font-bold leading-[1.02] tracking-[-0.04em] xl:text-6xl">Run the shop with one clear record.</h2><p className="mt-6 max-w-xl text-lg leading-8 text-slate-400">Sales, phone parts, repairs, engineers, payments, expenses and daily closing—kept connected for Ame3ing.</p></div></div>
-          <div className="relative grid max-w-xl gap-3 sm:grid-cols-2"><Benefit text="Know what sold" /><Benefit text="Know every part" /><Benefit text="See who owes" /><Benefit text="Close the day clearly" /></div>
-        </section>
+    <AuthShell>
+      <NovatechLogo dark />
+      <div className="mt-8">
+        <p className="font-mono text-[11px] text-[#e7b784]">Private business system</p>
+        <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">Sign in to Danchrista.</h1>
+        <p className="mt-3 text-sm leading-6 text-[#93a69c]">Only Ame3ing and approved staff can enter the workspace.</p>
+      </div>
+      {authError && <ErrorMessage>{authError}</ErrorMessage>}
+      <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+        <FieldLabel label="Email">
+          <EmailField value={email} onChange={setEmail} />
+        </FieldLabel>
+        <FieldLabel label="Password">
+          <PasswordField
+            value={password}
+            onChange={setPassword}
+            show={showPassword}
+            onToggle={() => setShowPassword((value) => !value)}
+            autoComplete="current-password"
+          />
+        </FieldLabel>
+        <div className="flex justify-end">
+          <button type="button" onClick={() => setMode("forgot")} className="text-xs font-medium text-[#e7b784] hover:text-[#f0c398]">
+            Forgot password?
+          </button>
+        </div>
+        <Submit loading={loading} label="Sign in" loadingLabel="Signing in…" />
+      </form>
+      <button
+        type="button"
+        onClick={() => { setAuthError(""); setMode("staff_signup"); }}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 px-5 py-3.5 text-sm font-medium text-[#c7d1cb] transition hover:border-white/25"
+      >
+        <UserPlus className="size-4 text-[#e7b784]" />
+        Have a staff invitation?
+      </button>
+      <div className="mt-7 flex items-center gap-3 text-[10px] text-[#5c6b64]">
+        <div className="h-px flex-1 bg-white/10" />
+        secure workspace
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+      <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[#93a69c]">
+        <ShieldCheck className="size-4 text-[#e7b784]" />
+        Access is controlled by your Danchrista role.
+      </div>
+    </AuthShell>
+  );
+}
 
-        <section className="flex items-center px-5 py-8 sm:px-8 lg:px-14 xl:px-20">
-          <div className="mx-auto w-full max-w-md">
-            <div className="mb-8"><div className="mb-8 lg:hidden"><NovatechLogo /></div><p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Private business system</p><h1 className="mt-2 font-heading text-4xl font-bold tracking-tight">Sign in to Danchrista.</h1><p className="mt-3 text-sm leading-6 text-slate-500">Only Ame3ing and approved staff can enter the business workspace.</p></div>
-            {authError && <ErrorMessage>{authError}</ErrorMessage>}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <FieldLabel label="Email"><div className="relative"><Mail className="icon" /><input type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="control pl-11" /></div></FieldLabel>
-              <FieldLabel label="Password"><PasswordField value={password} onChange={setPassword} show={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="current-password" /></FieldLabel>
-              <div className="flex justify-end"><button type="button" onClick={() => setMode("forgot")} className="text-xs font-semibold text-teal-700 hover:text-teal-800">Forgot password?</button></div>
-              <button type="submit" disabled={loading} className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50">{loading ? "Signing in…" : "Sign in"}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></button>
-            </form>
-            <button type="button" onClick={() => { setAuthError(""); setMode("staff_signup"); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"><UserPlus className="size-4 text-teal-700" />Have a staff invitation?</button>
-            <div className="mt-7 flex items-center gap-3 text-[11px] font-medium text-slate-400"><div className="h-px flex-1 bg-slate-200" />SECURE WORKSPACE<div className="h-px flex-1 bg-slate-200" /></div>
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500"><ShieldCheck className="size-4 text-teal-700" />Access is controlled by your Danchrista role.</div>
-          </div>
-        </section>
+function AuthShell({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="min-h-screen bg-[#0b1512] px-5 py-10 text-[#f4f1ea]">
+      <div className="mx-auto flex min-h-[85vh] max-w-md flex-col justify-center">
+        <div className="rounded-2xl border border-[#c98a4f]/15 bg-[#101f1a] p-8 sm:p-10">{children}</div>
       </div>
     </main>
   );
 }
 
-function AuthShell({ children }: { children: React.ReactNode }) { return <main className="min-h-screen bg-[#f5f7f6] px-5 py-6 text-slate-950"><div className="mx-auto flex min-h-[92vh] max-w-md items-center justify-center"><div className="w-full rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.25)] sm:p-10">{children}</div></div></main>; }
-function ErrorMessage({ children }: { children: React.ReactNode }) { return <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-xs leading-5 text-red-700">{children}</p>; }
-function PasswordField({ value, onChange, show, onToggle, autoComplete }: { value: string; onChange: (value: string) => void; show: boolean; onToggle: () => void; autoComplete: string }) { return <div className="relative"><LockKeyhole className="icon" /><input type={show ? "text" : "password"} autoComplete={autoComplete} placeholder="Your password" value={value} onChange={(e) => onChange(e.target.value)} className="control pl-11 pr-11" /><button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label={show ? "Hide password" : "Show password"}>{show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div>; }
-function Benefit({ text }: { text: string }) { return <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300"><span className="grid size-7 place-items-center rounded-full bg-teal-400/10 text-teal-300"><Check className="size-4" /></span>{text}</div>; }
-function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block text-sm font-semibold text-slate-800">{label}{children}</label>; }
+function ErrorMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-4 rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-center text-xs leading-5 text-red-300">
+      {children}
+    </p>
+  );
+}
+
+function EmailField({ value, onChange, autoFocus }: { value: string; onChange: (value: string) => void; autoFocus?: boolean }) {
+  return (
+    <div className="relative">
+      <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#6b7d74]" />
+      <input
+        type="email"
+        autoFocus={autoFocus}
+        autoComplete="email"
+        placeholder="you@example.com"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-[#f4f1ea] placeholder:text-[#6b7d74] focus:border-[#c98a4f]/60 focus:outline-none focus:ring-2 focus:ring-[#c98a4f]/20"
+      />
+    </div>
+  );
+}
+
+function PasswordField({
+  value,
+  onChange,
+  show,
+  onToggle,
+  autoComplete,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  show: boolean;
+  onToggle: () => void;
+  autoComplete: string;
+}) {
+  return (
+    <div className="relative">
+      <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#6b7d74]" />
+      <input
+        type={show ? "text" : "password"}
+        autoComplete={autoComplete}
+        placeholder="Your password"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-11 text-sm text-[#f4f1ea] placeholder:text-[#6b7d74] focus:border-[#c98a4f]/60 focus:outline-none focus:ring-2 focus:ring-[#c98a4f]/20"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#6b7d74] hover:bg-white/5 hover:text-[#f4f1ea]"
+        aria-label={show ? "Hide password" : "Show password"}
+      >
+        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    </div>
+  );
+}
+
+function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-[#c7d1cb]">
+      {label}
+      <div className="mt-1.5">{children}</div>
+    </label>
+  );
+}
+
+function Submit({ loading, label, loadingLabel, noArrow }: { loading: boolean; label: string; loadingLabel: string; noArrow?: boolean }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3.5 text-sm font-semibold text-[#1a1008] transition hover:bg-[#d69a61] disabled:opacity-50"
+    >
+      {loading ? loadingLabel : label}
+      {!loading && !noArrow && <ArrowRight className="size-4" />}
+    </button>
+  );
+}
+
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-3 w-full rounded-lg border border-white/10 px-5 py-3.5 text-sm font-medium text-[#c7d1cb] transition hover:border-white/25"
+    >
+      Back to sign in
+    </button>
+  );
+}
