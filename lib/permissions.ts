@@ -27,7 +27,7 @@ export function permissionForPath(pathname: string): Permission | null {
     ["/sales/mobile", "mobile_sales"], ["/sales", "sales"], ["/invoices", "invoices"],
     ["/expenses", "expenses"], ["/inventory", "inventory"], ["/customers", "customers"],
     ["/suppliers", "suppliers"], ["/engineer-workflow", "engineer_work"], ["/engineers", "engineers"],
-    ["/technician-ledger", "engineers"], ["/finance", "payments"], ["/parts-credit", "payments"],
+    ["/technician-ledger", "engineers"], ["/finance", "payments"], ["/credit", "payments"], ["/parts-credit", "payments"],
     ["/outstanding", "outstanding"], ["/reports/daily-closing", "daily_closing"], ["/reports", "profit"],
     ["/audit", "staff"], ["/activity", "staff"], ["/alerts", "profit"], ["/whatsapp", "whatsapp"],
     ["/assistant", "assistant"], ["/staff", "staff"], ["/search", "search"], ["/settings", "settings"],
