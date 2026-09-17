@@ -4,6 +4,7 @@ export type SaleItemInput = {
   inventory_id: string;
   quantity: number;
   unit_price: number;
+  price_override?: boolean;
 };
 
 export type Sale = {
