@@ -127,11 +127,13 @@ export default function AppSidebar() {
     const active = pathname === item.url || (item.url !== "/dashboard" && pathname.startsWith(`${item.url}`));
     return (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton asChild isActive={active} className={menuButtonClass()}>
-          <a href={item.url} className={active ? "bg-[#184b43] text-white" : ""}>
-            <item.icon className="size-4" />
-            <span>{item.title}</span>
-          </a>
+        <SidebarMenuButton
+          render={<a href={item.url} className={active ? "bg-[#184b43] text-white" : ""} />}
+          isActive={active}
+          className={menuButtonClass()}
+        >
+          <item.icon className="size-4" />
+          <span>{item.title}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -187,11 +189,13 @@ export default function AppSidebar() {
       <SidebarContent className="bg-[#123b34] px-2 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === "/dashboard"} className={menuButtonClass()}>
-              <a href="/dashboard" className={pathname === "/dashboard" ? "bg-[#184b43] text-white" : ""}>
-                <LayoutDashboard className="size-4" />
-                <span>Dashboard</span>
-              </a>
+            <SidebarMenuButton
+              render={<a href="/dashboard" className={pathname === "/dashboard" ? "bg-[#184b43] text-white" : ""} />}
+              isActive={pathname === "/dashboard"}
+              className={menuButtonClass()}
+            >
+              <LayoutDashboard className="size-4" />
+              <span>Dashboard</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
