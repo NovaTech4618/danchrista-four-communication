@@ -25,10 +25,10 @@ export const businessOperationsService = {
   async getSupplierPayable(payableId: string) { return await supabase.from("supplier_payables_balance_view").select("*").eq("id", payableId).single(); },
   async getSupplierPayableItems(payableId: string) { return await supabase.from("supplier_payable_items").select("*").eq("payable_id", payableId).order("created_at", { ascending: true }); },
   async getSupplierPayablePayments(payableId: string) { return await supabase.from("supplier_payable_payments").select("*").eq("payable_id", payableId).order("paid_at", { ascending: false }); },
-  async createSupplierPayable(input: { personName: string; phone?: string; description?: string; agreedAmount: number; dueDate?: string | null; notes?: string | null; branchId?: string | null }) {
+  async createSupplierPayable(input: { personName: string; phone?: string; customerId?: string | null; description?: string; agreedAmount: number; dueDate?: string | null; notes?: string | null; branchId?: string | null }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
     if (companyError || !companyId) return { data: null, error: companyError ?? new Error("No company found") };
-    return await supabase.from("supplier_payables").insert({ company_id: companyId, branch_id: input.branchId ?? null, person_name: input.personName.trim(), phone: input.phone?.trim() || null, description: input.description?.trim() || null, agreed_amount: input.agreedAmount, due_date: input.dueDate || null, notes: input.notes?.trim() || null }).select("id").single();
+    return await supabase.from("supplier_payables").insert({ company_id: companyId, branch_id: input.branchId ?? null, customer_id: input.customerId ?? null, person_name: input.personName.trim(), phone: input.phone?.trim() || null, description: input.description?.trim() || null, agreed_amount: input.agreedAmount, due_date: input.dueDate || null, notes: input.notes?.trim() || null }).select("id").single();
   },
   async addSupplierPayableItem(input: { payableId: string; itemName: string; quantity: number; unitValue: number }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
@@ -60,12 +60,6 @@ export const businessOperationsService = {
   async recordSupplierPayablePayment(input: { payableId: string; amount: number; paymentMethod: "cash" | "transfer" | "pos" | "other"; note?: string | null; paidAt?: string }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
     if (companyError || !companyId) return { data: null, error: companyError ?? new Error("No company found") };
-    const { data: payable, error: payableError } = await supabase.from("supplier_payables").select("agreed_amount").eq("id", input.payableId).eq("company_id", companyId).single();
-    if (payableError) return { data: null, error: payableError };
-    const { data: paidRows, error: paidError } = await supabase.from("supplier_payable_payments").select("amount").eq("payable_id", input.payableId).eq("company_id", companyId);
-    if (paidError) return { data: null, error: paidError };
-    const paid = (paidRows ?? []).reduce((sum, row) => sum + Number(row.amount), 0);
-    if (paid + input.amount > Number(payable.agreed_amount) + 0.01) return { data: null, error: new Error("Payment is greater than the outstanding balance.") };
-    return await supabase.from("supplier_payable_payments").insert({ company_id: companyId, payable_id: input.payableId, amount: input.amount, payment_method: input.paymentMethod, note: input.note?.trim() || null, paid_at: input.paidAt || new Date().toISOString() });
+    return await supabase.from("supplier_payable_payments").insert({ company_id: companyId, payable_id: input.payableId, amount: input.amount, payment_method: input.paymentMethod, note: input.note?.trim() || null, paid_at: input.paidAt ?? new Date().toISOString() }).select("id").single();
   },
 };
