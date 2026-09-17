@@ -78,7 +78,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (checkingAuth || checkingAccess) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[var(--background)] px-6" aria-busy="true" aria-label="Loading NOVATECH workspace">
+      <div className="grid min-h-screen place-items-center bg-[var(--background)] px-6" aria-busy="true" aria-label="Loading Danchrista Four Communication workspace">
         <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(18,59,52,0.10)]">
           <NovatechLogo />
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
