@@ -37,7 +37,7 @@ export default function ShowcasePage({ params }: { params: Promise<{ slug: strin
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-8 sm:px-8">
-        <header className="flex items-center justify-between gap-4"><div className="flex items-center gap-2 text-slate-400"><NovatechLogo dark compact /><span className="text-xs">Powered by NOVATECH</span></div></header>
+        <header className="flex items-center justify-between gap-4"><div className="flex items-center gap-2 text-slate-400"><NovatechLogo dark compact /><span className="text-xs">Danchrista Four Communication</span></div></header>
         <section className="flex flex-1 items-center py-16 sm:py-24"><div className="w-full">
           <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-center">
             <div>
@@ -50,7 +50,7 @@ export default function ShowcasePage({ params }: { params: Promise<{ slug: strin
             <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl"><div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-xl bg-teal-400/10 text-teal-300"><Wrench className="size-5" /></div><div><p className="font-semibold">Services</p><p className="text-xs text-slate-500">What this business offers</p></div></div><div className="mt-5 flex flex-wrap gap-2">{(company.showcase_services || []).map((service) => <span key={service} className="rounded-full border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300">{service}</span>)}{company.showcase_services?.length === 0 && <p className="text-sm text-slate-500">Services will appear here.</p>}</div></div>
           </div>
         </div></section>
-        <footer className="border-t border-slate-800 pt-5 text-xs text-slate-500">Business information published by {company.name}. Powered by NOVATECH Repair Suite.</footer>
+        <footer className="border-t border-slate-800 pt-5 text-xs text-slate-500">Business information published by {company.name}. Danchrista Four Communication.</footer>
       </div>
     </main>
   );
