@@ -42,7 +42,12 @@ export default function OwnerControlPanel() {
     ]);
     if (dashboardResult.error) setError(dashboardResult.error.message); else if (dashboardResult.data) setSummary(dashboardResult.data);
     if (profitResult.error) setError((current) => current || profitResult.error.message); else setProfit(Array.isArray(profitResult.data) ? profitResult.data[0] ?? null : null);
-    if (closingResult.error) setError((current) => current || closingResult.error.message); else setClosing(closingResult.data);
+    if (closingResult.error) {
+      const closingErrorMessage = closingResult.error.message;
+      setError((current) => current || closingErrorMessage);
+    } else {
+      setClosing(closingResult.data);
+    }
     setLoading(false);
   }
 
