@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, HandCoins, Package, ShoppingCart, Wrench } from "lucide-react";
-import { DanchristaLogo } from "@/components/brand/NovatechLogo";
+import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
 
 export const metadata: Metadata = {
   title: "Danchrista Four Communication | Shop record system",
