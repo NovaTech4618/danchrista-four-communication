@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { branchService } from "@/services/branchService";
 import { staffService } from "@/services/staffService";
+import { permissionsFor, type Permission } from "@/lib/permissions";
 import type { StaffInvitation, StaffMember, StaffRole } from "@/types/staff";
 
 const ROLE_LABELS: Record<StaffRole, string> = {
@@ -21,7 +22,16 @@ const ROLE_LABELS: Record<StaffRole, string> = {
 
 type ManageableRole = "technician" | "front_desk";
 const MANAGEABLE_ROLES: ManageableRole[] = ["technician", "front_desk"];
+const ACCESS_LABELS: Record<Permission, string> = {
+  dashboard: "Dashboard", repairs: "Repairs", sales: "Sales", mobile_sales: "Mobile sales", invoices: "Invoices", expenses: "Expenses",
+  inventory: "Inventory", customers: "Customers", suppliers: "Suppliers", engineers: "Engineers", engineer_work: "Engineer work", payments: "Money", outstanding: "Debit",
+  profit: "Reports", daily_closing: "Daily closing", whatsapp: "WhatsApp", assistant: "Assistant", staff: "Staff", search: "Search", settings: "Settings", help: "Help",
+};
 const inputClass = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/15";
+
+function accessFor(role: StaffRole) {
+  return permissionsFor(role).map((permission) => ACCESS_LABELS[permission]).filter(Boolean);
+}
 
 export default function StaffPage() {
   const [myRole, setMyRole] = useState<StaffRole | null>(null);
@@ -38,12 +48,8 @@ export default function StaffPage() {
   async function loadAll() {
     setLoading(true);
     const [roleRes, branchRes, staffRes, inviteRes] = await Promise.all([
-      staffService.getMyRole(),
-      branchService.getBranches(),
-      staffService.getStaff(),
-      staffService.getInvitations(),
+      staffService.getMyRole(), branchService.getBranches(), staffService.getStaff(), staffService.getInvitations(),
     ]);
-
     if (roleRes.data) setMyRole(roleRes.data);
     if (branchRes.data) {
       const main = branchRes.data.find((branch) => branch.is_main && branch.is_active) ?? branchRes.data.find((branch) => branch.is_active);
@@ -55,10 +61,10 @@ export default function StaffPage() {
     setLoading(false);
   }
 
-  const canManage = myRole === "owner" || myRole === "branch_manager";
+  const canManage = myRole === "owner";
 
   async function handleRoleChange(profileId: string, role: StaffRole) {
-    if (role === "branch_manager") return;
+    if (role === "branch_manager" || role === "owner") return;
     const { error } = await staffService.updateStaffRole(profileId, role);
     if (error) return toast.error(error.message);
     toast.success("Staff role updated.");
@@ -76,15 +82,9 @@ export default function StaffPage() {
     e.preventDefault();
     if (!inviteEmail.trim()) return toast.error("Email is required.");
     if (!shopBranchId) return toast.error("The shop setup is missing its main record.");
-
     setSendingInvite(true);
-    const { error } = await staffService.inviteStaff({
-      email: inviteEmail.trim(),
-      role: inviteRole,
-      branch_ids: [shopBranchId],
-    });
+    const { error } = await staffService.inviteStaff({ email: inviteEmail.trim(), role: inviteRole, branch_ids: [shopBranchId] });
     setSendingInvite(false);
-
     if (error) return toast.error(error.message);
     setInviteEmail("");
     toast.success("Staff invitation created.");
@@ -99,8 +99,7 @@ export default function StaffPage() {
   }
 
   if (loading) return <AppLayout><div className="space-y-4"><div className="h-8 w-56 animate-pulse rounded bg-slate-100" /><div className="h-40 animate-pulse rounded-2xl bg-slate-100" /></div></AppLayout>;
-
-  if (!canManage) return <AppLayout><Card className="border-dashed border-slate-200 shadow-none"><CardContent className="flex flex-col items-center gap-2 py-12 text-center"><ShieldCheck className="size-6 text-slate-300" /><p className="text-slate-500">Only the shop owner or manager can manage staff.</p></CardContent></Card></AppLayout>;
+  if (!canManage) return <AppLayout><Card className="border-dashed border-slate-200 shadow-none"><CardContent className="flex flex-col items-center gap-2 py-12 text-center"><ShieldCheck className="size-6 text-slate-300" /><p className="text-slate-500">Only the Danchrista owner can manage staff.</p></CardContent></Card></AppLayout>;
 
   return (
     <AppLayout>
@@ -108,31 +107,31 @@ export default function StaffPage() {
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Danchrista</p>
           <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-950">Staff</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage who can work with the shop records.</p>
+          <p className="mt-1 text-sm text-slate-500">See who works here and exactly what each person can access.</p>
         </header>
 
         <Card className="border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="font-heading text-lg">Current staff</CardTitle>
-            <p className="text-sm text-slate-500">Owner accounts stay protected. Staff access can be changed here.</p>
+            <CardTitle className="font-heading text-lg">Current staff & access</CardTitle>
+            <p className="text-sm text-slate-500">The owner has full access. Staff access is controlled by role.</p>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-xl border border-slate-100">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[760px] text-sm">
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <tr><th className="px-3 py-3 text-left">Name</th><th className="px-3 py-3 text-left">Role</th><th className="px-3 py-3 text-left">Status</th><th className="px-3 py-3 text-right">Access</th></tr>
+                  <tr><th className="px-3 py-3 text-left">Name</th><th className="px-3 py-3 text-left">Role</th><th className="px-3 py-3 text-left">Status</th><th className="px-3 py-3 text-left">Access</th><th className="px-3 py-3 text-right">Control</th></tr>
                 </thead>
                 <tbody>
                   {staff.map((s) => {
                     const isOwner = s.role === "owner";
                     const isLegacyManager = s.role === "branch_manager";
-                    return <tr key={s.id} className="border-t border-slate-100">
-                      <td className="px-3 py-3 font-medium text-slate-900">{s.full_name || "Unnamed"}</td>
-                      <td className="px-3 py-3">
-                        {isOwner || isLegacyManager ? <Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge> : <select value={s.role} onChange={(e) => void handleRoleChange(s.id, e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}
-                      </td>
-                      <td className="px-3 py-3"><Badge variant={s.is_active ? "secondary" : "destructive"}>{s.is_active ? "Active" : "Inactive"}</Badge></td>
-                      <td className="px-3 py-3 text-right">{isOwner ? <span className="text-xs font-medium text-slate-400">Protected</span> : <button onClick={() => void handleToggleActive(s.id, s.is_active)} className="text-xs font-medium text-slate-500 underline hover:text-slate-800">{s.is_active ? "Deactivate" : "Reactivate"}</button>}</td>
+                    const access = accessFor(s.role);
+                    return <tr key={s.id} className="border-t border-slate-100 align-top">
+                      <td className="px-3 py-4 font-medium text-slate-900">{s.full_name || "Unnamed"}</td>
+                      <td className="px-3 py-4">{isOwner || isLegacyManager ? <Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge> : <select value={s.role} onChange={(e) => void handleRoleChange(s.id, e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}</td>
+                      <td className="px-3 py-4"><Badge variant={s.is_active ? "secondary" : "destructive"}>{s.is_active ? "Active" : "Inactive"}</Badge></td>
+                      <td className="max-w-xl px-3 py-4"><div className="flex flex-wrap gap-1.5">{access.map((label) => <span key={label} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{label}</span>)}</div></td>
+                      <td className="px-3 py-4 text-right">{isOwner ? <span className="text-xs font-medium text-slate-400">Protected</span> : <button onClick={() => void handleToggleActive(s.id, s.is_active)} className="text-xs font-medium text-slate-500 underline hover:text-slate-800">{s.is_active ? "Deactivate" : "Reactivate"}</button>}</td>
                     </tr>;
                   })}
                 </tbody>
