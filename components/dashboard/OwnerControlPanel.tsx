@@ -52,7 +52,7 @@ export default function OwnerControlPanel() {
   }
 
   const sales = Number(profit?.total_revenue || 0);
-  const grossProfit = Number(profit?.gross_profit || 0);
+  const grossProfit = Number((profit?.total_revenue || 0) - (profit?.parts_cost || 0));
   const attention = [
     summary.active_repairs > 0 ? { label: `${summary.active_repairs} repair${summary.active_repairs === 1 ? "" : "s"} still in the workshop`, href: "/repairs", icon: Wrench } : null,
     summary.low_stock_count > 0 ? { label: `${summary.low_stock_count} stock item${summary.low_stock_count === 1 ? "" : "s"} need attention`, href: "/inventory", icon: PackageSearch } : null,
