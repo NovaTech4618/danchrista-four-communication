@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MapPin, Phone, Wrench } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { NovatechLogo } from "@/components/brand/NovatechLogo";
+import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
 
 type Company = {
   name: string;
@@ -37,7 +37,7 @@ export default function ShowcasePage({ params }: { params: Promise<{ slug: strin
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-8 sm:px-8">
-        <header className="flex items-center justify-between gap-4"><div className="flex items-center gap-2 text-slate-400"><NovatechLogo dark compact /><span className="text-xs">Danchrista Four Communication</span></div></header>
+        <header className="flex items-center justify-between gap-4"><div className="flex items-center gap-2 text-slate-400"><DanchristaLogo dark compact /><span className="text-xs">Danchrista Four Communication</span></div></header>
         <section className="flex flex-1 items-center py-16 sm:py-24"><div className="w-full">
           <div className="grid gap-10 lg:grid-cols-[1fr_.7fr] lg:items-center">
             <div>
