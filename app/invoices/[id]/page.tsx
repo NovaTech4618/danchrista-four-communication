@@ -37,11 +37,7 @@ export default function InvoiceDetailPage() {
 
     let customerResult: Customer | null = null;
     if (invoiceResult.data?.customer_id) {
-      const result = await supabase
-        .from("customers")
-        .select("full_name,phone")
-        .eq("id", invoiceResult.data.customer_id)
-        .single();
+      const result = await supabase.from("customers").select("full_name,phone").eq("id", invoiceResult.data.customer_id).single();
       customerResult = (result.data as Customer | null) ?? null;
     }
 
@@ -78,39 +74,41 @@ export default function InvoiceDetailPage() {
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl space-y-5">
-        <div className="flex items-center justify-between print:hidden">
-          <button onClick={() => router.back()} className="text-sm font-semibold text-slate-500 hover:text-slate-900">← Back</button>
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
+          <button onClick={() => router.back()} className="text-left text-sm font-semibold text-slate-500 hover:text-slate-900">← Back</button>
+          <div className="flex flex-wrap gap-2">
             {invoice.repair_id && <Link href={`/repairs/${invoice.repair_id}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Open repair</Link>}
             <button onClick={() => window.print()} className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white">Print / Save PDF</button>
           </div>
         </div>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm print:border-0 print:shadow-none">
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7 print:border-0 print:shadow-none">
           <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
-            <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">NOVATECH REPAIR SUITE</p><h1 className="mt-2 text-3xl font-bold text-slate-950">Invoice</h1><p className="mt-1 text-sm text-slate-500">Customer-facing billing document</p></div>
+            <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">DANCHRISTA FOUR COMMUNICATION</p><h1 className="mt-2 text-3xl font-bold text-slate-950">Invoice</h1><p className="mt-1 text-sm text-slate-500">Customer-facing billing document</p></div>
             <div className="text-left sm:text-right"><p className="text-lg font-bold">{invoice.invoice_number}</p><p className="text-sm text-slate-500">{new Date(invoice.issued_at).toLocaleDateString()}</p><span className="mt-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{invoice.payment_status}</span></div>
           </header>
           <section className="grid gap-6 py-6 sm:grid-cols-2">
             <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Bill to</p><p className="mt-2 font-semibold">{customer?.full_name ?? (invoice.customer_id ? "Customer" : "Walk-in customer")}</p>{customer?.phone && <p className="text-sm text-slate-500">{customer.phone}</p>}</div>
             <div className="sm:text-right"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Due</p><p className="mt-2 font-semibold">{invoice.due_at ? new Date(invoice.due_at).toLocaleDateString() : "On receipt"}</p></div>
           </section>
-          <table className="w-full text-sm"><thead className="border-y border-slate-200 text-xs uppercase tracking-wide text-slate-400"><tr><th className="py-3 text-left">Description</th><th className="py-3 text-right">Qty</th><th className="py-3 text-right">Price</th><th className="py-3 text-right">Amount</th></tr></thead><tbody>{items.map((item) => <tr key={item.id} className="border-b border-slate-100"><td className="py-4">{item.description}</td><td className="py-4 text-right">{item.quantity}</td><td className="py-4 text-right">{money(item.unit_price)}</td><td className="py-4 text-right font-semibold">{money(item.line_total)}</td></tr>)}</tbody></table>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[520px] text-sm"><thead className="border-y border-slate-200 text-xs uppercase tracking-wide text-slate-400"><tr><th className="py-3 text-left">Description</th><th className="py-3 text-right">Qty</th><th className="py-3 text-right">Price</th><th className="py-3 text-right">Amount</th></tr></thead><tbody>{items.map((item) => <tr key={item.id} className="border-b border-slate-100"><td className="py-4">{item.description}</td><td className="py-4 text-right">{item.quantity}</td><td className="py-4 text-right">{money(item.unit_price)}</td><td className="py-4 text-right font-semibold">{money(item.line_total)}</td></tr>)}</tbody></table>
+          </div>
           <div className="ml-auto mt-6 max-w-xs space-y-2 text-sm"><div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span>{money(invoice.subtotal)}</span></div><div className="flex justify-between"><span className="text-slate-500">Discount</span><span>{money(invoice.discount)}</span></div><div className="flex justify-between"><span className="text-slate-500">Paid</span><span>{money(paid)}</span></div><div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-bold"><span>Balance</span><span>{money(outstanding)}</span></div></div>
           {invoice.notes && <p className="mt-7 border-t border-slate-100 pt-5 text-sm text-slate-500">{invoice.notes}</p>}
-          <footer className="mt-10 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">Thank you for choosing Novatech.</footer>
+          <footer className="mt-10 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">Thank you for choosing Danchrista Four Communication.</footer>
         </article>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 print:hidden">
           <h2 className="font-semibold text-slate-950">Record payment</h2>
           <p className="mt-1 text-xs text-slate-500">Remaining balance: <strong>{money(outstanding)}</strong>. Payments update the invoice, customer debt and Finance.</p>
-          {outstanding > 0 ? <div className="mt-4 grid gap-3 md:grid-cols-4"><input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" min="0" max={outstanding} placeholder="Amount (₦)" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"/><select value={method} onChange={(e) => setMethod(e.target.value as typeof method)} className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="pos">POS</option><option value="other">Other</option></select><input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment note (optional)" className="h-10 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"/><button disabled={saving} onClick={pay} className="h-10 rounded-xl bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50">{saving ? "Saving…" : "Record payment"}</button></div> : <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-700">Invoice fully paid.</p>}
+          {outstanding > 0 ? <div className="mt-4 grid gap-3 md:grid-cols-4"><input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" min="0" max={outstanding} placeholder="Amount (₦)" className="h-10 min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"/><select value={method} onChange={(e) => setMethod(e.target.value as typeof method)} className="h-10 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="pos">POS</option><option value="other">Other</option></select><input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment note (optional)" className="h-10 min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-teal-500"/><button disabled={saving} onClick={pay} className="h-10 rounded-xl bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50">{saving ? "Saving…" : "Record payment"}</button></div> : <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-700">Invoice fully paid.</p>}
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm print:hidden">
           <div className="border-b border-slate-100 px-5 py-4 font-semibold">Payment history</div>
-          {payments.length === 0 ? <p className="p-5 text-sm text-slate-500">No payments recorded.</p> : <div className="divide-y divide-slate-100">{payments.map((payment) => <div key={payment.id} className="flex items-center justify-between gap-4 px-5 py-4 text-sm"><div><p className="font-semibold text-slate-900">{money(payment.amount)}</p><p className="text-xs text-slate-500">{payment.payment_method} · {new Date(payment.payment_date).toLocaleString()}{payment.notes ? ` · ${payment.notes}` : ""}</p></div><Link href={`/invoices/${id}/receipt/${payment.id}`} className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Receipt</Link></div>)}</div>}
+          {payments.length === 0 ? <p className="p-5 text-sm text-slate-500">No payments recorded.</p> : <div className="divide-y divide-slate-100">{payments.map((payment) => <div key={payment.id} className="flex items-center justify-between gap-4 px-5 py-4 text-sm"><div className="min-w-0"><p className="font-semibold text-slate-900">{money(payment.amount)}</p><p className="text-xs text-slate-500">{payment.payment_method} · {new Date(payment.payment_date).toLocaleString()}{payment.notes ? ` · ${payment.notes}` : ""}</p></div><Link href={`/invoices/${id}/receipt/${payment.id}`} className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Receipt</Link></div>)}</div>}
         </section>
       </div>
     </AppLayout>
