@@ -15,10 +15,10 @@ const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.verc
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "NOVATECH", template: "%s · NOVATECH" },
+  title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
   description:
-    "NOVATECH — the connected business workspace for repairs, inventory, sales, engineers, payments and daily operations.",
-  applicationName: "NOVATECH",
+    "Business management system for Danchrista Four Communication — repairs, inventory, sales, engineers, payments and daily operations.",
+  applicationName: "Danchrista Four Communication",
   category: "business",
   robots: { index: true, follow: true },
 };
