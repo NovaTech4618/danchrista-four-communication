@@ -6,28 +6,25 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import { RoleRouteGuard } from "@/components/auth/RoleRouteGuard";
 
-// Danchrista Four Communication business system typography.
 const sora = Sora({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: ["400", "500", "600", "700"] });
 const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
-// Treat an empty/whitespace NEXT_PUBLIC_SITE_URL as missing so metadata generation
-// cannot crash the production build with new URL("").
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Danchrista Four Communication", template: "%s · Danchrista" },
+  title: { default: "NOVATECH", template: "%s · NOVATECH" },
   description:
-    "Business management system for Danchrista Four Communication: sales, repairs, inventory, engineers, payments and daily business records.",
-  applicationName: "Danchrista Four Communication",
+    "NOVATECH — the connected business workspace for repairs, inventory, sales, engineers, payments and daily operations.",
+  applicationName: "NOVATECH",
   category: "business",
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#12b76a",
+  themeColor: "#123b34",
   width: "device-width",
   initialScale: 1,
 };
@@ -36,6 +33,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${sora.variable} ${manrope.variable} ${spaceMono.variable}`}>
       <body className="min-w-0 overflow-x-hidden">
+        <a
+          href="#main-content"
+          className="sr-only fixed left-3 top-3 z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--novatech-primary)]"
+        >
+          Skip to main content
+        </a>
         <TooltipProvider>
           <RoleRouteGuard>{children}</RoleRouteGuard>
           <Toaster richColors position="top-right" />

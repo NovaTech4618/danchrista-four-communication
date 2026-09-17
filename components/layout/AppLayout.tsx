@@ -9,6 +9,7 @@ import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
 import { DEFAULT_ROLE_PATH, hasPermission, permissionForPath } from "@/lib/permissions";
 import { staffService } from "@/services/staffService";
+import { NovatechLogo } from "@/components/brand/NovatechLogo";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -64,7 +65,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         router.replace("/login");
         return;
       }
-      void checkWorkspaceAccess();
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        void checkWorkspaceAccess();
+      }
     });
 
     return () => {
@@ -75,12 +78,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (checkingAuth || checkingAccess) {
     return (
-      <div className="min-h-screen bg-[var(--background)]" aria-busy="true" aria-label="Loading workspace">
-        <div className="flex min-h-screen items-center justify-center px-6">
-          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-medium text-slate-600 shadow-sm">
+      <div className="grid min-h-screen place-items-center bg-[var(--background)] px-6" aria-busy="true" aria-label="Loading NOVATECH workspace">
+        <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(18,59,52,0.10)]">
+          <NovatechLogo />
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
             <span className="size-2 animate-pulse rounded-full bg-[var(--novatech-primary)]" aria-hidden="true" />
-            Checking your workspace…
+            Securing your workspace…
           </div>
+          <p className="text-xs leading-5 text-slate-400">Checking your session and workspace access.</p>
         </div>
       </div>
     );
@@ -91,7 +96,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset className="min-h-screen bg-[var(--background)]">
         <Header />
-        <main className="flex-1 overflow-y-auto" tabIndex={-1}>
+        <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             {children}
           </div>
