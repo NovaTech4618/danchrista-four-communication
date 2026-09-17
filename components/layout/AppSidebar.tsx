@@ -21,7 +21,7 @@ const groups: { label: string; items: NavItem[] }[] = [
   ] },
   { label: "Owing & owed", items: [
     { title: "Debit · people owe us", url: "/outstanding", icon: HandCoins, permission: "outstanding" },
-    { title: "Credit · we owe people", url: "/finance", icon: WalletCards, permission: "payments" },
+    { title: "Credit · we owe people", url: "/credit", icon: WalletCards, permission: "payments" },
   ] },
   { label: "Owner control", items: [
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
@@ -39,7 +39,7 @@ function menuButtonClass(active: boolean) { return `h-10 rounded-xl border trans
 
 export default function AppSidebar() {
   const pathname = usePathname(); const router = useRouter(); const [myRole, setMyRole] = useState<StaffRole | null>(null); const [profile, setProfile] = useState<{ fullName: string; companyName: string } | null>(null);
-  useEffect(() => { let active = true; void staffService.getMyRole().then(({ data }) => { if (active && data) setMyRole(data); }); void companyService.getCompany().then(({ data }) => { if (active && data) setProfile({ fullName: data.full_name ?? "Staff member", companyName: data.companies?.[0]?.name ?? "Danchrista Four Communication" }); }); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; void staffService.getMyRole().then(({ data }) => { if (active && data) setMyRole(data); }); void companyService.getCompany().then(({ data }) => { if (active && data) setProfile({ fullName: data.full_name ?? "Staff member", companyName: data.companies?.[0]?.name ?? "Danchrista Four Communication" }); return () => { active = false; }; }, []);
   async function handleLogout() { await supabase.auth.signOut(); router.replace("/login"); }
   function renderItem(item: NavItem) { if (!hasPermission(myRole, item.permission)) return null; const active = pathname === item.url || pathname.startsWith(`${item.url}/`); return <SidebarMenuItem key={item.title}><SidebarMenuButton render={<a href={item.url} className={active ? "bg-white text-[#123b34]" : ""} />} isActive={active} className={menuButtonClass(active)} tooltip={item.title}><item.icon className="size-4" /><span>{item.title}</span></SidebarMenuButton></SidebarMenuItem>; }
   return <Sidebar collapsible="icon" className="border-r border-[#d7a95a]/10 bg-[#123b34] text-white shadow-[12px_0_40px_rgba(18,59,52,0.14)]">
