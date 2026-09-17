@@ -6,7 +6,6 @@ import { Bell, LogOut, Search, Settings } from "lucide-react";
 import { supabase, getCurrentSession } from "@/lib/supabase";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { NovatechLogo } from "@/components/brand/NovatechLogo";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard", "/customers": "Customers", "/devices": "Devices", "/repairs": "Repairs",
@@ -21,7 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
 function getPageTitle(pathname: string) {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   const root = `/${pathname.split("/")[1]}`;
-  return PAGE_TITLES[root] || "NOVATECH";
+  return PAGE_TITLES[root] || "Danchrista Four Communication";
 }
 
 export default function Header() {
