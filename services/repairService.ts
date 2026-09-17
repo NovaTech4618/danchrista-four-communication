@@ -61,10 +61,22 @@ export const repairService = {
     return result;
   },
 
-  async updateRepair(id: string, repair: { technician: string | null; issue: string; diagnosis: string | null; repair_notes: string | null; solution: string | null; priority: string; expected_completion_date: string | null; }) {
-    // Financial identity (deposit, estimated/final cost), ownership, branch,
-    // timestamps and status are deliberately excluded from direct client updates.
-    // Those mutations must use their dedicated authorized RPC boundaries.
+  async updateRepair(id: string, repair: {
+    technician: string | null;
+    issue: string;
+    diagnosis: string | null;
+    repair_notes: string | null;
+    solution: string | null;
+    priority: string;
+    expected_completion_date: string | null;
+    // Legacy callers may still provide these fields; they are intentionally ignored.
+    deposit?: number;
+    estimated_cost?: number | null;
+    final_cost?: number | null;
+    status?: string;
+  }) {
+    // Gate D boundary: only operational, non-financial columns are writable directly.
+    // Financial identity, status, ownership, branch and completion fields use dedicated RPCs.
     const { data, error } = await supabase
       .from("repairs")
       .update({
