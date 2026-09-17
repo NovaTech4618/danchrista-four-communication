@@ -33,7 +33,17 @@ export const businessOperationsService = {
   async addSupplierPayableItem(input: { payableId: string; itemName: string; quantity: number; unitValue: number }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
     if (companyError || !companyId) return { data: null, error: companyError ?? new Error("No company found") };
-    return await supabase.from("supplier_payable_items").insert({ company_id: companyId, payable_id: input.payableId, item_name: input.itemName.trim(), quantity: input.quantity, unit_value: input.unitValue });
+    const lineTotal = Number(input.quantity) * Number(input.unitValue);
+    if (!Number.isFinite(lineTotal) || lineTotal <= 0) return { data: null, error: new Error("Item value must be greater than zero.") };
+    const { count, error: countError } = await supabase.from("supplier_payable_items").select("id", { count: "exact", head: true }).eq("payable_id", input.payableId).eq("company_id", companyId);
+    if (countError) return { data: null, error: countError };
+    const { data, error } = await supabase.from("supplier_payable_items").insert({ company_id: companyId, payable_id: input.payableId, item_name: input.itemName.trim(), quantity: input.quantity, unit_value: input.unitValue }).select("id").single();
+    if (error) return { data: null, error };
+    if ((count ?? 0) === 0) return { data, error: null };
+    const { data: payable, error: payableError } = await supabase.from("supplier_payables").select("agreed_amount").eq("id", input.payableId).eq("company_id", companyId).single();
+    if (payableError || !payable) return { data: null, error: payableError ?? new Error("Credit account not found") };
+    const { error: updateError } = await supabase.from("supplier_payables").update({ agreed_amount: Number(payable.agreed_amount) + lineTotal, updated_at: new Date().toISOString() }).eq("id", input.payableId).eq("company_id", companyId);
+    return { data, error: updateError };
   },
   async addSupplierPayableItemAndIncreaseBalance(input: { payableId: string; itemName: string; quantity: number; unitValue: number }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
@@ -42,10 +52,10 @@ export const businessOperationsService = {
     if (!Number.isFinite(lineTotal) || lineTotal <= 0) return { data: null, error: new Error("Item value must be greater than zero.") };
     const { data: payable, error: payableError } = await supabase.from("supplier_payables").select("agreed_amount").eq("id", input.payableId).eq("company_id", companyId).single();
     if (payableError || !payable) return { data: null, error: payableError ?? new Error("Credit account not found") };
-    const { error: itemError } = await supabase.from("supplier_payable_items").insert({ company_id: companyId, payable_id: input.payableId, item_name: input.itemName.trim(), quantity: input.quantity, unit_value: input.unitValue });
+    const { data: item, error: itemError } = await supabase.from("supplier_payable_items").insert({ company_id: companyId, payable_id: input.payableId, item_name: input.itemName.trim(), quantity: input.quantity, unit_value: input.unitValue }).select("id").single();
     if (itemError) return { data: null, error: itemError };
     const { data, error } = await supabase.from("supplier_payables").update({ agreed_amount: Number(payable.agreed_amount) + lineTotal, updated_at: new Date().toISOString() }).eq("id", input.payableId).eq("company_id", companyId).select("id").single();
-    return { data, error };
+    return { data: data ?? item, error };
   },
   async recordSupplierPayablePayment(input: { payableId: string; amount: number; paymentMethod: "cash" | "transfer" | "pos" | "other"; note?: string | null; paidAt?: string }) {
     const { data: companyId, error: companyError } = await supabase.rpc("get_my_company_id");
