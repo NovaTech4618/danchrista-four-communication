@@ -1,210 +1,376 @@
-# Danchrista Product Map
+# Danchrista Four Communication — Real Product Map
 
-## Product decision
+## Product definition
 
-Danchrista Four Communication Ventures is the product requirement. The existing NOVATECH application is implementation material, not the product definition.
+This is a private business management system for **Danchrista Four Communication Ventures**. It is not a generic repair-shop SaaS.
 
-Primary goal: at closing time, the owner should understand what was sold, what cash was received, what is owed, what stock moved, what was bought, and whether the day produced a profit or loss without manually reconciling multiple books.
+The rule is simple:
 
-## Real shop books -> system
+> **The software must follow the way Danchrista already works.**
 
-### Book 1 — Sales
-Gadgets and accessories, including phones, privacy phones, Android accessories, Samsung screen guards, chargers, Type-C cables, iPhone chargers, earbuds, smartwatches, power banks and similar retail goods.
+The three real records are the foundation:
 
-System outcome:
-- Sale transaction
-- Sale items
-- Payment/cash record
-- Stock decrease
-- Cost of goods sold
-- Gross profit
-- Receipt/invoice when required
+1. **Sales / accessories book** — what was sold and how much was received.
+2. **Parts book** — what phone parts are in stock, what moved, prices and reorder needs.
+3. **Debit / credit book** — who collected goods and owes Danchrista, and who supplied/left goods with Danchrista and is owed money.
 
-### Book 2 — Parts
-Phone parts such as downboards, charging flex/flat cables, back glass and other repair parts.
+Repairs are a separate daily workflow because a repair must follow a phone from intake to collection.
 
-System outcome:
-- Inventory quantity
+---
+
+## 1. SALES — fastest screen in the system
+
+Normal accessory sales are usually anonymous walk-ins.
+
+### Normal flow
+
+**Select item → quantity → price → payment → complete**
+
+Customer name, phone number and other details are optional for ordinary walk-in sales.
+
+### Only ask for customer details when useful
+
+Examples:
+- credit/debit account
+- repair
+- receipt/statement requested
+- customer wants an account/history
+
+### Sale automatically
+
+- records sale
+- records payment method
+- decreases stock
+- preserves selling price
+- preserves cost basis
+- calculates revenue/profit data
+- keeps a transaction history
+
+Sales must remain fast enough for a busy counter.
+
+---
+
+## 2. INVENTORY — like a simple shopping catalogue
+
+Inventory is divided into two obvious shelves.
+
+### Accessories & Gadgets
+
+Examples:
+- Chargers
+- USB cables
+- Earphones/headsets
+- Power banks
+- Speakers
+- Phone cases
+- Screen protectors
+- Smartwatches
+- Other accessories
+
+### Phone Parts
+
+Examples:
+- Displays / downboards
+- Charging flex / flat cables
+- Earpiece flex
+- Back glass / housing
+- Power
+- Audio
+- Camera
+- Other phone parts
+
+Phone-part brands/models can then be grouped underneath these categories: Tecno, Infinix, itel, Samsung, Redmi, Nokia, iPhone, etc.
+
+### Every item should eventually contain
+
+- Item name
+- Category
+- Subcategory
+- Brand/model compatibility where useful
+- Quantity
 - Cost price
-- Selling price
-- Stock movement
-- Engineer issue/return
-- Repair usage/return
-- Purchase/receiving history
+- Normal selling price
+- **Minimum selling price / price floor**
+- Minimum stock / reorder level
+- Supplier
+- Shelf/location
+- Product picture
 
-### Book 3 — Engineer credit
-An engineer may collect a part/service now and pay later.
+### Owner stock signals
 
-System outcome:
-- Engineer account
-- Debit for part/service issued on credit
-- Payment against account
-- Running balance
-- Complete transaction history
-- Parts vs service breakdown
-- Outstanding/debt ageing information
+The system must answer automatically:
 
-## Core business equation
+- What is low?
+- What is empty?
+- What is moving fast?
+- What is not moving?
+- What is below the reorder level?
+- Which products are being sold too cheaply?
 
-Never collapse these concepts:
+### Price-floor rule
 
-**Revenue != Cash received != Outstanding credit != Profit**
+Normal selling price is the staff's default price.
 
-For an inventory item:
-- Revenue = selling price actually charged
-- COGS = cost basis of inventory consumed/sold
-- Gross profit = revenue - COGS
-- Cash received = amount actually paid now
-- Credit = amount still owed
+Minimum selling price is the lowest acceptable price. A sale below that price should require an owner/authorized override rather than silently allowing it.
 
-Operating expenses (rent, salary, utilities, etc.) are separate from gross profit. Net operating result should only be presented when the system has the required expense data.
+---
 
-## Core actions
+## 3. REPAIRS — simple repair book
 
-The application should be organized around actions rather than database concepts.
+Repair intake should not feel like accounting software.
 
-1. **Record Sale**
-   - Select item(s), quantity and price
-   - Choose payment state/method
-   - Automatically update stock, sale totals, payment and profit data
+### Minimum useful record
 
-2. **Give Part to Engineer**
-   - Select engineer, part and quantity
-   - Automatically decrease stock
-   - Create engineer debit when unpaid
-   - Record the responsible staff member and timestamp
+- Customer name
+- Customer phone
+- Device
+- Problem
+- Price / estimate
+- Deposit/payment where applicable
+- Status
 
-3. **Receive Engineer Payment**
-   - Select engineer and amount
-   - Automatically reduce outstanding balance
-   - Record payment method and timestamp
+### Status flow
 
-4. **Record Repair**
-   - Customer/device/problem
-   - Engineer assignment
-   - Service charge
-   - Parts used
-   - Payment/deposit/credit state
-   - Repair status
-   - Profit contribution when cost data exists
+**Received → Diagnosis → Approved → Repairing → Testing → Ready/Completed → Collected**
 
-5. **Add Stock / Receive Purchase**
-   - Supplier/purchase reference
-   - Item and quantity
-   - Unit cost
-   - Payment state
-   - Automatically increase stock and preserve purchase cost history
+Exceptional states such as No Fix, Failed Repair, Returned Unrepaired and Cancelled remain available.
 
-6. **Daily Closing**
-   - Sales/revenue
-   - Cash received by payment method
-   - Engineer credit issued
-   - Engineer payments received
-   - Repair/service revenue
-   - Purchases/cash out
-   - Gross profit
-   - Operating expenses where recorded
-   - Net result where determinable
-   - Stock anomalies / adjustments
+### Repair screen must make these obvious
 
-## Owner homepage
+- Who brought the phone?
+- What phone is it?
+- What is wrong?
+- How much?
+- Has the customer paid?
+- Is the phone ready?
+- Who is handling it?
 
-The first screen should be a business control panel, not a generic SaaS dashboard.
+---
 
-Header:
-- Danchrista
-- Good morning/afternoon/evening. Here's today's shop.
+## 4. DEBIT — people who owe Danchrista
 
-Primary numbers:
-- Today's Sales
-- Today's Gross Profit
-- Cash Received
-- Engineer Debt
-- Active Repairs
-- Low Stock
+This is a first-class module, not a small part of Sales.
 
-Primary actions:
+The real daily record is:
+
+**Name → item collected → price → paid/unpaid**
+
+### Each person needs
+
+- Name
+- Phone / WhatsApp number
+- Items collected
+- Amount charged
+- Amount paid
+- Outstanding balance
+- Dates
+- Transaction history
+
+### Example
+
+| Person | Item | Price | Status |
+|---|---|---:|---|
+| Ahmed | Charger | ₦8,000 | Not paid |
+| Musa | Earpiece | ₦5,000 | Paid |
+| John | Screen | ₦25,000 | Part paid |
+
+### Owner functions
+
+- See everyone owing Danchrista
+- See total outstanding
+- Open a person's account
+- Record another item
+- Record a payment
+- See running balance
+- Generate weekly statement
+- Generate monthly statement
+- Send reminder/statement to WhatsApp
+
+A person's account should never be reduced to one balance number; the transaction history is the source of truth.
+
+---
+
+## 5. CREDIT — people Danchrista owes
+
+This is the opposite direction and must remain separate from customer debit.
+
+Danchrista sometimes collects goods from people and needs to pay them later.
+
+### The credit record needs
+
+- Person/supplier name
+- Phone / WhatsApp
+- Goods collected
+- Quantity where relevant
+- Agreed value
+- Amount already paid
+- Outstanding amount
+- Due date
+- Payment history
+- Notes
+
+### Owner questions
+
+- Who do we owe?
+- How much do we owe them?
+- What goods did we collect?
+- When should we pay?
+- What have we already paid?
+- What is due soon?
+
+### Reminder
+
+The system should support due-date reminders so Danchrista does not forget to pay someone on time.
+
+This ledger must not be mixed with customer debit, engineer balances or ordinary shop expenses.
+
+---
+
+## 6. OWNER DASHBOARD
+
+The dashboard is not a generic analytics screen.
+
+It should answer five questions immediately:
+
+1. **What sold?**
+2. **What is low?**
+3. **What is moving fast?**
+4. **Who owes us?**
+5. **Who do we owe?**
+
+### Primary actions
+
 - Record Sale
-- Give Part
-- Receive Payment
-- Record Repair
-- Add Stock
+- New Repair
+- Check Inventory
+- Record Debit
+- Record Credit/payment
 
-Secondary intelligence:
-- What needs attention?
-- Who owes the most?
+### Owner signals
+
+- Sales today
+- Money received
 - Low stock
-- Today's largest transactions
-- Sales/profit trend versus previous day
-- Closing checklist
+- Out of stock
+- Fast-moving goods
+- Outstanding customer debit
+- Outstanding Danchrista credit
+- Repairs waiting/ready
+- Daily closing
 
-## Navigation model
+---
 
-Keep navigation shallow:
+## 7. NAVIGATION
 
-- Overview
+Keep it shallow and understandable.
+
+### Dashboard
+Owner's view of today's shop.
+
+### Daily Books
 - Sales
-- Parts & Stock
-- Engineers
 - Repairs
-- Money
+- Inventory
+
+### Owing & Owed
+- Debit — People owe us
+- Credit — We owe people
+
+### Owner Control
 - Reports
+- Daily closing
+- Alerts
+
+### People & Tools
+- Staff
+- WhatsApp
+- Search
 - Settings
 
-Avoid exposing internal concepts such as "financial ledger", "stock movement foundation", or "RPC" as primary navigation. Those are implementation details.
+Do not expose database concepts such as RPCs, financial foundations, stock movement engines or internal accounting structures as primary user navigation.
 
-## Existing implementation assessment
+---
 
-### Strong material to preserve/adapt
+## 8. MONEY RULES
 
-- `inventory` already stores `selling_price`, `cost_price`, quantity, minimum stock and item type.
-- `sales` + `sale_items` already represent retail transactions.
-- `inventory_stock_movements` already models sale, purchase, repair use, engineer issue/return and adjustments.
-- `engineers` + engineer transaction/parts/payment tables already model the credit workflow.
-- `repairs` already connects devices, engineers, parts usage and repair payments.
-- `financial_transactions` provides a separate money/cash layer.
-- `inventory_purchases` + purchase items provide purchase history.
-- Branch, role, RLS and audit infrastructure should be preserved where it supports security without adding unnecessary user-facing complexity.
+Never confuse:
 
-### Important gaps to resolve before calling the product complete
+**Revenue ≠ cash received ≠ outstanding debit ≠ credit owed ≠ profit.**
 
-1. Retail sales must explicitly support the business distinction between paid-now and credit/amount-due where Danchrista needs it; payment method alone is not sufficient to represent every cash/credit situation.
-2. Profit must be based on reliable cost-of-goods data, not only selling totals.
-3. Engineer credit must be a first-class action with one transaction path that atomically handles stock + debt + audit records.
-4. Repair service revenue, repair parts cost, deposits/payments and outstanding balances must feed one consistent financial model without duplicate entries.
-5. Purchase cash-out must be distinguishable from inventory value and gross-profit calculations.
-6. Daily closing needs a single owner-facing reconciliation view rather than forcing the owner to assemble figures from separate modules.
-7. User-facing terminology should be Danchrista/shop language, not generic enterprise SaaS terminology.
-8. The current dashboard should be simplified around today's business state and quick actions.
+A sale can create revenue and stock movement without requiring customer information.
 
-## Rebuild rule
+A debit creates an amount owed to Danchrista.
 
-Before adding a feature, answer:
+A credit creates an amount Danchrista owes someone else.
 
-> Does this help the Danchrista owner record a real shop action, control stock/money/debt, close the day, or understand the business?
+A payment changes a balance; it should not erase the original transaction.
 
-If not, it does not belong in the core product.
+Profit requires reliable cost data.
 
-## Build sequence
+---
 
-### Phase A — Truth model
-Map every real-world action to exactly one authoritative database workflow and define invariants.
+## 9. WHATSAPP
 
-### Phase B — Core transactions
-Sales, stock receiving, engineer issue, engineer payment, repair + parts + payment.
+WhatsApp should be useful, not decoration.
 
-### Phase C — Owner control panel
-Today's numbers, quick actions, attention items and daily closing.
+### Customer debit
+- weekly statement
+- monthly statement
+- outstanding reminder
 
-### Phase D — Reports
-Sales, gross profit, cash, engineer debt, stock, purchases, repairs and daily comparison.
+### Credit/payables
+- due reminder where appropriate
 
-### Phase E — Hardening
-RLS, RPC execution boundaries, transaction atomicity, audit logs, idempotency and production verification.
+### Repairs
+- ready-for-collection message where appropriate
 
-### Phase F — Polish
-Responsive UX, receipts, WhatsApp, assistant/intelligence and optional multi-branch features only after the core workflow is stable.
+### Owner alerts
+- low stock
+- important stock signals
+- payment/due reminders
 
-## Current principle
+Messages must be generated from real records, not manually typed amounts that can become inaccurate.
 
-**One action -> one authoritative workflow -> all necessary records update automatically.**
+---
+
+## 10. BUILD ORDER
+
+### Part 1 — Daily usability
+Sales, dashboard, navigation and simple repair intake.
+
+### Part 2 — Inventory intelligence
+Categories, pictures, stock levels, low-stock alerts, fast-moving analysis and price-floor enforcement.
+
+### Part 3 — Debit
+Daily debit entry, accounts, payments, balances and statements.
+
+### Part 4 — Credit
+People Danchrista owes, goods collected, due dates, payments and reminders.
+
+### Part 5 — Repair completion
+Simple repair lifecycle, payments, collection and parts usage.
+
+### Part 6 — Owner reports
+Sales, stock, repairs, debit, credit, profit and daily comparison.
+
+### Part 7 — Daily closing
+A single reconciliation screen for the owner.
+
+### Part 8 — WhatsApp automation
+Statements, reminders and owner alerts.
+
+### Part 9 — Security and hardening
+RLS, permissions, audit history, idempotency and financial integrity.
+
+### Part 10 — Polish
+Pictures, responsive UX, search, receipts and other improvements only when they solve a real shop problem.
+
+---
+
+## Final product rule
+
+Before adding anything, ask:
+
+> **Would a Danchrista worker or owner actually use this during a normal working day?**
+
+If the answer is no, it does not belong in the core system.
