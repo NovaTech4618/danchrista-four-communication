@@ -23,5 +23,3 @@ export const DANCHRISTA = {
     glow: "0 0 40px rgba(15,107,76,.18)",
   },
 } as const;
-
-export const NOVATECH = DANCHRISTA;
