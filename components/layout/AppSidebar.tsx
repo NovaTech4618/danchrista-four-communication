@@ -9,7 +9,7 @@ import { companyService } from "@/services/companyService";
 import { supabase } from "@/lib/supabase";
 import { hasPermission, type Permission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
-import { DanchristaLogo } from "@/components/brand/NovatechLogo";
+import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
 
 type Icon = typeof LayoutDashboard;
 type NavItem = { title: string; url: string; icon: Icon; permission: Permission };
