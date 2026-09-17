@@ -9,7 +9,7 @@ import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
 import { DEFAULT_ROLE_PATH, hasPermission, permissionForPath } from "@/lib/permissions";
 import { staffService } from "@/services/staffService";
-import { NovatechLogo } from "@/components/brand/NovatechLogo";
+import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -80,7 +80,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-screen place-items-center bg-[var(--background)] px-6" aria-busy="true" aria-label="Loading Danchrista Four Communication workspace">
         <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(18,59,52,0.10)]">
-          <NovatechLogo />
+          <DanchristaLogo />
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
             <span className="size-2 animate-pulse rounded-full bg-[var(--novatech-primary)]" aria-hidden="true" />
             Securing your workspace…
