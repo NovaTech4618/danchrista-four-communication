@@ -17,39 +17,24 @@ export default function FloatingAssistant() {
                 <Bot className="size-4" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">NOVATECH Assistant</p>
-                <p className="truncate text-[11px] text-slate-300">Your workshop copilot</p>
+                <p className="truncate text-sm font-semibold">Danchrista Assistant</p>
+                <p className="truncate text-[11px] text-slate-300">Shop assistant</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close assistant"
-              className="shrink-0 rounded-lg p-1.5 text-slate-300 hover:bg-white/10 hover:text-white"
-            >
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close assistant" className="shrink-0 rounded-lg p-1.5 text-slate-300 hover:bg-white/10 hover:text-white">
               <X className="size-4" />
             </button>
           </div>
           <div className="max-h-[calc(58svh-58px)] overflow-y-auto p-4">
-            <p className="text-sm leading-6 text-slate-600">
-              Ask about repairs, stock, customers, engineers, sales, debt, profit and business risks.
-            </p>
-            <Link
-              href="/assistant"
-              className="mt-4 flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white hover:bg-slate-800"
-            >
+            <p className="text-sm leading-6 text-slate-600">Ask about repairs, stock, customers, sales, debit, credit, profit and shop records.</p>
+            <Link href="/assistant" className="mt-4 flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white hover:bg-slate-800">
               <MessageCircle className="size-4" />
               Open Assistant
             </Link>
           </div>
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-label={open ? "Close NOVATECH Assistant" : "Open NOVATECH Assistant"}
-        className="ml-auto flex size-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-950/20 ring-4 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800"
-      >
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close Danchrista Assistant" : "Open Danchrista Assistant"} className="ml-auto flex size-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-950/20 ring-4 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800">
         {open ? <X className="size-5" /> : <Bot className="size-6" />}
       </button>
     </div>
