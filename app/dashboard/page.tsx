@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, HandCoins, Package, Plus, ShoppingCart, TrendingUp, WalletCards, Wrench } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import DailyShopMetrics from "@/components/dashboard/DailyShopMetrics";
+import InventoryIntelligence from "@/components/dashboard/InventoryIntelligence";
 import ManagementInsights from "@/components/dashboard/ManagementInsights";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import LowStock from "@/components/dashboard/LowStock";
@@ -20,6 +21,8 @@ export default function DashboardPage() {
     <DailyShopMetrics />
 
     <section className="space-y-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Daily book shortcuts</p><h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">Record what is happening now.</h2></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{actions.map(({ title, description, href, icon: Icon, primary }) => <Link key={title} href={href} className={`group relative rounded-2xl border p-5 transition hover:-translate-y-1 ${primary ? "border-[#123b34] bg-[#123b34] text-white shadow-[0_16px_34px_rgba(18,59,52,0.14)]" : "border-[#dfe6df] bg-white text-[#182a28] shadow-[0_10px_28px_rgba(18,59,52,0.06)] hover:border-[#1d6a54]/30"}`}><span className={`flex size-10 items-center justify-center rounded-xl ${primary ? "bg-[#d7a95a] text-[#123b34]" : "bg-[#eef4f1] text-[#1d6a54]"}`}><Icon className="size-4" /></span><p className="mt-5 text-sm font-bold">{title}</p><p className={`mt-1.5 text-xs leading-5 ${primary ? "text-[#c7d8d2]" : "text-[#687974]"}`}>{description}</p><ArrowRight className={`absolute right-5 top-5 size-4 transition-transform group-hover:translate-x-1 ${primary ? "text-[#d7a95a]" : "text-[#9aa9a4]"}`} /></Link>)}</div></section>
+
+    <InventoryIntelligence />
 
     <section className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]"><div className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]"><div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4 sm:px-6"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Owner view</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Today's shop</h2><p className="mt-0.5 text-xs text-[#74837e]">The detailed numbers stay in reports.</p></div><Link href="/reports" className="text-xs font-bold text-[#1d6a54]">Reports</Link></div><div className="p-4 sm:p-6"><ManagementInsights /></div></div><div className="overflow-hidden rounded-2xl border border-[#e8e4da] bg-[#fbfaf7] shadow-[0_10px_28px_rgba(18,59,52,0.06)]"><div className="flex items-center gap-3 border-b border-[#e8e4da] px-5 py-4"><Package className="size-4 text-[#8a641d]" /><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8a641d]">Stockroom</p><h2 className="mt-1 font-heading text-base font-bold text-[#182a28]">Low stock</h2></div></div><div className="p-4 sm:p-5"><LowStock /></div><Link href="/inventory" className="block border-t border-[#e8e4da] px-5 py-3 text-xs font-bold text-[#8a641d]">Open full inventory →</Link></div></section>
 
