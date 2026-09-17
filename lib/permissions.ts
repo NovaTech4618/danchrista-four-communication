@@ -3,13 +3,13 @@ import type { StaffRole } from "@/types/staff";
 export type Permission =
   | "dashboard" | "repairs" | "sales" | "mobile_sales" | "invoices" | "expenses"
   | "inventory" | "customers" | "suppliers" | "engineers" | "engineer_work" | "payments" | "outstanding"
-  | "profit" | "daily_closing" | "whatsapp" | "assistant" | "staff" | "search" | "settings";
+  | "profit" | "daily_closing" | "whatsapp" | "assistant" | "staff" | "search" | "settings" | "help";
 
 const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
-  owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings"],
-  branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search"],
-  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","outstanding","whatsapp","search"],
-  technician: ["dashboard","repairs","customers"],
+  owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings","help"],
+  branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","help"],
+  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","outstanding","whatsapp","search","help"],
+  technician: ["dashboard","repairs","customers","help"],
 };
 
 export function hasPermission(role: StaffRole | null | undefined, permission: Permission) {
@@ -31,6 +31,7 @@ export function permissionForPath(pathname: string): Permission | null {
     ["/outstanding", "outstanding"], ["/reports/daily-closing", "daily_closing"], ["/reports", "profit"],
     ["/audit", "staff"], ["/activity", "staff"], ["/alerts", "profit"], ["/whatsapp", "whatsapp"],
     ["/assistant", "assistant"], ["/staff", "staff"], ["/search", "search"], ["/settings", "settings"],
+    ["/help", "help"],
   ];
   const match = rules.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   return match?.[1] ?? null;
