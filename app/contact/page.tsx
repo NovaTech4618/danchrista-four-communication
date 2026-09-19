@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Contact Danchrista Four Communication | Kubwa, Abuja",
+  title: "Contact Amezing Limited | Kubwa, Abuja",
   description:
-    "Contact Danchrista Four Communication in Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
+    "Contact Amezing Limited in Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
   alternates: { canonical: "/contact" },
   robots: { index: true, follow: true },
 };
