@@ -11,15 +11,14 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: [
 const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.vercel.app";
+const siteUrl = configuredSiteUrl || "https://danchrista-four-communication-nova-tech-repair-suite.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
-  description: "Danchrista Four Communication's private business workspace for sales, inventory, phone repairs, accounts and daily shop records.",
+  description: "Danchrista Four Communication in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   applicationName: "Danchrista Four Communication",
   category: "business",
-  robots: { index: false, follow: false },
   verification: {
     google: "USlgSboAgAcCA_YC5xI7KFZI6zcxRRU6IkurLz0GmcM",
   },
