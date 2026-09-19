@@ -101,7 +101,7 @@ export default function FinancePage() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Owner money book</p>
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Money movement</h1>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">
-              Record money that enters or leaves Danchrista. Debit and Credit have their own books.
+              Record money that enters or leaves Amezing. Debit and Credit have their own books.
             </p>
           </div>
           <div className="flex gap-2">
