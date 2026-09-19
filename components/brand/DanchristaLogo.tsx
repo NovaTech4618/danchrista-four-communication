@@ -10,7 +10,7 @@ export function AmezingLogo({ dark = false, compact = false, className = "" }: A
       </span>
       {!compact && (
         <span className="leading-none">
-          <span className={`block font-heading text-[17px] font-bold tracking-[-0.025em] ${dark ? "text-white" : "text-slate-950"}`}>DANCHRISTA</span>
+          <span className={`block font-heading text-[17px] font-bold tracking-[-0.025em] ${dark ? "text-white" : "text-slate-950"}`}>AMEZING</span>
           <span className={`mt-1.5 block text-[8px] font-bold uppercase tracking-[0.22em] ${dark ? "text-slate-400" : "text-slate-400"}`}>Four Communication</span>
         </span>
       )}
