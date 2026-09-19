@@ -11,7 +11,7 @@ import InventoryImage from "@/components/inventory/InventoryImage";
 
 type Props = { editingItem: InventoryItem | null; onSaved: () => void; onCancelEdit: () => void };
 
-const PART_SUBCATEGORIES = ["Displays", "Charging", "Power", "Audio", "Back Glass / Housing", "Camera", "Other Phone Parts"];
+const PART_SUBCATEGORIES = ["Downboards", "Charging Flex", "Power Flex", "Earpiece Flex", "Back Glass", "Other Phone Parts"];
 const GOODS_SUBCATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Phone Accessories", "Other Gadgets & Accessories"];
 
 export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Props) {
