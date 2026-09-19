@@ -64,7 +64,7 @@ export default function CompanyShowcaseSettings({ companyId, initialShowcaseName
     </div>
 
     <div className="mt-6 grid gap-4 md:grid-cols-2">
-      <label className="text-xs font-semibold text-slate-600">Public business name<Input value={showcaseName} onChange={(e) => setShowcaseName(e.target.value)} placeholder="Danchrista Four Communications" className="mt-1.5" /><span className="mt-1.5 block font-normal text-slate-400">This is the name customers will see.</span></label>
+      <label className="text-xs font-semibold text-slate-600">Public business name<Input value={showcaseName} onChange={(e) => setShowcaseName(e.target.value)} placeholder="Amezing Limited" className="mt-1.5" /><span className="mt-1.5 block font-normal text-slate-400">This is the name customers will see.</span></label>
       <label className="text-xs font-semibold text-slate-600">Public link name<Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="danchrista-four-communications" className="mt-1.5" /><span className="mt-1.5 block font-normal text-slate-400">/showcase/{slug || "your-business"}</span></label>
       <label className="text-xs font-semibold text-slate-600">Public phone<input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Business phone number" className={field} /></label>
       <label className="md:col-span-2 text-xs font-semibold text-slate-600">Short business description<textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell customers what your business does." rows={3} className={field} /></label>
