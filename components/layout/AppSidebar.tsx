@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Boxes, ClipboardList, HandCoins, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench } from "lucide-react";
+import { BarChart3, Boxes, ClipboardList, HandCoins, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench, UserRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { staffService } from "@/services/staffService";
 import { companyService } from "@/services/companyService";
@@ -29,6 +29,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     { title: "Alerts", url: "/alerts", icon: Boxes, permission: "inventory" },
   ] },
   { label: "People & tools", items: [
+    { title: "Engineers", url: "/engineers", icon: UserRound, permission: "engineers" },
     { title: "Staff", url: "/staff", icon: Users, permission: "staff" },
     { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle, permission: "whatsapp" },
     { title: "Search", url: "/search", icon: Search, permission: "search" },
