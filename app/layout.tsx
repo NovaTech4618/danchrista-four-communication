@@ -15,9 +15,9 @@ const siteUrl = configuredSiteUrl || "https://danchrista-four-communication-nova
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
-  description: "Danchrista Four Communication in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
-  applicationName: "Danchrista Four Communication",
+  title: { default: "Amezing Limited", template: "%s · Amezing Limited" },
+  description: "Amezing Limited in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
+  applicationName: "Amezing Limited",
   category: "business",
   verification: {
     google: "USlgSboAgAcCA_YC5xI7KFZI6zcxRRU6IkurLz0GmcM",
