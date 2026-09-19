@@ -11,6 +11,7 @@ export type InventoryItem = {
   compatible_models: string | null;
   sku: string | null;
   selling_price: number;
+  minimum_selling_price: number;
   cost_price: number | null;
   quantity: number;
   minimum_stock: number;
