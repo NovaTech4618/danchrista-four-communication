@@ -76,6 +76,7 @@ export default function InventoryPage() {
   function refresh() { setRefreshKey(v => v + 1); }
 
   const currentPart = PARTS.find(p => p.name === category);
+  const accessoryCategory = ACCESSORIES.includes(category || "") ? category : null;
 
   return (
     <AppLayout>
@@ -104,7 +105,7 @@ export default function InventoryPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#CFE3F2] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
+        <section className="rounded-2xl border border-[#CFE3F2] bg-white p-5 shadow-[0_10px_28px_rgba(11,61,145,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B3D91]">Browse stock</p>
@@ -134,17 +135,28 @@ export default function InventoryPage() {
                 <CategoryCard key={name} label={name} count={accessories.filter(i => i.subcategory === name || i.category === name).length} description="Browse this stock shelf" icon={Package} onClick={() => setCategory(name)} />
               ))}
             </div>
-          ) : category && currentPart ? (
+          ) : category && (currentPart || accessoryCategory) ? (
             <div className="mt-5">
               <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-[#62788F]">
-                <button type="button" onClick={() => { setCategory(null); setBrand(null); }} className="font-bold text-[#0B3D91]">Phone Parts</button>
+                <button type="button" onClick={() => { setCategory(null); setBrand(null); }} className="font-bold text-[#0B3D91]">{currentPart ? "Phone Parts" : "Accessories"}</button>
                 <ChevronRight className="size-3" /> <span>{category}</span>
               </div>
-              {currentPart.brands && (
+              {currentPart?.brands && (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                   {currentPart.brands.map(b => (
                     <CategoryCard key={b} label={b} count={parts.filter(i => i.subcategory === category && (i.brand || "").toLowerCase() === b.toLowerCase()).length} description="View brand stock" icon={Smartphone} onClick={() => setBrand(b === "Other" ? null : b)} active={brand === b} />
                   ))}
+                </div>
+              )}
+              {accessoryCategory && (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="rounded-2xl border border-[#CFE3F2] bg-[#E8F6FF] p-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#0B3D91]">Shelf</p>
+                    <p className="mt-2 text-lg font-bold text-[#102A43]">{accessoryCategory}</p>
+                    <p className="mt-1 text-sm text-[#62788F]">Products currently grouped in this accessory category.</p>
+                    <p className="mt-4 text-2xl font-bold text-[#0B3D91]">{accessories.filter(i => i.subcategory === accessoryCategory || i.category === accessoryCategory).length}</p>
+                    <p className="text-xs text-[#62788F]">items</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -175,7 +187,7 @@ export default function InventoryPage() {
           <PurchaseStockPanel items={items} onSaved={refresh} />
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-[#CFE3F2] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
+        <section className="overflow-hidden rounded-2xl border border-[#CFE3F2] bg-white shadow-[0_10px_28px_rgba(11,61,145,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#edf0ed] px-5 py-4">
             <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B3D91]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#102A43]">Products</h2></div>
             {category && <span className="rounded-full bg-[#EAF7FF] px-3 py-1 text-xs font-semibold text-[#0B3D91]">{category}{brand ? ` · ${brand}` : ""}</span>}
@@ -189,7 +201,7 @@ export default function InventoryPage() {
 
 function SummaryCard({ title, value, detail, active, tone, onClick }: { title:string; value:number; detail:string; active?:boolean; tone?: "amber"; onClick:()=>void }) {
   return <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${active ? "border-[#0B3D91] bg-[#EAF7FF]" : "border-[#CFE3F2] bg-white"}`}>
-    <span className={`inline-flex rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-[#EAF7FF] text-[#0B3D91]"}`}>{title}</span>
+    <span className={`inline-flex rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${tone === "amber" ? "bg-[#E8F6FF] text-[#0B3D91]" : "bg-[#EAF7FF] text-[#0B3D91]"}`}>{title}</span>
     <p className="mt-3 font-heading text-2xl font-bold text-[#102A43]">{value}</p><p className="mt-1 text-[11px] text-[#62788F]">{detail}</p>
   </button>;
 }
