@@ -15,7 +15,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-[72px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-7">
-          <Link href="/" className="font-heading text-lg font-bold">DANCHRISTA</Link>
+          <Link href="/" className="font-heading text-lg font-bold">AMEZING</Link>
           <Link href="/services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Services</Link>
         </div>
       </header>

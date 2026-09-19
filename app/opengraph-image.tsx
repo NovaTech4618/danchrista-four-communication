@@ -38,8 +38,8 @@ export default function OpenGraphImage() {
             D
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 30, fontWeight: 700 }}>DANCHRISTA FOUR</div>
-            <div style={{ fontSize: 15, letterSpacing: 3, color: "#64748b" }}>COMMUNICATION</div>
+            <div style={{ fontSize: 30, fontWeight: 700 }}>AMEZING</div>
+            <div style={{ fontSize: 15, letterSpacing: 3, color: "#64748b" }}>LIMITED</div>
           </div>
         </div>
 
