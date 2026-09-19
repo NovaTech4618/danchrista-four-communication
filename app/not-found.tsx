@@ -8,7 +8,7 @@ export default function NotFound() {
         <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
           <Compass className="size-6" />
         </div>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Danchrista Four Communication</p>
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Amezing Limited</p>
         <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight">That page isn’t here.</h1>
         <p className="mt-3 text-sm leading-7 text-slate-500">The link may be outdated, or the page you requested may have moved.</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
