@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Plus, UserRound, Wallet } from "lucide-react";
+import { ArrowLeft, Plus, UserRound, Wallet, Search, X } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,8 @@ export default function EngineersPage() {
   const [message, setMessage] = useState("");
   const [action, setAction] = useState<Action>(null);
   const [period, setPeriod] = useState<Period>("all");
+  const [engineerSearch, setEngineerSearch] = useState("");
+  const [accountFilter, setAccountFilter] = useState<"all" | "owing" | "clear" | "inactive">("all");
   const [showEngineerForm, setShowEngineerForm] = useState(false);
   const [editingEngineer, setEditingEngineer] = useState<Engineer | null>(null);
   const [engineerForm, setEngineerForm] = useState<EngineerInput>(emptyEngineer);
@@ -74,6 +76,19 @@ export default function EngineersPage() {
 
   const balanceMap = useMemo(() => new Map(balances.map((item) => [item.engineer_id, item])), [balances]);
   const selectedEngineer = engineers.find((engineer) => engineer.id === selectedId);
+  const visibleEngineers = useMemo(() => {
+    const q = engineerSearch.trim().toLowerCase();
+    return engineers.filter((engineer) => {
+      const balance = Number(balanceMap.get(engineer.id)?.balance ?? 0);
+      const text = [engineer.name, engineer.phone, engineer.business_name].filter(Boolean).join(" ").toLowerCase();
+      const matchesSearch = !q || text.includes(q);
+      const matchesFilter = accountFilter === "all"
+        || (accountFilter === "owing" && balance > 0)
+        || (accountFilter === "clear" && balance <= 0 && engineer.status === "active")
+        || (accountFilter === "inactive" && engineer.status === "inactive");
+      return matchesSearch && matchesFilter;
+    });
+  }, [engineers, balanceMap, engineerSearch, accountFilter]);
   const selectedBalance = selectedId ? balanceMap.get(selectedId) : undefined;
 
   const filteredTransactions = useMemo(() => {
@@ -377,9 +392,9 @@ export default function EngineersPage() {
               {engineers.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 p-10 text-center text-slate-500">
                   <UserRound className="size-6 text-slate-300" />
-                  No engineers found.
+                  {engineers.length === 0 ? "No engineers found." : "No engineers match this search or filter."}
                 </div>
-              ) : engineers.map((engineer) => {
+              ) : visibleEngineers.map((engineer) => {
                 const balance = balanceMap.get(engineer.id);
                 const owing = Number(balance?.balance ?? 0) > 0;
                 return (
