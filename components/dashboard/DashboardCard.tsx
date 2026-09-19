@@ -26,10 +26,10 @@ export default function DashboardCard({ title, value, icon: Icon, color, label, 
           <Icon className="text-white" size={20} strokeWidth={2} />
         </div>
       </div>
-      {href && <span className="mt-3 block text-[11px] font-semibold text-[#087443] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Open details →</span>}
+      {href && <span className="mt-3 block text-[11px] font-semibold text-[#0B3D91] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Open details →</span>}
     </>
   );
 
-  const className = "group block rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 hover:bg-slate-[1%] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]";
+  const className = "group block rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 hover:bg-slate-[1%] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3BA7F2]";
   return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
 }
