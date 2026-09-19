@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://danchrista-four-communication.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://danchrista-four-communication.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: siteUrl,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },
