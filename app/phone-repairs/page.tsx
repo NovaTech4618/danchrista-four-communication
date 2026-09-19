@@ -20,7 +20,7 @@ export default function PhoneRepairsPage() {
   return <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
     <header className="border-b border-white/10">
       <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-7">
-        <Link href="/" className="font-heading text-lg font-bold tracking-tight">DANCHRISTA</Link>
+        <Link href="/" className="font-heading text-lg font-bold tracking-tight">AMEZING</Link>
         <Link href="/login" className="rounded-lg bg-[#c98a4f] px-4 py-2.5 text-sm font-semibold text-[#1a1008]">Sign in</Link>
       </div>
     </header>

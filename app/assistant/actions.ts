@@ -124,7 +124,7 @@ RULES:
 
 Keep answers calm, direct and practical. Simple lookup: 1–2 sentences. Investigation: finding → evidence → meaning → next useful check.
 
-LIVE DANCHRISTA DATA:
+LIVE AMEZING DATA:
 ${context}`;
 
   let response: Response;
