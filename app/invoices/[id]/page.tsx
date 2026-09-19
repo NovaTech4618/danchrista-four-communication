@@ -84,7 +84,7 @@ export default function InvoiceDetailPage() {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7 print:border-0 print:shadow-none">
           <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
-            <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">DANCHRISTA FOUR COMMUNICATION</p><h1 className="mt-2 text-3xl font-bold text-slate-950">Invoice</h1><p className="mt-1 text-sm text-slate-500">Customer-facing billing document</p></div>
+            <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">AMEZING LIMITED</p><h1 className="mt-2 text-3xl font-bold text-slate-950">Invoice</h1><p className="mt-1 text-sm text-slate-500">Customer-facing billing document</p></div>
             <div className="text-left sm:text-right"><p className="text-lg font-bold">{invoice.invoice_number}</p><p className="text-sm text-slate-500">{new Date(invoice.issued_at).toLocaleDateString()}</p><span className="mt-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{invoice.payment_status}</span></div>
           </header>
           <section className="grid gap-6 py-6 sm:grid-cols-2">
@@ -96,7 +96,7 @@ export default function InvoiceDetailPage() {
           </div>
           <div className="ml-auto mt-6 max-w-xs space-y-2 text-sm"><div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span>{money(invoice.subtotal)}</span></div><div className="flex justify-between"><span className="text-slate-500">Discount</span><span>{money(invoice.discount)}</span></div><div className="flex justify-between"><span className="text-slate-500">Paid</span><span>{money(paid)}</span></div><div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-bold"><span>Balance</span><span>{money(outstanding)}</span></div></div>
           {invoice.notes && <p className="mt-7 border-t border-slate-100 pt-5 text-sm text-slate-500">{invoice.notes}</p>}
-          <footer className="mt-10 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">Thank you for choosing Danchrista Four Communication.</footer>
+          <footer className="mt-10 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">Thank you for choosing Amezing Limited.</footer>
         </article>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 print:hidden">
