@@ -43,7 +43,7 @@ export async function askAssistant(question: string, conversationId?: string): P
   const { supabase, user } = await authenticatedClient();
   if (!user) return { ok: false, text: "Your session has expired. Please sign in again." };
   const { data: profile } = await supabase.from("profiles").select("full_name,role,company_id").eq("id", user.id).maybeSingle();
-  if (!profile?.company_id) return { ok: false, text: "Your Danchrista account is not fully configured yet. Please contact the owner." };
+  if (!profile?.company_id) return { ok: false, text: "Your Amezing account is not fully configured yet. Please contact the owner." };
   const companyId = profile.company_id;
 
   const [{ data: repairs }, { data: inventory }, { data: customers }, { data: services }, { data: engineers }, { data: sales }, { data: debts }, { data: engineerTransactions }, { data: dashboard }] = await Promise.all([
@@ -100,11 +100,11 @@ export async function askAssistant(question: string, conversationId?: string): P
   const context = boundedText(JSON.stringify({ currentDate, profile, intelligence, records: { repairs: repairRows, inventory: inventoryRows, customers: customerRows, services: rows(services), engineers: engineerRows, sales: salesRows, customerDebtLedger: debtRows, engineerTransactions: engineerTransactionRows } }), MAX_CONTEXT_CHARS);
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL || "gpt-5.6-luna";
-  if (!apiKey) return { ok: false, text: "The Danchrista Assistant is not connected to its AI service yet. Add OPENAI_API_KEY to the server environment.", conversationId: conversation };
+  if (!apiKey) return { ok: false, text: "The Amezing Assistant is not connected to its AI service yet. Add OPENAI_API_KEY to the server environment.", conversationId: conversation };
 
   const history = await supabase.from("assistant_messages").select("role,content").eq("conversation_id", conversation).order("created_at", { ascending: true }).limit(30);
   const historyText = boundedText((history.data ?? []).map(m => `${String(m.role).toUpperCase()}: ${String(m.content)}`).join("\n"), 50_000);
-  const instructions = `You are Danchrista Assistant, a practical business assistant for Danchrista Four Communication Ventures.
+  const instructions = `You are Amezing Assistant, a practical business assistant for Amezing Limited.
 
 Investigate the shop records and give the owner or authorized staff a useful answer. Do not sound like a SaaS product.
 
@@ -131,19 +131,19 @@ ${context}`;
   try {
     response = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ model, instructions, input: historyText, store: false }) });
   } catch (error) {
-    console.error("Danchrista Assistant network error", error);
+    console.error("Amezing Assistant network error", error);
     return { ok: false, text: "I can't reach the AI service right now. Please try again shortly.", conversationId: conversation };
   }
   if (!response.ok) {
-    const detail = await response.text(); console.error("Danchrista Assistant provider error", response.status, detail);
+    const detail = await response.text(); console.error("Amezing Assistant provider error", response.status, detail);
     const message = response.status === 401 ? "The AI provider rejected the API key. Check OPENAI_API_KEY." : response.status === 429 ? "The AI service is temporarily rate-limited or out of available quota. Try again shortly." : `The AI service returned an error (${response.status}). Check the server configuration.`;
     return { ok: false, text: message, conversationId: conversation };
   }
   const payload = await response.json() as { output_text?: string; output?: Array<{ content?: Array<{ text?: string }> }> };
   const answer = payload.output_text?.trim() || payload.output?.flatMap(item => item.content ?? []).map(part => part.text ?? "").join("\n").trim();
-  const resultText = answer || "I couldn't produce a response from the available Danchrista records.";
+  const resultText = answer || "I couldn't produce a response from the available Amezing records.";
   const { error: assistantMessageError } = await supabase.from("assistant_messages").insert({ conversation_id: conversation, company_id: companyId, user_id: user.id, role: "assistant", content: resultText });
-  if (assistantMessageError) console.error("Danchrista Assistant save error", assistantMessageError);
+  if (assistantMessageError) console.error("Amezing Assistant save error", assistantMessageError);
   await supabase.from("assistant_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversation).eq("company_id", companyId);
   return { ok: true, text: resultText, conversationId: conversation };
 }
