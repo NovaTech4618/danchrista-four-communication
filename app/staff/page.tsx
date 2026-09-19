@@ -1,7 +1,160 @@
 "use client";
 
-import { useEffect,useState } from "react"; import { toast } from "sonner"; import { ShieldCheck,UserPlus } from "lucide-react"; import AppLayout from "@/components/layout/AppLayout"; import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Badge } from "@/components/ui/badge"; import { branchService } from "@/services/branchService"; import { staffService } from "@/services/staffService"; import { permissionsFor,type Permission } from "@/lib/permissions"; import type { StaffInvitation,StaffMember,StaffRole } from "@/types/staff";
-const ROLE_LABELS:Record<StaffRole,string>={owner:"Owner",branch_manager:"Manager",technician:"Technician",front_desk:"Front Desk"}; type ManageableRole="technician"|"front_desk"; const MANAGEABLE_ROLES:ManageableRole[]=["technician","front_desk"]; const ACCESS_LABELS:Record<Permission,string>={dashboard:"Dashboard",repairs:"Repairs",sales:"Sales",mobile_sales:"Mobile sales",invoices:"Invoices",expenses:"Expenses",inventory:"Inventory",customers:"Customers",suppliers:"Suppliers",engineers:"Engineers",engineer_work:"Engineer work",payments:"Money",outstanding:"Debit",profit:"Reports",daily_closing:"Daily closing",whatsapp:"WhatsApp",assistant:"Assistant",staff:"Staff",search:"Search",settings:"Settings",help:"Help"}; const inputClass="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/15"; function accessFor(role:StaffRole){return permissionsFor(role).map(p=>ACCESS_LABELS[p]).filter(Boolean);}
-export default function StaffPage(){const[myRole,setMyRole]=useState<StaffRole|null>(null);const[staff,setStaff]=useState<StaffMember[]>([]);const[invitations,setInvitations]=useState<StaffInvitation[]>([]);const[shopBranchId,setShopBranchId]=useState<string|null>(null);const[loading,setLoading]=useState(true);const[inviteEmail,setInviteEmail]=useState("");const[inviteRole,setInviteRole]=useState<ManageableRole>("technician");const[sendingInvite,setSendingInvite]=useState(false);useEffect(()=>{void loadAll();},[]);async function loadAll(){setLoading(true);const[roleRes,branchRes,staffRes,inviteRes]=await Promise.all([staffService.getMyRole(),branchService.getBranches(),staffService.getStaff(),staffService.getInvitations()]);if(roleRes.data)setMyRole(roleRes.data);if(branchRes.data){const main=branchRes.data.find(b=>b.is_main&&b.is_active)??branchRes.data.find(b=>b.is_active);setShopBranchId(main?.id??null);}if(staffRes.data)setStaff(staffRes.data);if(inviteRes.data)setInvitations(inviteRes.data as StaffInvitation[]);if(roleRes.error||staffRes.error||inviteRes.error)toast.error("Some staff information could not be loaded.");setLoading(false);}const canManage=myRole==="owner";async function handleRoleChange(profileId:string,role:StaffRole){if(role==="branch_manager"||role==="owner")return;const{error}=await staffService.updateStaffRole(profileId,role);if(error)return toast.error(error.message);toast.success("Staff role updated.");void loadAll();}async function handleToggleActive(profileId:string,isActive:boolean){const{error}=await staffService.setStaffActive(profileId,!isActive);if(error)return toast.error(error.message);toast.success(!isActive?"Staff member reactivated.":"Staff member deactivated.");void loadAll();}async function handleInvite(e:React.FormEvent){e.preventDefault();if(!inviteEmail.trim())return toast.error("Email is required.");if(!shopBranchId)return toast.error("The shop setup is missing its main record.");setSendingInvite(true);const{error}=await staffService.inviteStaff({email:inviteEmail.trim(),role:inviteRole,branch_ids:[shopBranchId]});setSendingInvite(false);if(error)return toast.error(error.message);setInviteEmail("");toast.success("Staff invitation created.");void loadAll();}async function handleRevoke(id:string){const{error}=await staffService.revokeInvitation(id);if(error)return toast.error(error.message);toast.success("Invitation revoked.");void loadAll();}
-if(loading)return <AppLayout><div className="space-y-4"><div className="h-8 w-56 animate-pulse rounded bg-slate-100"/><div className="h-40 animate-pulse rounded-2xl bg-slate-100"/></div></AppLayout>; if(!canManage)return <AppLayout><Card className="border-dashed border-slate-200 shadow-none"><CardContent className="flex flex-col items-center gap-2 py-12 text-center"><ShieldCheck className="size-6 text-slate-300"/><p className="text-slate-500">Only the Amezing Limited owner can manage staff.</p></CardContent></Card></AppLayout>;
-return <AppLayout><div className="space-y-7"><header><p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Amezing Limited</p><h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-950">Staff</h1><p className="mt-1 text-sm text-slate-500">See who works here and exactly what each person can access.</p></header><Card className="border-slate-200 shadow-sm"><CardHeader><CardTitle className="font-heading text-lg">Current staff & access</CardTitle><p className="text-sm text-slate-500">The owner has full access. Staff access is controlled by role.</p></CardHeader><CardContent><div className="overflow-x-auto rounded-xl border border-slate-100"><table className="w-full min-w-[760px] text-sm"><thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-3 py-3 text-left">Name</th><th className="px-3 py-3 text-left">Role</th><th className="px-3 py-3 text-left">Status</th><th className="px-3 py-3 text-left">Access</th><th className="px-3 py-3 text-right">Control</th></tr></thead><tbody>{staff.map(s=>{const isOwner=s.role==="owner";const isLegacyManager=s.role==="branch_manager";const access=accessFor(s.role);return <tr key={s.id} className="border-t border-slate-100 align-top"><td className="px-3 py-4 font-medium text-slate-900">{s.full_name||"Unnamed"}</td><td className="px-3 py-4">{isOwner||isLegacyManager?<Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge>:<select value={s.role} onChange={e=>void handleRoleChange(s.id,e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map(r=><option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}</td><td className="px-3 py-4"><Badge variant={s.is_active?"secondary":"destructive"}>{s.is_active?"Active":"Inactive"}</Badge></td><td className="max-w-xl px-3 py-4"><div className="flex flex-wrap gap-1.5">{access.map(label=><span key={label} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{label}</span>)}</div></td><td className="px-3 py-4 text-right">{isOwner?<span className="text-xs font-medium text-slate-400">Protected</span>:<button onClick={()=>void handleToggleActive(s.id,s.is_active)} className="text-xs font-medium text-slate-500 underline hover:text-slate-800">{s.is_active?"Deactivate":"Reactivate"}</button>}</td></tr>;})}</tbody></table></div></CardContent></Card><Card className="border-slate-200 shadow-sm"><CardHeader><div className="flex items-center gap-2"><UserPlus className="size-4 text-teal-600"/><CardTitle className="font-heading text-lg">Add staff</CardTitle></div><p className="text-sm text-slate-500">Invite a technician or front-desk staff member to Amezing Limited.</p></CardHeader><CardContent><form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2"><input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="staff@email.com" className={inputClass}/><select value={inviteRole} onChange={e=>setInviteRole(e.target.value as ManageableRole)} className={inputClass}>{MANAGEABLE_ROLES.map(r=><option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select><div className="md:col-span-2"><Button type="submit" disabled={sendingInvite||!shopBranchId}>{sendingInvite?"Creating...":"Create staff invitation"}</Button></div></form>{invitations.length>0&&<div className="mt-6 space-y-2">{invitations.map(inv=><div key={inv.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-sm"><div><span className="font-medium text-slate-900">{inv.email}</span><span className="ml-2 text-slate-500">{ROLE_LABELS[inv.role]} · {inv.status}</span></div>{inv.status==="pending"&&<button onClick={()=>void handleRevoke(inv.id)} className="text-xs font-medium text-rose-600 underline">Revoke</button>}</div>)}</div>}</CardContent></Card></div></AppLayout>;}
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { ShieldCheck, UserPlus } from "lucide-react";
+
+import AppLayout from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { branchService } from "@/services/branchService";
+import { staffService } from "@/services/staffService";
+import { permissionsFor, type Permission } from "@/lib/permissions";
+import type { StaffInvitation, StaffMember, StaffRole } from "@/types/staff";
+
+const ROLE_LABELS: Record<StaffRole, string> = {
+  owner: "Owner",
+  branch_manager: "Manager",
+  technician: "Technician",
+  front_desk: "Front Desk",
+};
+
+type ManageableRole = "technician" | "front_desk";
+const MANAGEABLE_ROLES: ManageableRole[] = ["technician", "front_desk"];
+const ACCESS_LABELS: Record<Permission, string> = {
+  dashboard: "Dashboard", repairs: "Repairs", sales: "Sales", mobile_sales: "Mobile sales", invoices: "Invoices", expenses: "Expenses",
+  inventory: "Inventory", customers: "Customers", suppliers: "Suppliers", engineers: "Engineers", engineer_work: "Engineer work", payments: "Money", outstanding: "Debit",
+  profit: "Reports", daily_closing: "Daily closing", whatsapp: "WhatsApp", assistant: "Assistant", staff: "Staff", search: "Search", settings: "Settings", help: "Help",
+};
+const inputClass = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/15";
+
+function accessFor(role: StaffRole) {
+  return permissionsFor(role).map((permission) => ACCESS_LABELS[permission]).filter(Boolean);
+}
+
+export default function StaffPage() {
+  const [myRole, setMyRole] = useState<StaffRole | null>(null);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [invitations, setInvitations] = useState<StaffInvitation[]>([]);
+  const [shopBranchId, setShopBranchId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<ManageableRole>("technician");
+  const [sendingInvite, setSendingInvite] = useState(false);
+
+  useEffect(() => { void loadAll(); }, []);
+
+  async function loadAll() {
+    setLoading(true);
+    const [roleRes, branchRes, staffRes, inviteRes] = await Promise.all([
+      staffService.getMyRole(), branchService.getBranches(), staffService.getStaff(), staffService.getInvitations(),
+    ]);
+    if (roleRes.data) setMyRole(roleRes.data);
+    if (branchRes.data) {
+      const main = branchRes.data.find((branch) => branch.is_main && branch.is_active) ?? branchRes.data.find((branch) => branch.is_active);
+      setShopBranchId(main?.id ?? null);
+    }
+    if (staffRes.data) setStaff(staffRes.data);
+    if (inviteRes.data) setInvitations(inviteRes.data as StaffInvitation[]);
+    if (roleRes.error || staffRes.error || inviteRes.error) toast.error("Some staff information could not be loaded.");
+    setLoading(false);
+  }
+
+  const canManage = myRole === "owner";
+
+  async function handleRoleChange(profileId: string, role: StaffRole) {
+    if (role === "branch_manager" || role === "owner") return;
+    const { error } = await staffService.updateStaffRole(profileId, role);
+    if (error) return toast.error(error.message);
+    toast.success("Staff role updated.");
+    void loadAll();
+  }
+
+  async function handleToggleActive(profileId: string, isActive: boolean) {
+    const { error } = await staffService.setStaffActive(profileId, !isActive);
+    if (error) return toast.error(error.message);
+    toast.success(!isActive ? "Staff member reactivated." : "Staff member deactivated.");
+    void loadAll();
+  }
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return toast.error("Email is required.");
+    if (!shopBranchId) return toast.error("The shop setup is missing its main record.");
+    setSendingInvite(true);
+    const { error } = await staffService.inviteStaff({ email: inviteEmail.trim(), role: inviteRole, branch_ids: [shopBranchId] });
+    setSendingInvite(false);
+    if (error) return toast.error(error.message);
+    setInviteEmail("");
+    toast.success("Staff invitation created.");
+    void loadAll();
+  }
+
+  async function handleRevoke(id: string) {
+    const { error } = await staffService.revokeInvitation(id);
+    if (error) return toast.error(error.message);
+    toast.success("Invitation revoked.");
+    void loadAll();
+  }
+
+  if (loading) return <AppLayout><div className="space-y-4"><div className="h-8 w-56 animate-pulse rounded bg-slate-100" /><div className="h-40 animate-pulse rounded-2xl bg-slate-100" /></div></AppLayout>;
+  if (!canManage) return <AppLayout><Card className="border-dashed border-slate-200 shadow-none"><CardContent className="flex flex-col items-center gap-2 py-12 text-center"><ShieldCheck className="size-6 text-slate-300" /><p className="text-slate-500">Only the Amezing Limited owner can manage staff.</p></CardContent></Card></AppLayout>;
+
+  return (
+    <AppLayout>
+      <div className="space-y-7">
+        <header>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Amezing Limited</p>
+          <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-950">Staff</h1>
+          <p className="mt-1 text-sm text-slate-500">See who works here and exactly what each person can access.</p>
+        </header>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="font-heading text-lg">Current staff & access</CardTitle>
+            <p className="text-sm text-slate-500">The owner has full access. Staff access is controlled by role.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto rounded-xl border border-slate-100">
+              <table className="w-full min-w-[760px] text-sm">
+                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                  <tr><th className="px-3 py-3 text-left">Name</th><th className="px-3 py-3 text-left">Role</th><th className="px-3 py-3 text-left">Status</th><th className="px-3 py-3 text-left">Access</th><th className="px-3 py-3 text-right">Control</th></tr>
+                </thead>
+                <tbody>
+                  {staff.map((s) => {
+                    const isOwner = s.role === "owner";
+                    const isLegacyManager = s.role === "branch_manager";
+                    const access = accessFor(s.role);
+                    return <tr key={s.id} className="border-t border-slate-100 align-top">
+                      <td className="px-3 py-4 font-medium text-slate-900">{s.full_name || "Unnamed"}</td>
+                      <td className="px-3 py-4">{isOwner || isLegacyManager ? <Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge> : <select value={s.role} onChange={(e) => void handleRoleChange(s.id, e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}</td>
+                      <td className="px-3 py-4"><Badge variant={s.is_active ? "secondary" : "destructive"}>{s.is_active ? "Active" : "Inactive"}</Badge></td>
+                      <td className="max-w-xl px-3 py-4"><div className="flex flex-wrap gap-1.5">{access.map((label) => <span key={label} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{label}</span>)}</div></td>
+                      <td className="px-3 py-4 text-right">{isOwner ? <span className="text-xs font-medium text-slate-400">Protected</span> : <button onClick={() => void handleToggleActive(s.id, s.is_active)} className="text-xs font-medium text-slate-500 underline hover:text-slate-800">{s.is_active ? "Deactivate" : "Reactivate"}</button>}</td>
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2"><UserPlus className="size-4 text-teal-600" /><CardTitle className="font-heading text-lg">Add staff</CardTitle></div>
+            <p className="text-sm text-slate-500">Invite a technician or front-desk staff member to Amezing Limited.</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2">
+              <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="staff@email.com" className={inputClass} />
+              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as ManageableRole)} className={inputClass}>{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>
+              <div className="md:col-span-2"><Button type="submit" disabled={sendingInvite || !shopBranchId}>{sendingInvite ? "Creating..." : "Create staff invitation"}</Button></div>
+            </form>
+            {invitations.length > 0 && <div className="mt-6 space-y-2">{invitations.map((inv) => <div key={inv.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-sm"><div><span className="font-medium text-slate-900">{inv.email}</span><span className="ml-2 text-slate-500">{ROLE_LABELS[inv.role]} · {inv.status}</span></div>{inv.status === "pending" && <button onClick={() => void handleRevoke(inv.id)} className="text-xs font-medium text-rose-600 underline">Revoke</button>}</div>)}</div>}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
+  );
+}
