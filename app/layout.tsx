@@ -16,7 +16,7 @@ const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.verc
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
-  description: "Daily sales, inventory, repairs, debit, credit and money records for Danchrista Four Communication.",
+  description: "Danchrista Four Communication's private business workspace for sales, inventory, phone repairs, accounts and daily shop records.",
   applicationName: "Danchrista Four Communication",
   category: "business",
   robots: { index: false, follow: false },
@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${manrope.variable} ${spaceMono.variable}`}>
+    <html lang="en" className={sora.variable + " " + manrope.variable + " " + spaceMono.variable}>
       <body className="min-w-0 overflow-x-hidden">
         <a
           href="#main-content"
