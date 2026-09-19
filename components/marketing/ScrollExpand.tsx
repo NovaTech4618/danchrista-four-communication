@@ -137,7 +137,7 @@ export default function ScrollExpand({
           <div className="relative z-10 flex h-full flex-col justify-between p-4 text-white sm:p-8 lg:p-12">
             <div className="flex items-start justify-between gap-3" style={{ opacity: introOpacity }}>
               <div className="max-w-2xl">
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-teal-200 sm:text-[11px] sm:tracking-[0.25em]">Danchrista Four Communication</p>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-teal-200 sm:text-[11px] sm:tracking-[0.25em]">Amezing Limited</p>
                 {title ? <h2 className="mt-2 max-w-2xl font-heading text-xl font-bold leading-[1.02] tracking-[-0.04em] sm:text-4xl lg:text-6xl">{title}</h2> : null}
               </div>
               <div className="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-bold backdrop-blur-md sm:block">Ame3ing's business, connected.</div>
