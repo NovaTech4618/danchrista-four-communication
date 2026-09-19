@@ -3,9 +3,36 @@ import Link from "next/link";
 import { ArrowRight, HandCoins, Package, ShoppingCart, Wrench } from "lucide-react";
 import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://danchrista-four-communication.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Danchrista Four Communication | Shop record system",
-  description: "The internal business system for Danchrista Four Communication.",
+  title: "Danchrista Four Communication | Phone Repairs, Parts & Shop Management",
+  description:
+    "Danchrista Four Communication keeps phone repairs, phone parts, accessories, sales and daily business records organized in one place.",
+  keywords: [
+    "Danchrista Four Communication",
+    "phone repair",
+    "phone parts",
+    "phone accessories",
+    "phone repairs",
+    "shop management",
+  ],
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: "Danchrista Four Communication",
+    description:
+      "Phone repairs, phone parts, accessories, sales and organized daily shop records.",
+    url: "/",
+    siteName: "Danchrista Four Communication",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Danchrista Four Communication",
+    description:
+      "Phone repairs, phone parts, accessories, sales and organized daily shop records.",
+  },
 };
 
 const modules = [
@@ -17,9 +44,22 @@ const modules = [
   ["Owner view", "The shop picture at a glance."],
 ] as const;
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Danchrista Four Communication",
+  url: siteUrl,
+  description:
+    "Phone repairs, phone parts, accessories, sales and organized daily business records.",
+};
+
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
+    <main id="main-content" className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       <nav className="border-b border-white/10 bg-[#0b1512]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-7">
           <Link href="/" aria-label="Danchrista home">
@@ -38,13 +78,14 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#e7b784]">
-              Private business system
+              Phone repairs · Parts · Accessories · Shop records
             </p>
             <h1 className="mt-4 max-w-2xl font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">
               Danchrista should not have to remember everything.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-[#93a69c] sm:text-lg">
-              One clean place for the shop&apos;s sales, stock, repairs, debit, credit and daily records.
+              One clean place for phone repairs, phone parts, accessories, sales, stock,
+              debit, credit and daily shop records.
             </p>
             <Link
               href="/login"
