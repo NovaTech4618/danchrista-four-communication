@@ -7,6 +7,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "glass" | "outline" | "destructive" | "ghost";
   size?: "sm" | "md" | "lg" | "icon-sm" | "icon-md" | "icon-lg";
   nativeButton?: boolean;
+  /** Render the button styles on its child element instead of a native button. */
   asChild?: boolean;
   render?: React.ReactElement<{ className?: string; children?: React.ReactNode }>;
 }
@@ -47,7 +48,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       } as Partial<React.HTMLAttributes<HTMLElement>>);
     }
 
-    if (!nativeButton && render) {
+    if (render && !nativeButton) {
       return React.cloneElement(render, {
         className: cn(classes, render.props.className),
         children: content,
