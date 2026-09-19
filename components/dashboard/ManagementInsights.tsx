@@ -114,7 +114,7 @@ export default function ManagementInsights() {
                   key={days}
                   type="button"
                   onClick={() => setRange(days as 7 | 30)}
-                  className={`min-h-9 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a] ${range === days ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800"}`}
+                  className={`min-h-9 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3BA7F2] ${range === days ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800"}`}
                   aria-pressed={range === days}
                 >
                   {days} days
@@ -150,7 +150,7 @@ export default function ManagementInsights() {
                   <div key={item.day} className="group relative flex min-w-0 flex-1 flex-col items-center justify-center">
                     <div className="relative flex h-full w-full items-center justify-center">
                       <div
-                        className={`absolute w-[72%] min-w-[5px] rounded-sm transition-opacity group-hover:opacity-80 ${positive ? "bg-[#12b76a]" : "bg-rose-500"}`}
+                        className={`absolute w-[72%] min-w-[5px] rounded-sm transition-opacity group-hover:opacity-80 ${positive ? "bg-[#3BA7F2]" : "bg-rose-500"}`}
                         style={{ height: `${height}%`, top: positive ? `${50 - height}%` : "50%" }}
                         title={`${item.day}: ${money(value)} profit | Revenue ${money(Number(item.revenue || 0))} | Costs ${money(Number(item.parts_cost || 0) + Number(item.operating_expenses || 0) + Number(item.engineer_cost || 0))}`}
                       />
@@ -158,7 +158,7 @@ export default function ManagementInsights() {
                     <span className="absolute bottom-0 text-[9px] font-medium text-slate-400 sm:text-[10px]">{range === 7 ? labelDate.toLocaleDateString("en-NG", { weekday: "short" }) : labelDate.getDate()}</span>
                     <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2 text-[10px] shadow-lg group-hover:block group-focus-within:block">
                       <p className="font-semibold text-slate-900">{labelDate.toLocaleDateString("en-NG", { day: "numeric", month: "short" })}</p>
-                      <p className={`mt-1 font-bold ${value < 0 ? "text-rose-700" : "text-[#087443]"}`}>{money(value)} profit</p>
+                      <p className={`mt-1 font-bold ${value < 0 ? "text-rose-700" : "text-[#0B3D91]"}`}>{money(value)} profit</p>
                       <p className="mt-0.5 text-slate-500">Revenue {money(Number(item.revenue || 0))}</p>
                       <p className="text-slate-500">Costs {money(Number(item.parts_cost || 0) + Number(item.operating_expenses || 0) + Number(item.engineer_cost || 0))}</p>
                     </div>
@@ -167,7 +167,7 @@ export default function ManagementInsights() {
               })}
             </div>
           </div>
-          <div className="mt-2 flex items-center gap-4 text-[10px] text-slate-400"><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-[#12b76a]" /> Profit</span><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-rose-500" /> Loss</span><span className="ml-auto">Dashed line = zero profit</span></div>
+          <div className="mt-2 flex items-center gap-4 text-[10px] text-slate-400"><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-[#3BA7F2]" /> Profit</span><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-rose-500" /> Loss</span><span className="ml-auto">Dashed line = zero profit</span></div>
           {loading && <p className="mt-3 text-center text-[11px] text-slate-400">Updating profit figures…</p>}
         </div>
 
@@ -180,7 +180,7 @@ export default function ManagementInsights() {
             <Pulse label="Engineer cost" value={money(Number(profit?.engineer_cost || 0))} />
             <Pulse label="Cash received" value={money(Number(profit?.cash_in || 0))} />
           </div>
-          <Link href="/reports" className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-[#087443] hover:text-[#065c35] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]">Open full reports <ArrowUpRight className="size-3.5" /></Link>
+          <Link href="/reports" className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-[#0B3D91] hover:text-[#082E6D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3BA7F2]">Open full reports <ArrowUpRight className="size-3.5" /></Link>
         </div>
       </div>
     </section>
@@ -189,10 +189,10 @@ export default function ManagementInsights() {
 
 function MetricCard({ title, value, hint, icon: Icon, href }: { title: string; value: string; hint: string; icon: typeof CircleDollarSign; href: string }) {
   return (
-    <Link href={href} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]">
+    <Link href={href} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3BA7F2]">
       <div className="flex items-start justify-between gap-3">
         <div><p className="text-xs font-medium text-slate-500">{title}</p><p className={`mt-2 font-heading text-xl font-bold tracking-tight ${title.includes("net profit") && value.startsWith("-") ? "text-rose-700" : "text-slate-950"}`}>{value}</p><p className="mt-1 text-[11px] text-slate-400">{hint}</p></div>
-        <div className="flex size-9 items-center justify-center rounded-lg bg-[#eaf8f1] text-[#087443]"><Icon className="size-4" /></div>
+        <div className="flex size-9 items-center justify-center rounded-lg bg-[#EAF7FF] text-[#0B3D91]"><Icon className="size-4" /></div>
       </div>
     </Link>
   );
