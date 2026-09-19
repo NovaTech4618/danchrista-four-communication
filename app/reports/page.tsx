@@ -46,7 +46,7 @@ export default function ReportsPage() {
 
   return <AppLayout><div className="space-y-7">
     <header className="flex flex-wrap items-end justify-between gap-4">
-      <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Danchrista owner records</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Reports</h1><p className="mt-1 text-sm text-slate-500">Sales, repairs, stock, money received, costs and what is still owed.</p></div>
+      <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Amezing owner records</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Reports</h1><p className="mt-1 text-sm text-slate-500">Sales, repairs, stock, money received, costs and what is still owed.</p></div>
       <select aria-label="Report period" value={period} onChange={(e) => setPeriod(e.target.value as Period)} className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="today">Today</option><option value="week">Last 7 days</option><option value="month">Last 30 days</option><option value="all">All time</option></select>
     </header>
     {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
