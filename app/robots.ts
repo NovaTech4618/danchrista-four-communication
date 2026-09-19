@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://danchrista-four-communication.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://danchrista-four-communication.vercel.app";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -31,8 +31,9 @@ export default function robots(): MetadataRoute.Robots {
         "/whatsapp/",
         "/help/",
         "/api/",
+        "/login",
       ],
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: siteUrl + "/sitemap.xml",
   };
 }
