@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   applicationName: "Danchrista Four Communication",
   category: "business",
   robots: { index: false, follow: false },
+  verification: {
+    google: "USlgSboAgAcCA_YC5xI7KFZI6zcxRRU6IkurLz0GmcM",
+  },
 };
 
 export const viewport: Viewport = {
