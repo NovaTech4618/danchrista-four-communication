@@ -2,6 +2,7 @@ export type InventoryItem = {
   id: string;
   company_id?: string;
   branch_id: string | null;
+  is_active: boolean;
   item_name: string;
   category: string | null;
   subcategory: string | null;
@@ -38,4 +39,5 @@ export type InventoryItemInput = {
   shelf_location: string | null;
   notes: string | null;
   image_url?: string | null;
+  is_active?: boolean;
 };
