@@ -9,8 +9,8 @@ import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
 
-const PART_CATEGORIES = ["Displays / Downboards", "Charging Flex", "Earpiece Flex", "Back Glass / Housing", "Power", "Audio", "Camera", "Other Phone Parts"];
-const ACCESSORY_CATEGORIES = ["Chargers", "USB Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Phone Cases", "Screen Protectors", "Other Accessories"];
+const PART_CATEGORIES = ["Displays", "Charging", "Power", "Audio", "Back Glass / Housing", "Camera", "Other Phone Parts"];
+const ACCESSORY_CATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Phone Accessories", "Other Gadgets & Accessories"];
 function groupFor(item: InventoryItem) { return item.item_type === "part" || item.category === "Phone Parts" ? "parts" : "accessories"; }
 function stockState(item: InventoryItem) { if (Number(item.quantity) === 0) return "out"; if (Number(item.quantity) <= Number(item.minimum_stock)) return "low"; return "ok"; }
 function money(n: number) { return `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`; }
