@@ -39,6 +39,6 @@ export const assistantService = {
       const { data,error }=await supabase.rpc("get_dashboard_summary"); if(error)return{data:{text:"I couldn't load today's business summary right now."},error}; const s=Array.isArray(data)?data[0]:data; if(!s)return{data:{text:"There isn't enough dashboard data to summarize yet."},error:null};
       return {data:{text:"Here is the live shop snapshot I can access.",items:Object.entries(s).slice(0,8).map(([k,v])=>({label:k.replaceAll("_"," "),value:typeof v==="number"?money(v):String(v??"—")}))},error:null};
     }
-    return { data:{text:"I can help with live Danchrista records. Try: 'What's low in stock?', 'Who owes money?', 'How are the engineers doing?', 'Show active repairs', or 'How is the shop today?'"},error:null };
+    return { data:{text:"I can help with live Amezing records. Try: 'What's low in stock?', 'Who owes money?', 'How are the engineers doing?', 'Show active repairs', or 'How is the shop today?'"},error:null };
   }
 };
