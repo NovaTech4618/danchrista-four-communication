@@ -98,17 +98,17 @@ export default function FinancePage() {
       <main className="space-y-6">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Owner money book</p>
-            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Money movement</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0B3D91]">Owner money book</p>
+            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#102A43]">Money movement</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#62788F]">
               Record money that enters or leaves Danchrista. Debit and Credit have their own books.
             </p>
           </div>
           <div className="flex gap-2">
-            <Link href="/outstanding" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#123b34]">
+            <Link href="/outstanding" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#CFE3F2] bg-white px-4 text-sm font-bold text-[#0B3D91]">
               People who owe us
             </Link>
-            <Link href="/credit" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#123b34] px-4 text-sm font-bold text-white">
+            <Link href="/credit" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0B3D91] px-4 text-sm font-bold text-white">
               People we owe
             </Link>
           </div>
@@ -121,19 +121,19 @@ export default function FinancePage() {
         </section>
 
         {message && (
-          <div className="rounded-xl border border-[#dfe6df] bg-white px-4 py-3 text-sm text-[#53635d]" role="status">
+          <div className="rounded-xl border border-[#CFE3F2] bg-white px-4 py-3 text-sm text-[#536B83]" role="status">
             {message}
           </div>
         )}
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white">
+          <section className="overflow-hidden rounded-2xl border border-[#CFE3F2] bg-white">
             <div className="flex flex-col gap-3 border-b border-[#edf0ed] p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Cash book</p>
-                <h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Recent money movement</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B3D91]">Cash book</p>
+                <h2 className="mt-1 font-heading text-lg font-bold text-[#102A43]">Recent money movement</h2>
               </div>
-              <select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-10 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
+              <select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-10 rounded-xl border border-[#CFE3F2] bg-white px-3 text-sm">
                 <option value="day">Today</option>
                 <option value="week">This week</option>
                 <option value="month">This month</option>
@@ -142,20 +142,20 @@ export default function FinancePage() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[620px] text-left text-sm">
-                <thead className="bg-[#f7f8f5]">
+                <thead className="bg-[#F4FAFF]">
                   <tr>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Date</th>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Description</th>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Type</th>
-                    <th className="px-5 py-3 text-right text-[10px] uppercase tracking-wide text-[#74837e]">Amount</th>
+                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#62788F]">Date</th>
+                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#62788F]">Description</th>
+                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#62788F]">Type</th>
+                    <th className="px-5 py-3 text-right text-[10px] uppercase tracking-wide text-[#62788F]">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((transaction) => (
                     <tr key={transaction.id} className="border-t border-[#edf0ed]">
-                      <td className="px-5 py-4 text-xs text-[#74837e]">{new Date(transaction.occurred_at).toLocaleDateString("en-NG")}</td>
+                      <td className="px-5 py-4 text-xs text-[#62788F]">{new Date(transaction.occurred_at).toLocaleDateString("en-NG")}</td>
                       <td className="px-5 py-4 font-medium">{transaction.description}</td>
-                      <td className="px-5 py-4 text-xs text-[#53635d]">{labels[transaction.category] ?? transaction.category}</td>
+                      <td className="px-5 py-4 text-xs text-[#536B83]">{labels[transaction.category] ?? transaction.category}</td>
                       <td className={`px-5 py-4 text-right font-bold ${transaction.direction === "in" ? "text-emerald-700" : "text-red-700"}`}>
                         {transaction.direction === "in" ? "+" : "−"}{money(Number(transaction.amount))}
                       </td>
@@ -163,24 +163,24 @@ export default function FinancePage() {
                   ))}
                 </tbody>
               </table>
-              {filtered.length === 0 && <div className="py-12 text-center text-sm text-[#74837e]">No money movement in this period.</div>}
+              {filtered.length === 0 && <div className="py-12 text-center text-sm text-[#62788F]">No money movement in this period.</div>}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#dfe6df] bg-white p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Cash book entry</p>
+          <section className="rounded-2xl border border-[#CFE3F2] bg-white p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B3D91]">Cash book entry</p>
             <h2 className="mt-1 font-heading text-lg font-bold">Record movement</h2>
             <form onSubmit={submitMoney} className="mt-5 space-y-4">
-              <label className="block text-xs font-bold text-[#53635d]">
+              <label className="block text-xs font-bold text-[#536B83]">
                 Direction
-                <select value={direction} onChange={(event) => setDirection(event.target.value as FinancialDirection)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
+                <select value={direction} onChange={(event) => setDirection(event.target.value as FinancialDirection)} className="mt-1 h-11 w-full rounded-xl border border-[#CFE3F2] bg-white px-3 text-sm">
                   <option value="out">Money out</option>
                   <option value="in">Money in</option>
                 </select>
               </label>
-              <label className="block text-xs font-bold text-[#53635d]">
+              <label className="block text-xs font-bold text-[#536B83]">
                 Category
-                <select value={category} onChange={(event) => setCategory(event.target.value as FinancialCategory)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
+                <select value={category} onChange={(event) => setCategory(event.target.value as FinancialCategory)} className="mt-1 h-11 w-full rounded-xl border border-[#CFE3F2] bg-white px-3 text-sm">
                   <option value="other">Other</option>
                   <option value="part_purchase">Part purchase</option>
                   <option value="salary">Salary</option>
@@ -189,9 +189,9 @@ export default function FinancePage() {
                 </select>
               </label>
               <Field label="Amount" value={amount} onChange={setAmount} placeholder="₦0" type="number" />
-              <label className="block text-xs font-bold text-[#53635d]">
+              <label className="block text-xs font-bold text-[#536B83]">
                 Payment method
-                <select value={method} onChange={(event) => setMethod(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
+                <select value={method} onChange={(event) => setMethod(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#CFE3F2] bg-white px-3 text-sm">
                   <option value="cash">Cash</option>
                   <option value="transfer">Transfer</option>
                   <option value="pos">POS</option>
@@ -199,7 +199,7 @@ export default function FinancePage() {
                 </select>
               </label>
               <Field label="Description" value={description} onChange={setDescription} placeholder="e.g. shop electricity" />
-              <button disabled={saving} className="h-11 w-full rounded-xl bg-[#123b34] px-4 text-sm font-bold text-white disabled:opacity-50">
+              <button disabled={saving} className="h-11 w-full rounded-xl bg-[#0B3D91] px-4 text-sm font-bold text-white disabled:opacity-50">
                 {saving ? "Saving…" : "Record movement"}
               </button>
             </form>
@@ -212,18 +212,18 @@ export default function FinancePage() {
 
 function Metric({ label, value, tone = "green" }: { label: string; value: string; tone?: "green" | "red" }) {
   return (
-    <div className="rounded-2xl border border-[#dfe6df] bg-white p-5">
-      <p className="text-xs font-semibold text-[#74837e]">{label}</p>
-      <p className={`mt-2 font-heading text-2xl font-bold ${tone === "red" ? "text-red-700" : "text-[#123b34]"}`}>{value}</p>
+    <div className="rounded-2xl border border-[#CFE3F2] bg-white p-5">
+      <p className="text-xs font-semibold text-[#62788F]">{label}</p>
+      <p className={`mt-2 font-heading text-2xl font-bold ${tone === "red" ? "text-red-700" : "text-[#0B3D91]"}`}>{value}</p>
     </div>
   );
 }
 
 function Field({ label, value, onChange, placeholder, type = "text" }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; type?: string }) {
   return (
-    <label className="block text-xs font-bold text-[#53635d]">
+    <label className="block text-xs font-bold text-[#536B83]">
       {label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} min={type === "number" ? "0" : undefined} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-normal outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" />
+      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} min={type === "number" ? "0" : undefined} className="mt-1 h-11 w-full rounded-xl border border-[#CFE3F2] bg-white px-3 text-sm font-normal outline-none focus:border-[#0B3D91] focus:ring-2 focus:ring-[#0B3D91]/10" />
     </label>
   );
 }
