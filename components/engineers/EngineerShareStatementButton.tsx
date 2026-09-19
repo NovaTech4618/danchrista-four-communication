@@ -21,7 +21,7 @@ function buildStatement(engineer: Engineer, balance: EngineerBalance | undefined
   });
 
   return [
-    "DANCHRISTA FOUR COMMUNICATION — Engineer Account Statement",
+    "AMEZING LIMITED — Engineer Account Statement",
     "",
     `Engineer: ${engineer.name}`,
     engineer.business_name ? `Business: ${engineer.business_name}` : "",
@@ -30,7 +30,7 @@ function buildStatement(engineer: Engineer, balance: EngineerBalance | undefined
     "Recent activity:",
     ...(lines.length ? lines : ["No transactions recorded."]),
     "",
-    "This statement reflects the transactions currently recorded in the Danchrista Four Communication account.",
+    "This statement reflects the transactions currently recorded in the Amezing Limited account.",
   ].filter(Boolean).join("\n");
 }
 
