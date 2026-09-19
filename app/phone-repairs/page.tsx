@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight, BatteryCharging, Smartphone, Wrench, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Phone Repairs | Danchrista Four Communication",
-  description: "Phone repair services from Danchrista Four Communication, including screen, battery, charging and software-related repairs.",
+  title: "Phone Repairs | Amezing Limited",
+  description: "Phone repair services from Amezing Limited, including screen, battery, charging and software-related repairs.",
   alternates: { canonical: "/phone-repairs" },
   robots: { index: true, follow: true },
 };
@@ -28,7 +28,7 @@ export default function PhoneRepairsPage() {
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#e7b784]">Phone repair services</p>
         <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Get your phone working properly again.</h1>
-        <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">Danchrista Four Communication provides practical phone repair and software services, with the job recorded clearly from intake through completion.</p>
+        <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">Amezing Limited provides practical phone repair and software services, with the job recorded clearly from intake through completion.</p>
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {services.map(([title, text, Icon]) => <article key={title as string} className="rounded-2xl border border-white/10 bg-[#101f1a] p-6">
             <Icon className="size-6 text-[#e7b784]" />
@@ -39,7 +39,7 @@ export default function PhoneRepairsPage() {
         <div className="mt-12 rounded-2xl border border-[#c98a4f]/20 bg-[#101f1a] p-7">
           <h2 className="font-heading text-2xl font-bold">Not sure what your phone needs?</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#93a69c]">Bring the device in for assessment. The exact repair, parts requirement and cost can be discussed before work proceeds.</p>
-          <Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Contact Danchrista <ArrowRight className="size-4" /></Link>
+          <Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Contact Amezing <ArrowRight className="size-4" /></Link>
         </div>
       </div>
     </section>
