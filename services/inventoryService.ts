@@ -36,7 +36,7 @@ async function getCompanyId() {
 
 export const inventoryService = {
   async getInventory() {
-    const result = await supabase.from("inventory").select("*").order("item_name", { ascending: true });
+    const result = await supabase.from("inventory").select("*").eq("is_active", true).order("item_name", { ascending: true });
     if (result.error) return result;
     return { ...result, data: await withSignedImages((result.data || []) as InventoryItem[]) };
   },
@@ -46,7 +46,7 @@ export const inventoryService = {
     return { ...result, data: await withSignedImage(result.data as InventoryItem) };
   },
   async getLowStock() {
-    const { data, error } = await supabase.from("inventory").select("id,item_name,quantity,minimum_stock").order("quantity", { ascending: true });
+    const { data, error } = await supabase.from("inventory").select("id,item_name,quantity,minimum_stock").eq("is_active", true).order("quantity", { ascending: true });
     if (error) return { data: null, error };
     return { data: (data || []).filter((i) => i.quantity <= i.minimum_stock).slice(0, 5), error: null };
   },
@@ -56,17 +56,8 @@ export const inventoryService = {
   async updateInventoryItem(id: string, item: InventoryItemInput) {
     return await supabase.from("inventory").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id);
   },
-  async deleteInventoryItem(id: string) {
-    const existing = await supabase.from("inventory").select("image_path").eq("id", id).single();
-    if (existing.error) return existing;
-    const imagePath = existing.data?.image_path || null;
-    const deleted = await supabase.from("inventory").delete().eq("id", id);
-    if (deleted.error) return deleted;
-    if (imagePath) {
-      const { error } = await supabase.storage.from(BUCKET).remove([imagePath]);
-      if (error) return { data: null, error };
-    }
-    return deleted;
+  async deactivateInventoryItem(id: string) {
+    return await supabase.from("inventory").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", id);
   },
   async uploadItemImage(itemId: string, file: File) {
     const validationError = validateImage(file);
