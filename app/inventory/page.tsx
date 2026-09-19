@@ -7,6 +7,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import InventoryForm from "@/components/inventory/InventoryForm";
 import InventoryTable from "@/components/inventory/InventoryTable";
 import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
+import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
 
@@ -186,6 +187,8 @@ export default function InventoryPage() {
           <InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} />
           <PurchaseStockPanel items={items} onSaved={refresh} />
         </section>
+
+        <EngineerPartIssuePanel items={items} onSaved={refresh} />
 
         <section className="overflow-hidden rounded-2xl border border-[#CFE3F2] bg-white shadow-[0_10px_28px_rgba(11,61,145,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#CFE3F2] px-5 py-4">
