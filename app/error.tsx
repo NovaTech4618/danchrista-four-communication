@@ -6,7 +6,7 @@ import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error("Danchrista Four Communication application error:", error);
+    console.error("Amezing Limited application error:", error);
   }, [error]);
 
   return (
@@ -15,7 +15,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-amber-50 text-amber-700">
           <AlertTriangle className="size-6" />
         </div>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Danchrista Four Communication</p>
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Amezing Limited</p>
         <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight">Something went wrong.</h1>
         <p className="mt-3 text-sm leading-7 text-slate-500">
           The workspace hit an unexpected error. Try the page again or return to the dashboard.
