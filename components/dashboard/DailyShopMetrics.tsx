@@ -35,6 +35,6 @@ export default function DailyShopMetrics() {
 }
 
 function Metric({ label, value, hint, icon: Icon, tone = "green" }: { label: string; value: string; hint: string; icon: typeof ShoppingCart; tone?: "green" | "amber" | "red" }) {
-  const toneClass = tone === "red" ? "bg-red-50 text-red-700" : tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-[#EAF7FF] text-[#0B3D91]";
-  return <div className="rounded-2xl border border-[#CFE3F2] bg-white p-5 shadow-[0_8px_24px_rgba(18,59,52,0.05)]"><div className={`flex size-9 items-center justify-center rounded-xl ${toneClass}`}><Icon className="size-4" /></div><p className="mt-4 text-xs font-semibold text-[#62788F]">{label}</p><p className="mt-1 font-heading text-2xl font-bold text-[#102A43]">{value}</p><p className="mt-1 text-[11px] text-[#8AA3BA]">{hint}</p></div>;
+  const toneClass = tone === "red" ? "bg-red-50 text-red-700" : tone === "amber" ? "bg-amber-50 text-amber-700" : "bg-[#eef4f1] text-[#1d6a54]";
+  return <div className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_8px_24px_rgba(18,59,52,0.05)]"><div className={`flex size-9 items-center justify-center rounded-xl ${toneClass}`}><Icon className="size-4" /></div><p className="mt-4 text-xs font-semibold text-[#74837e]">{label}</p><p className="mt-1 font-heading text-2xl font-bold text-[#182a28]">{value}</p><p className="mt-1 text-[11px] text-[#9aa9a4]">{hint}</p></div>;
 }
