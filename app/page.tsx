@@ -65,12 +65,14 @@ export default function HomePage() {
           <Link href="/" aria-label="Danchrista home">
             <DanchristaLogo />
           </Link>
-          <Link
-            href="/login"
-            className="rounded-lg bg-[#c98a4f] px-4 py-2.5 text-sm font-semibold text-[#1a1008] transition hover:bg-[#d69a61]"
-          >
-            Sign in
-          </Link>
+          <div className="hidden items-center gap-5 md:flex">
+            <Link href="/phone-repairs" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Repairs</Link>
+            <Link href="/phone-parts" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Parts</Link>
+            <Link href="/accessories" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Accessories</Link>
+            <Link href="/services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Services</Link>
+            <Link href="/contact" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Contact</Link>
+          </div>
+          <Link href="/login" className="rounded-lg bg-[#c98a4f] px-4 py-2.5 text-sm font-semibold text-[#1a1008] transition hover:bg-[#d69a61]">Sign in</Link>
         </div>
       </nav>
 
@@ -152,9 +154,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="mx-auto flex max-w-6xl justify-between border-t border-white/10 px-5 py-8 text-xs text-[#5c6b64] sm:px-7">
-        <span>Danchrista Four Communication</span>
-        <span>Internal business system</span>
+      <footer className="border-t border-white/10 px-5 py-10 sm:px-7">
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div><span className="font-semibold text-[#f4f1ea]">Danchrista Four Communication</span><span className="ml-3 text-xs text-[#5c6b64]">Phone repairs · Parts · Accessories</span></div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#6b7d74]">
+            <Link href="/about" className="hover:text-[#e7b784]">About</Link><Link href="/services" className="hover:text-[#e7b784]">Services</Link><Link href="/contact" className="hover:text-[#e7b784]">Contact</Link><Link href="/login" className="hover:text-[#e7b784]">Staff sign in</Link>
+          </div>
+        </div>
       </footer>
     </main>
   );
