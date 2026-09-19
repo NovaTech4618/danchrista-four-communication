@@ -1,18 +1,18 @@
-# Danchrista Four Communication — Real Product Map
+# Amezing Limited — Real Product Map
 
 ## Product definition
 
-This is a private business management system for **Danchrista Four Communication Ventures**. It is not a generic repair-shop SaaS.
+This is a private business management system for **Amezing Limited**. It is not a generic repair-shop SaaS.
 
 The rule is simple:
 
-> **The software must follow the way Danchrista already works.**
+> **The software must follow the way Amezing Limited already works.**
 
 The three real records are the foundation:
 
 1. **Sales / accessories book** — what was sold and how much was received.
 2. **Parts book** — what phone parts are in stock, what moved, prices and reorder needs.
-3. **Debit / credit book** — who collected goods and owes Danchrista, and who supplied/left goods with Danchrista and is owed money.
+3. **Debit / credit book** — who collected goods and owes Amezing Limited, and who supplied/left goods with Amezing Limited and is owed money.
 
 Repairs are a separate daily workflow because a repair must follow a phone from intake to collection.
 
@@ -147,7 +147,7 @@ Exceptional states such as No Fix, Failed Repair, Returned Unrepaired and Cancel
 
 ---
 
-## 4. DEBIT — people who owe Danchrista
+## 4. DEBIT — people who owe Amezing Limited
 
 This is a first-class module, not a small part of Sales.
 
@@ -176,7 +176,7 @@ The real daily record is:
 
 ### Owner functions
 
-- See everyone owing Danchrista
+- See everyone owing Amezing Limited
 - See total outstanding
 - Open a person's account
 - Record another item
@@ -190,11 +190,11 @@ A person's account should never be reduced to one balance number; the transactio
 
 ---
 
-## 5. CREDIT — people Danchrista owes
+## 5. CREDIT — people Amezing Limited owes
 
 This is the opposite direction and must remain separate from customer debit.
 
-Danchrista sometimes collects goods from people and needs to pay them later.
+Amezing Limited sometimes collects goods from people and needs to pay them later.
 
 ### The credit record needs
 
@@ -220,7 +220,7 @@ Danchrista sometimes collects goods from people and needs to pay them later.
 
 ### Reminder
 
-The system should support due-date reminders so Danchrista does not forget to pay someone on time.
+The system should support due-date reminders so Amezing Limited does not forget to pay someone on time.
 
 This ledger must not be mixed with customer debit, engineer balances or ordinary shop expenses.
 
@@ -254,7 +254,7 @@ It should answer five questions immediately:
 - Out of stock
 - Fast-moving goods
 - Outstanding customer debit
-- Outstanding Danchrista credit
+- Outstanding Amezing Limited credit
 - Repairs waiting/ready
 - Daily closing
 
@@ -299,9 +299,9 @@ Never confuse:
 
 A sale can create revenue and stock movement without requiring customer information.
 
-A debit creates an amount owed to Danchrista.
+A debit creates an amount owed to Amezing Limited.
 
-A credit creates an amount Danchrista owes someone else.
+A credit creates an amount Amezing Limited owes someone else.
 
 A payment changes a balance; it should not erase the original transaction.
 
@@ -345,7 +345,7 @@ Categories, pictures, stock levels, low-stock alerts, fast-moving analysis and p
 Daily debit entry, accounts, payments, balances and statements.
 
 ### Part 4 — Credit
-People Danchrista owes, goods collected, due dates, payments and reminders.
+People Amezing Limited owes, goods collected, due dates, payments and reminders.
 
 ### Part 5 — Repair completion
 Simple repair lifecycle, payments, collection and parts usage.
@@ -371,6 +371,6 @@ Pictures, responsive UX, search, receipts and other improvements only when they 
 
 Before adding anything, ask:
 
-> **Would a Danchrista worker or owner actually use this during a normal working day?**
+> **Would a Amezing Limited worker or owner actually use this during a normal working day?**
 
 If the answer is no, it does not belong in the core system.

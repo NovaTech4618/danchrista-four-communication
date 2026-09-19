@@ -1,6 +1,6 @@
-# Danchrista Four Communication — Real Workflow
+# Amezing Limited — Real Workflow
 
-This project is a private business system for Danchrista Four Communication Ventures. It is not a generic repair-shop SaaS.
+This project is a private business system for Amezing Limited. It is not a generic repair-shop SaaS.
 
 ## Core rule
 
@@ -88,7 +88,7 @@ Typical statuses:
 
 Do not make repair intake depend on a large customer profile before saving a job.
 
-## 4. Debit — people who owe Danchrista
+## 4. Debit — people who owe Amezing Limited
 
 This is a first-class business ledger, not a small option hidden inside sales.
 
@@ -115,18 +115,18 @@ Future messaging flow:
 - send statement/reminder to WhatsApp
 - keep a record of the message/statement event
 
-## 5. Credit / Payables — people Danchrista owes
+## 5. Credit / Payables — people Amezing Limited owes
 
 This is the opposite direction and must remain separate from debit.
 
-When Danchrista collects goods from someone and has not fully paid them, the system records:
+When Amezing Limited collects goods from someone and has not fully paid them, the system records:
 
 - person/supplier
 - WhatsApp/phone
 - item/goods received
 - value
 - amount already paid
-- balance owed by Danchrista
+- balance owed by Amezing Limited
 - due date
 - payment status
 
@@ -147,8 +147,8 @@ The dashboard should answer five owner questions immediately:
 1. What sold today?
 2. What stock is low or finished?
 3. What goods are moving fast?
-4. Who owes Danchrista?
-5. Who does Danchrista owe?
+4. Who owes Amezing Limited?
+5. Who does Amezing Limited owe?
 
 Quick actions should prioritize:
 
@@ -159,7 +159,7 @@ Quick actions should prioritize:
 
 ## 7. Separation of records
 
-Danchrista has different real-world books. The software must respect that separation:
+Amezing Limited has different real-world books. The software must respect that separation:
 
 - Sales/accessories book
 - Phone-parts/stock book
@@ -180,4 +180,4 @@ The interface should use plain shop language, large obvious actions, minimal req
 
 The UI has been redesigned around this model. The existing financial and inventory foundations should be preserved.
 
-The next deep backend phase is the dedicated debit/credit ledger. It should not be simulated with the existing engineer-only ledger because Danchrista's debit book is broader than engineers.
+The next deep backend phase is the dedicated debit/credit ledger. It should not be simulated with the existing engineer-only ledger because Amezing Limited's debit book is broader than engineers.

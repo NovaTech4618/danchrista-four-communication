@@ -1,10 +1,10 @@
-# Danchrista Financial Model
+# Amezing Limited Financial Model
 
 Status: Phase 1 financial-truth foundation
 
 ## Principle
 
-Danchrista separates economic performance from cash movement. A payment is not new revenue when the underlying sale, repair, engineer charge, or invoice has already created the receivable/revenue event.
+Amezing Limited separates economic performance from cash movement. A payment is not new revenue when the underlying sale, repair, engineer charge, or invoice has already created the receivable/revenue event.
 
 ## Authoritative event mapping
 
@@ -28,7 +28,7 @@ Danchrista separates economic performance from cash movement. A payment is not n
 ## Recognition decisions
 
 ### Sales
-A completed sale row is the revenue event. Its payment method describes how the sale was settled. The current Danchrista model treats sales as immediately settled; a future true customer-credit sale workflow must introduce an explicit receivable/payment event rather than reusing the current cash semantics.
+A completed sale row is the revenue event. Its payment method describes how the sale was settled. The current Amezing Limited model treats sales as immediately settled; a future true customer-credit sale workflow must introduce an explicit receivable/payment event rather than reusing the current cash semantics.
 
 ### Repairs
 The current workflow has `Completed` and `Collected` terminal chargeable states and stores `final_cost` or `estimated_cost`. Repair revenue is recognized from the chargeable repair event, not from repair payments. Cancelled/Returned Unrepaired repairs are not revenue events.
@@ -113,7 +113,7 @@ If a revenue event has no traceable cost, the report must expose that limitation
 
 ## Business timezone
 
-All stored transaction timestamps remain `timestamptz`. Reporting periods and business dates are derived using `companies.timezone`. Danchrista is configured as `Africa/Lagos`. Browser timezone is not authoritative.
+All stored transaction timestamps remain `timestamptz`. Reporting periods and business dates are derived using `companies.timezone`. Amezing Limited is configured as `Africa/Lagos`. Browser timezone is not authoritative.
 
 ## Reporting rule
 

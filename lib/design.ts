@@ -1,4 +1,4 @@
-export const DANCHRISTA = {
+export const AMEZING = {
   colors: {
     primary: "#0F6B4C",
     primaryLight: "#178A61",
