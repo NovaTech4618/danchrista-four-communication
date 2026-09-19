@@ -17,7 +17,7 @@ export default function CustomersPage() {
       <main className="mx-auto w-full max-w-[1500px] space-y-5 p-5 sm:p-6 lg:p-8">
         <header className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-[#087443]">Repair desk</p>
+            <p className="text-sm font-semibold text-[#0B3D91]">Repair desk</p>
             <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Customers</h1>
             <p className="mt-1 text-sm text-slate-500">Keep customer details and repair history easy to find.</p>
           </div>
@@ -26,7 +26,7 @@ export default function CustomersPage() {
         <section className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
           <section className="min-w-0">
             <div className="mb-3 flex items-center gap-2 px-1">
-              <UserPlus className="size-4 text-[#087443]" aria-hidden="true" />
+              <UserPlus className="size-4 text-[#0B3D91]" aria-hidden="true" />
               <h2 className="font-heading text-base font-semibold text-slate-950">{editingCustomer ? "Edit customer" : "New customer"}</h2>
             </div>
             <CustomerForm onCustomerAdded={() => setRefreshKey((prev) => prev + 1)} editingCustomer={editingCustomer} onCancelEdit={() => setEditingCustomer(null)} />
