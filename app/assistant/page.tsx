@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { askAssistant, getAssistantConversation } from "./actions";
 
 type Message = { role: "user" | "assistant"; text: string };
-const CONVERSATION_STORAGE_KEY = "danchrista-assistant-conversation";
+const CONVERSATION_STORAGE_KEY = "amezing-limited-assistant-conversation";
 const suggestions = [
   "Why are sales low today?",
   "Which repairs need attention right now?",

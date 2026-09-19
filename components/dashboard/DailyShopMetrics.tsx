@@ -29,7 +29,7 @@ export default function DailyShopMetrics() {
   return <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <Metric label="Sales today" value={sales === null ? "—" : String(sales)} hint="Walk-in sales recorded" icon={ShoppingCart} />
     <Metric label="Money received" value={summary ? money(summary.cash_today) : "—"} hint="Recorded today" icon={WalletCards} />
-    <Metric label="Owed to Danchrista" value={summary ? money(summary.outstanding_customer) : "—"} hint="Unpaid customer debit" icon={HandCoins} tone="amber" />
+    <Metric label="Owed to Amezing Limited" value={summary ? money(summary.outstanding_customer) : "—"} hint="Unpaid customer debit" icon={HandCoins} tone="amber" />
     <Metric label="Stock attention" value={summary ? String(summary.low_stock_count) : "—"} hint="Low or empty items" icon={AlertTriangle} tone="red" />
   </section>;
 }

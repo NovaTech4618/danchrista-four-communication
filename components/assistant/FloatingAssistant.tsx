@@ -17,7 +17,7 @@ export default function FloatingAssistant() {
                 <Bot className="size-4" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">Danchrista Assistant</p>
+                <p className="truncate text-sm font-semibold">Amezing Limited Assistant</p>
                 <p className="truncate text-[11px] text-slate-300">Shop assistant</p>
               </div>
             </div>
@@ -34,7 +34,7 @@ export default function FloatingAssistant() {
           </div>
         </div>
       )}
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close Danchrista Assistant" : "Open Danchrista Assistant"} className="ml-auto flex size-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-950/20 ring-4 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800">
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close Amezing Limited Assistant" : "Open Amezing Limited Assistant"} className="ml-auto flex size-14 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-950/20 ring-4 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800">
         {open ? <X className="size-5" /> : <Bot className="size-6" />}
       </button>
     </div>
