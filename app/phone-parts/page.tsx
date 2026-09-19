@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Cpu, Package, Search } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Phone Parts | Danchrista Four Communication",
-  description: "Phone parts and replacement components from Danchrista Four Communication, including charging flexes, downboards, back glass and other repair parts.",
+  title: "Phone Parts | Amezing Limited",
+  description: "Phone parts and replacement components from Amezing Limited, including charging flexes, downboards, back glass and other repair parts.",
   alternates: { canonical: "/phone-parts" },
   robots: { index: true, follow: true },
 };
@@ -24,7 +24,7 @@ export default function PhonePartsPage() {
     <section className="px-5 py-16 sm:px-7 sm:py-24"><div className="mx-auto max-w-6xl">
       <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#e7b784]">Phone parts</p>
       <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">The repair part matters as much as the repair.</h1>
-      <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">Danchrista keeps phone replacement parts organized by type and model so technicians can find what they need and customers can get repairs moving.</p>
+      <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">Amezing keeps phone replacement parts organized by type and model so technicians can find what they need and customers can get repairs moving.</p>
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map(([title, text]) => <article key={title} className="rounded-2xl border border-white/10 bg-[#101f1a] p-6"><Package className="size-6 text-[#e7b784]" /><h2 className="mt-5 font-heading text-xl font-bold">{title}</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">{text}</p></article>)}
       </div>
