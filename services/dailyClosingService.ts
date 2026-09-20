@@ -51,6 +51,15 @@ export type DailyClosingPaymentMethod = {
 
 export type PaymentMethodActuals = Record<DailyClosingPaymentMethod["payment_method"], number>;
 
+export type DailyMoneyBuckets = {
+  parts_sales: number;
+  accessories_sales: number;
+  repair_payments: number;
+  transportation_expenses: number;
+  water_expenses: number;
+  other_shop_expenses: number;
+};
+
 export type DailyClosingServiceResult<T = DailyClosing> = {
   data: T | null;
   error: Error | null;
@@ -209,6 +218,19 @@ export const dailyClosingService = {
         : await supabase.rpc("close_daily_closing", { p_daily_closing_id: dailyClosingId, p_actual_cash: actualCash, p_notes: notes?.trim() || null });
       return { data: Array.isArray(result.data) ? result.data[0] ?? null : result.data, error: result.error };
     });
+  },
+
+  async getMoneyBuckets(businessDate: string): Promise<DailyClosingServiceResult<DailyMoneyBuckets>> {
+    try {
+      const authError = await authorize();
+      if (authError) return { data: null, error: authError };
+      const result = await supabase.rpc("get_daily_money_buckets", { p_business_date: businessDate });
+      if (result.error) return { data: null, error: normalizeError(result.error, "Unable to load money buckets.") };
+      const row = Array.isArray(result.data) ? result.data[0] ?? null : result.data;
+      return { data: row as DailyMoneyBuckets | null, error: null };
+    } catch (error) {
+      return { data: null, error: normalizeError(error, "Unable to load money buckets.") };
+    }
   },
 
   async reopen(dailyClosingId: string, reason: string): Promise<DailyClosingServiceResult> {
