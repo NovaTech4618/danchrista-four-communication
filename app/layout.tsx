@@ -5,6 +5,7 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import { RoleRouteGuard } from "@/components/auth/RoleRouteGuard";
+import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
 
 const sora = Sora({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: ["400", "500", "600", "700"] });
@@ -19,13 +20,26 @@ export const metadata: Metadata = {
   description: "Amezing Limited in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   applicationName: "Amezing Limited",
   category: "business",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Amezing Limited",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
+    ],
+    apple: "/icon.svg",
+  },
   verification: {
     google: "USlgSboAgAcCA_YC5xI7KFZI6zcxRRU6IkurLz0GmcM",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#123b34",
+  themeColor: "#0f766e",
   width: "device-width",
   initialScale: 1,
 };
@@ -40,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to main content
         </a>
+        <ServiceWorkerRegistration />
         <TooltipProvider>
           <RoleRouteGuard>{children}</RoleRouteGuard>
           <Toaster richColors position="top-right" />
