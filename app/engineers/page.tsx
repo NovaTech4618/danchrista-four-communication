@@ -336,7 +336,7 @@ export default function EngineersPage() {
 
         <section className="engineer-debit-report hidden print:block">
           <div className="mb-6 border-b pb-4">
-            <h1 className="text-2xl font-bold">NOVATECH — Engineer Debit Statement</h1>
+            <h1 className="text-2xl font-bold">AMEZING — Engineer Debit Statement</h1>
             <p className="mt-1 text-lg font-semibold">Engineer: {selectedEngineer?.name ?? ""}</p>
             <p>Period: {periodLabel}</p>
             {selectedEngineer?.phone && <p>Phone: {selectedEngineer.phone}</p>}
@@ -350,7 +350,7 @@ export default function EngineersPage() {
             <thead><tr className="border-b-2"><th className="p-2 text-left">Date</th><th className="p-2 text-left">Description</th><th className="p-2 text-left">Type</th><th className="p-2 text-right">Debit</th></tr></thead>
             <tbody>{debitTransactions.map((transaction) => <tr key={transaction.id} className="border-b"><td className="p-2">{new Date(transaction.transaction_date).toLocaleDateString()}</td><td className="p-2">{transaction.description}</td><td className="p-2">{transactionLabel[transaction.transaction_type] ?? transaction.transaction_type}</td><td className="p-2 text-right">{money(Number(transaction.debit))}</td></tr>)}</tbody>
           </table>
-          <div className="mt-8 border-t pt-4 text-xs">Generated from NOVATECH Repair Suite • {new Date().toLocaleString()}</div>
+          <div className="mt-8 border-t pt-4 text-xs">Generated from AMEZING Repair Suite • {new Date().toLocaleString()}</div>
         </section>
 
         {showEngineerForm && (
