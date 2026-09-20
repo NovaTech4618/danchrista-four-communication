@@ -80,9 +80,9 @@ function paymentLabel(value: string | null) {
 
 type Filter = "today" | "yesterday" | "week" | "month" | "custom";
 
-type Props = { refreshKey: number };
+type Props = { refreshKey: number; canViewSummary?: boolean };
 
-export default function SalesTable({ refreshKey }: Props) {
+export default function SalesTable({ refreshKey, canViewSummary = true }: Props) {
   const [sales, setSales] = useState<Sale[]>([]);
   const [filter, setFilter] = useState<Filter>("week");
   const [search, setSearch] = useState("");
@@ -91,7 +91,6 @@ export default function SalesTable({ refreshKey }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     saleService.getSales().then(({ data, error }) => {
       if (error) toast.error("Failed to load sales history.");
       else setSales((data || []) as Sale[]);
@@ -142,11 +141,11 @@ export default function SalesTable({ refreshKey }: Props) {
         <div className="border-b border-slate-200 p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div><h2 className="text-xl font-bold tracking-tight text-slate-950">Sales History</h2><p className="mt-1 text-sm text-slate-500">A day-by-day record of what left the shop.</p></div>
-            <div className="grid grid-cols-3 gap-2 sm:min-w-[430px]">
+            {canViewSummary && <div className="grid grid-cols-3 gap-2 sm:min-w-[430px]">
               <div className="rounded-xl bg-slate-50 p-3"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Today</p><p className="mt-1 text-lg font-bold text-slate-950">{money(summary.today)}</p></div>
               <div className="rounded-xl bg-slate-50 p-3"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">This week</p><p className="mt-1 text-lg font-bold text-slate-950">{money(summary.week)}</p></div>
               <div className="rounded-xl bg-slate-50 p-3"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">This month</p><p className="mt-1 text-lg font-bold text-slate-950">{money(summary.month)}</p></div>
-            </div>
+            </div>}
           </div>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -158,14 +157,14 @@ export default function SalesTable({ refreshKey }: Props) {
             <input aria-label="Search sales history" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search item, customer, staff or payment..." className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--amezing-primary)] focus:ring-2 focus:ring-[var(--amezing-primary)]/15" />
             {filter === "custom" && <><input aria-label="Sales from date" type="date" value={from} onChange={e => setFrom(e.target.value)} className="h-10 rounded-lg border border-slate-200 px-3 text-sm" /><input aria-label="Sales to date" type="date" value={to} min={from || undefined} onChange={e => setTo(e.target.value)} className="h-10 rounded-lg border border-slate-200 px-3 text-sm" /></>}
           </div>
-          <div className="mt-3 flex items-center justify-between gap-3 text-sm"><span className="text-slate-500">{filteredSales.length} transaction{filteredSales.length === 1 ? "" : "s"}</span><span className="font-semibold text-slate-900">Period sales: {money(periodTotal)}</span></div>
+          <div className="mt-3 flex items-center justify-between gap-3 text-sm"><span className="text-slate-500">{filteredSales.length} transaction{filteredSales.length === 1 ? "" : "s"}</span>{canViewSummary && <span className="font-semibold text-slate-900">Period sales: {money(periodTotal)}</span>}</div>
         </div>
 
         {loading ? <div className="p-10 text-center text-sm text-slate-500">Loading sales history…</div> : groups.length === 0 ? <div className="p-10 text-center"><p className="font-semibold text-slate-900">No sales in this period</p><p className="mt-1 text-sm text-slate-500">Try another date range or search.</p></div> : <div className="divide-y divide-slate-200">
           {groups.map(([key, daySales]) => {
             const dayTotal = daySales.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
             return <section key={key}>
-              <div className="flex items-center justify-between gap-4 bg-slate-50/80 px-4 py-3 sm:px-5"><div><h3 className="font-semibold text-slate-950">{formatDateHeading(key)}</h3><p className="mt-0.5 text-xs text-slate-500">{daySales.length} transaction{daySales.length === 1 ? "" : "s"}</p></div><div className="text-right"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Daily sales</p><p className="text-lg font-bold text-slate-950">{money(dayTotal)}</p></div></div>
+              <div className="flex items-center justify-between gap-4 bg-slate-50/80 px-4 py-3 sm:px-5"><div><h3 className="font-semibold text-slate-950">{formatDateHeading(key)}</h3><p className="mt-0.5 text-xs text-slate-500">{daySales.length} transaction{daySales.length === 1 ? "" : "s"}</p></div>{canViewSummary && <div className="text-right"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Daily sales</p><p className="text-lg font-bold text-slate-950">{money(dayTotal)}</p></div>}</div>
               <div className="hidden md:block">
                 {daySales.map(sale => { const customer = Array.isArray(sale.customers) ? sale.customers[0] : sale.customers; return <div key={sale.id} className="grid grid-cols-[80px_minmax(220px,1.8fr)_minmax(120px,1fr)_100px_120px_70px] items-center gap-4 border-t border-slate-100 px-4 py-3 text-sm sm:px-5"><span className="font-medium text-slate-500">{new Date(sale.sale_date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span><div className="min-w-0"><p className="truncate font-semibold text-slate-900">{itemNames(sale)}</p><p className="truncate text-xs text-slate-500">{customer?.full_name || "Walk-in"}</p></div><span className="truncate text-slate-600">{sale.staff_name || "—"}</span><Badge variant="secondary" className="w-fit">{paymentLabel(sale.payment_method)}</Badge><span className="text-right font-semibold text-slate-950">{money(sale.total)}</span><Link href={`/sales/${sale.id}`} className="text-right text-sm font-semibold text-teal-700 hover:text-teal-800">View</Link></div>; })}
               </div>
