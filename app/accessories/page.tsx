@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Phone Accessories | Amezing Limited",
   description: "Phone accessories from Amezing Limited, including chargers, cables, earphones, screen protectors, power banks and speakers.",
   alternates: { canonical: "/accessories" },
+  keywords: [
+      "Amezing Limited",
+      "phone accessories Kubwa",
+      "chargers Kubwa",
+      "phone cables Kubwa",
+      "screen protectors Kubwa",
+      "power banks Kubwa",
+      "phone accessories Abuja"
+  ],
   robots: { index: true, follow: true },
 };
 
