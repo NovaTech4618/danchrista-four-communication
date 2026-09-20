@@ -6,9 +6,24 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Amezing",
     description: "Business management for customers, repairs, inventory, sales and finances.",
     start_url: "/dashboard",
+    scope: "/",
     display: "standalone",
     background_color: "#f7f9f8",
     theme_color: "#0f766e",
     orientation: "portrait-primary",
+    icons: [
+      {
+        src: "/icons/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+      {
+        src: "/icons/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+    ],
   };
 }
