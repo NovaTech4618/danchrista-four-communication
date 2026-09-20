@@ -5,51 +5,51 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --novatech-primary: #1d6a54;
-  --novatech-primary-light: #63a28d;
-  --novatech-primary-dark: #123b34;
-  --novatech-amber: #d7a95a;
-  --novatech-amber-soft: #f2d8a5;
-  --novatech-cream: #f6f1e9;
-  --novatech-sand: #e8e0d2;
-  --novatech-ink: #182a28;
-  --novatech-slate: #5b6d68;
-  --novatech-background: #f5f2eb;
-  --novatech-border: #dfe6df;
-  --novatech-success: #2c8a63;
-  --novatech-warning: #d79d39;
-  --novatech-danger: #d14d4d;
-  --novatech-radius-sm: 8px;
-  --novatech-radius-md: 10px;
-  --novatech-radius-lg: 12px;
-  --novatech-shadow-card: 0 8px 25px rgba(18, 59, 52, 0.08);
-  --background: var(--novatech-background);
-  --foreground: var(--novatech-ink);
+  --amezing-primary: #1d6a54;
+  --amezing-primary-light: #63a28d;
+  --amezing-primary-dark: #123b34;
+  --amezing-amber: #d7a95a;
+  --amezing-amber-soft: #f2d8a5;
+  --amezing-cream: #f6f1e9;
+  --amezing-sand: #e8e0d2;
+  --amezing-ink: #182a28;
+  --amezing-slate: #5b6d68;
+  --amezing-background: #f5f2eb;
+  --amezing-border: #dfe6df;
+  --amezing-success: #2c8a63;
+  --amezing-warning: #d79d39;
+  --amezing-danger: #d14d4d;
+  --amezing-radius-sm: 8px;
+  --amezing-radius-md: 10px;
+  --amezing-radius-lg: 12px;
+  --amezing-shadow-card: 0 8px 25px rgba(18, 59, 52, 0.08);
+  --background: var(--amezing-background);
+  --foreground: var(--amezing-ink);
   --card: #fffdf9;
-  --card-foreground: var(--novatech-ink);
+  --card-foreground: var(--amezing-ink);
   --popover: #ffffff;
-  --popover-foreground: var(--novatech-ink);
-  --primary: var(--novatech-primary);
+  --popover-foreground: var(--amezing-ink);
+  --primary: var(--amezing-primary);
   --primary-foreground: #ffffff;
   --secondary: #edf3ef;
-  --secondary-foreground: var(--novatech-ink);
+  --secondary-foreground: var(--amezing-ink);
   --muted: #f1efe9;
-  --muted-foreground: var(--novatech-slate);
+  --muted-foreground: var(--amezing-slate);
   --accent: #ecf5f1;
-  --accent-foreground: var(--novatech-primary-dark);
-  --destructive: var(--novatech-danger);
-  --border: var(--novatech-border);
+  --accent-foreground: var(--amezing-primary-dark);
+  --destructive: var(--amezing-danger);
+  --border: var(--amezing-border);
   --input: #ebefe6;
-  --ring: var(--novatech-primary);
+  --ring: var(--amezing-primary);
   --radius: 0.75rem;
   --sidebar: #123b34;
   --sidebar-foreground: #edf3ef;
-  --sidebar-primary: var(--novatech-amber);
+  --sidebar-primary: var(--amezing-amber);
   --sidebar-primary-foreground: #123b34;
   --sidebar-accent: #184b43;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255,255,255,0.08);
-  --sidebar-ring: var(--novatech-amber);
+  --sidebar-ring: var(--amezing-amber);
 }
 
 @theme inline {
@@ -133,20 +133,20 @@
   position: relative;
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: var(--novatech-shadow-card);
+  box-shadow: var(--amezing-shadow-card);
   overflow: hidden;
 }
 
-.nova-gradient-text { color: var(--novatech-primary-dark); }
-.nova-gradient-border { border: 1px solid var(--novatech-border); background: var(--card); }
-.nova-soft-shadow { box-shadow: var(--novatech-shadow-card); }
-.nova-lift { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease; }
-.nova-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(18, 59, 52, 0.12); }
-.nova-fade-up { animation: nova-fade-up 450ms ease-out both; }
-.nova-delay-1 { animation-delay: 60ms; }
-.nova-delay-2 { animation-delay: 120ms; }
-.nova-delay-3 { animation-delay: 180ms; }
-.nova-wave { clip-path: none; }
+.amez-gradient-text { color: var(--amezing-primary-dark); }
+.amez-gradient-border { border: 1px solid var(--amezing-border); background: var(--card); }
+.amez-soft-shadow { box-shadow: var(--amezing-shadow-card); }
+.amez-lift { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease, transform 180ms ease; }
+.amez-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(18, 59, 52, 0.12); }
+.amez-fade-up { animation: amez-fade-up 450ms ease-out both; }
+.amez-delay-1 { animation-delay: 60ms; }
+.amez-delay-2 { animation-delay: 120ms; }
+.amez-delay-3 { animation-delay: 180ms; }
+.amez-wave { clip-path: none; }
 
 .neo-page {
   background: linear-gradient(180deg, #f6f1e9 0%, #eef3ef 100%);
@@ -175,26 +175,26 @@
 .neo-button:hover { transform: translateY(-2px); box-shadow: 0 16px 28px rgba(18,59,52,0.12); }
 .neo-button:active { transform: translateY(0); box-shadow: inset 2px 4px 10px rgba(18,59,52,0.08); }
 
-@keyframes nova-fade-up {
+@keyframes amez-fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .control {
   width: 100%; min-width: 0; margin-top: 0.5rem;
-  border-radius: var(--novatech-radius-md); border: 1px solid #dfe5df;
+  border-radius: var(--amezing-radius-md); border: 1px solid #dfe5df;
   background: #fff; padding: 0.72rem 0.9rem; color: #102620; box-shadow: none;
   transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out;
 }
 .control::placeholder { color: #7d8f88; }
 .control:hover { border-color: #c6d0c9; }
-.control:focus { border-color: var(--novatech-primary); background: #fff; box-shadow: 0 0 0 3px rgba(29, 106, 84, 0.12); outline: none; }
+.control:focus { border-color: var(--amezing-primary); background: #fff; box-shadow: 0 0 0 3px rgba(29, 106, 84, 0.12); outline: none; }
 .icon + .control { padding-left: 3rem !important; }
 .icon { pointer-events: none; position: absolute; left: 0.9rem; top: calc(50% + 0.25rem); width: 1rem; height: 1rem; transform: translateY(-50%); color: #7d8f88; z-index: 1; }
 button[aria-label="Show password"], button[aria-label="Hide password"] { top: calc(50% + 0.25rem) !important; }
 input, textarea, select { color-scheme: light; min-width: 0; }
 button, a, input, textarea, select { transition-property: color, background-color, border-color, box-shadow, opacity, transform; transition-duration: 150ms; transition-timing-function: ease-out; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--novatech-primary); outline-offset: 2px; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--amezing-primary); outline-offset: 2px; }
 button:disabled { opacity: 0.55; }
 
 @media (max-width: 640px) {
