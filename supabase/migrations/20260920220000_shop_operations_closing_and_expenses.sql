@@ -109,3 +109,77 @@ revoke execute on function public.record_shop_expense(date,text,numeric,text,tex
 grant execute on function public.record_shop_expense(date,text,numeric,text,text) to authenticated;
 
 comment on table public.shop_expenses is 'Operational shop expenses recorded by owner/apprentice; financial_transactions remains the accounting source of truth.';
+
+
+create or replace function public.get_daily_money_buckets(
+  p_business_date date
+)
+returns table(
+  parts_sales numeric,
+  accessories_sales numeric,
+  repair_payments numeric,
+  transportation_expenses numeric,
+  water_expenses numeric,
+  other_shop_expenses numeric
+)
+language plpgsql
+security definer
+stable
+set search_path = ''
+as $function$
+declare
+  v_company uuid := public.get_my_company_id();
+  v_timezone text;
+  v_start timestamptz;
+  v_end timestamptz;
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if not public.has_permission('profit') then raise exception 'Permission denied'; end if;
+  if v_company is null then raise exception 'Company not found'; end if;
+
+  select coalesce(c.timezone,'Africa/Lagos') into v_timezone
+  from public.companies c where c.id=v_company;
+  v_start := (p_business_date::text||' 00:00:00')::timestamp at time zone v_timezone;
+  v_end := ((p_business_date+1)::text||' 00:00:00')::timestamp at time zone v_timezone;
+
+  return query
+  with item_totals as (
+    select
+      si.sale_id,
+      sum(si.total_price) as subtotal,
+      sum(si.total_price) filter(where i.item_type='part') as parts_amount,
+      sum(si.total_price) filter(where i.item_type in ('accessory','gadget')) as accessories_amount
+    from public.sale_items si
+    join public.inventory i on i.id=si.inventory_id
+    group by si.sale_id
+  ),
+  allocated_sales as (
+    select
+      s.total,
+      coalesce(it.parts_amount,0) as parts_amount,
+      coalesce(it.accessories_amount,0) as accessories_amount,
+      greatest(coalesce(it.subtotal,0),0) as item_subtotal
+    from public.sales s
+    join item_totals it on it.sale_id=s.id
+    where s.company_id=v_company
+      and s.sale_date>=v_start and s.sale_date<v_end
+  )
+  select
+    coalesce(sum(case when item_subtotal>0 then total * parts_amount / item_subtotal else 0 end),0),
+    coalesce(sum(case when item_subtotal>0 then total * accessories_amount / item_subtotal else 0 end),0),
+    coalesce((select sum(f.amount) from public.financial_transactions f
+      where f.company_id=v_company and f.direction='in' and f.category='repair_payment'
+        and f.occurred_at>=v_start and f.occurred_at<v_end),0),
+    coalesce((select sum(e.amount) from public.shop_expenses e
+      where e.company_id=v_company and e.business_date=p_business_date and e.category='transportation'),0),
+    coalesce((select sum(e.amount) from public.shop_expenses e
+      where e.company_id=v_company and e.business_date=p_business_date and e.category='water'),0),
+    coalesce((select sum(e.amount) from public.shop_expenses e
+      where e.company_id=v_company and e.business_date=p_business_date and e.category='other'),0)
+  from allocated_sales;
+end;
+$function$;
+
+revoke execute on function public.get_daily_money_buckets(date) from public;
+revoke execute on function public.get_daily_money_buckets(date) from anon;
+grant execute on function public.get_daily_money_buckets(date) to authenticated;
