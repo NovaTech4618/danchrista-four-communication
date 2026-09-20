@@ -9,6 +9,8 @@ import InventoryTable from "@/components/inventory/InventoryTable";
 import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
 import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
 import { inventoryService } from "@/services/inventoryService";
+import { staffService } from "@/services/staffService";
+import type { StaffRole } from "@/types/staff";
 import type { InventoryItem } from "@/types/inventory";
 
 type Shelf = "all" | "parts" | "accessories";
@@ -39,6 +41,8 @@ function money(n: number) {
 
 export default function InventoryPage() {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [myRole, setMyRole] = useState<StaffRole | null>(null);
+  const isOwner = myRole === "owner";
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [shelf, setShelf] = useState<Shelf>("all");
@@ -48,6 +52,7 @@ export default function InventoryPage() {
   const [stockFilter, setStockFilter] = useState<"all"|"ok"|"low"|"out">("all");
 
   useEffect(() => {
+    void staffService.getMyRole().then(({ data }) => setMyRole(data));
     inventoryService.getInventory().then(({ data, error }) => {
       if (!error) setItems((data || []) as InventoryItem[]);
     });
@@ -90,8 +95,8 @@ export default function InventoryPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>
-            <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>
-            <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>
+            {isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>}
+            {isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>}
           </div>
         </header>
 
@@ -100,11 +105,11 @@ export default function InventoryPage() {
           <SummaryCard title="Phone parts" value={parts.length} detail="Repair parts" active={shelf === "parts"} onClick={() => { setShelf("parts"); setCategory(null); setBrand(null); }} />
           <SummaryCard title="Accessories" value={accessories.length} detail="Shop accessories" active={shelf === "accessories"} onClick={() => { setShelf("accessories"); setCategory(null); setBrand(null); }} />
           <SummaryCard title="Low stock" value={low.length} detail="At reorder level" tone="amber" onClick={() => { setStockFilter("low"); setCategory(null); setBrand(null); }} />
-          <div className="rounded-2xl border border-[#dfe6df] bg-[#1d6a54] p-4 text-white">
+          {isOwner && <div className="rounded-2xl border border-[#dfe6df] bg-[#1d6a54] p-4 text-white">
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#d7a95a]">Stock at cost</p>
             <p className="mt-2 font-heading text-xl font-bold">{money(stockValue)}</p>
             <p className="mt-1 text-[11px] text-[#c7d8d2]">Current stock value</p>
-          </div>
+          </div>}
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
@@ -184,19 +189,19 @@ export default function InventoryPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-2">
+        {isOwner && <section className="grid gap-6 xl:grid-cols-2">
           <InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} />
           <PurchaseStockPanel items={items} onSaved={refresh} />
-        </section>
+        </section>}
 
-        <EngineerPartIssuePanel items={items} onSaved={refresh} />
+        {isOwner && <EngineerPartIssuePanel items={items} onSaved={refresh} />}
 
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe6df] px-5 py-4">
             <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Products</h2></div>
             {category && <span className="rounded-full bg-[#eef4f1] px-3 py-1 text-xs font-semibold text-[#1d6a54]">{category}{brand ? ` · ${brand === "__other" ? "Other / unbranded" : brand}` : ""}</span>}
           </div>
-          <InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={visibleItems} embedded />
+          <InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={visibleItems} embedded showActions={isOwner} />
         </section>
       </main>
     </AppLayout>
