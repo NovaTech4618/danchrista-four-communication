@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   title: "About Amezing Limited",
   description: "Learn about Amezing Limited and its focus on phone repairs, parts, accessories and organized business service.",
   alternates: { canonical: "/about" },
+  keywords: [
+      "Amezing Limited",
+      "Amezing Limited Kubwa",
+      "phone repair business Kubwa",
+      "phone parts Kubwa",
+      "phone accessories Kubwa"
+  ],
   robots: { index: true, follow: true },
 };
 
