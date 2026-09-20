@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BatteryCharging, Cable, Clock3, MapPin, MessageCircle, Package, Smartphone, Wrench } from "lucide-react";
-import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
+import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  "https://danchrista-four-communication-nova-tech-repair-suite.vercel.app";
+  "https://amezing-limited.vercel.app";
 
 export const metadata: Metadata = {
   title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
@@ -94,7 +94,7 @@ export default function HomePage() {
       <nav className="border-b border-white/10 bg-[#0b1512]/95 backdrop-blur-xl">
         <div className="mx-auto flex min-h-[72px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-7">
           <Link href="/" aria-label="Amezing home">
-            <DanchristaLogo />
+            <AmezingLogo />
           </Link>
 
           <div className="hidden items-center gap-5 md:flex">
