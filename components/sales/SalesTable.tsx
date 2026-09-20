@@ -155,7 +155,7 @@ export default function SalesTable({ refreshKey }: Props) {
           </div>
 
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-            <input aria-label="Search sales history" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search item, customer, staff or payment..." className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--novatech-primary)] focus:ring-2 focus:ring-[var(--novatech-primary)]/15" />
+            <input aria-label="Search sales history" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search item, customer, staff or payment..." className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[var(--amezing-primary)] focus:ring-2 focus:ring-[var(--amezing-primary)]/15" />
             {filter === "custom" && <><input aria-label="Sales from date" type="date" value={from} onChange={e => setFrom(e.target.value)} className="h-10 rounded-lg border border-slate-200 px-3 text-sm" /><input aria-label="Sales to date" type="date" value={to} min={from || undefined} onChange={e => setTo(e.target.value)} className="h-10 rounded-lg border border-slate-200 px-3 text-sm" /></>}
           </div>
           <div className="mt-3 flex items-center justify-between gap-3 text-sm"><span className="text-slate-500">{filteredSales.length} transaction{filteredSales.length === 1 ? "" : "s"}</span><span className="font-semibold text-slate-900">Period sales: {money(periodTotal)}</span></div>
