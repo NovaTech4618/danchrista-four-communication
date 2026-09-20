@@ -91,7 +91,6 @@ export default function SalesTable({ refreshKey, canViewSummary = true }: Props)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     saleService.getSales().then(({ data, error }) => {
       if (error) toast.error("Failed to load sales history.");
       else setSales((data || []) as Sale[]);
