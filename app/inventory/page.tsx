@@ -89,6 +89,7 @@ export default function InventoryPage() {
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">One place for every product, phone part, quantity and stock movement.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>
             <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>
             <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>
           </div>
