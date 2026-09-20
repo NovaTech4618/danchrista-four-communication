@@ -30,6 +30,6 @@ export default function DashboardCard({ title, value, icon: Icon, color, label, 
     </>
   );
 
-  const className = "group block rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 hover:bg-slate-[1%] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]";
+  const className = "group block rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--amezing-shadow-card)] transition-colors hover:border-slate-300 hover:bg-slate-[1%] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]";
   return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
 }
