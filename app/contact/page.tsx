@@ -7,6 +7,15 @@ export const metadata: Metadata = {
   description:
     "Contact Amezing Limited in Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
   alternates: { canonical: "/contact" },
+  keywords: [
+      "Amezing Limited",
+      "Amezing Limited Kubwa",
+      "contact phone repair Kubwa",
+      "phone repair Kubwa",
+      "phone parts Kubwa",
+      "phone accessories Kubwa",
+      "Central Market Kubwa"
+  ],
   robots: { index: true, follow: true },
 };
 
