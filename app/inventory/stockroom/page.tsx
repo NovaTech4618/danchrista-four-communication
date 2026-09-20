@@ -11,16 +11,25 @@ import type { InventoryItem } from "@/types/inventory";
 type Shelf = "all" | "parts" | "accessories";
 type StockFilter = "all" | "healthy" | "low" | "out";
 
-const PARTS = [
-  { name: "Downboards", description: "Charging boards and lower boards", icon: Smartphone },
-  { name: "Charging Flex", description: "Charging and USB flexes", icon: Cable },
-  { name: "Power Flex", description: "Power and side-button flexes", icon: BatteryCharging },
-  { name: "Earpiece Flex", description: "Earpiece and speaker flexes", icon: Headphones },
-  { name: "Back Glass", description: "Back glass and phone covers", icon: Smartphone },
-  { name: "Other Phone Parts", description: "Other workshop repair parts", icon: Package },
+const PART_GROUPS = [
+  { name: "Displays", description: "LCD, OLED and replacement screens", matches: ["Displays"], icon: Smartphone },
+  { name: "Charging & Power", description: "Downboards, charging flexes and power flexes", matches: ["Downboards", "Charging Flex", "Power Flex", "Charging", "Power"], icon: Cable },
+  { name: "Audio", description: "Earpiece, speaker and audio flex parts", matches: ["Earpiece Flex", "Audio"], icon: Headphones },
+  { name: "Housing & Glass", description: "Back glass, housings and covers", matches: ["Back Glass", "Housing", "Back Glass/Housing"], icon: Smartphone },
+  { name: "Camera", description: "Camera modules and camera flex parts", matches: ["Camera"], icon: Smartphone },
+  { name: "Batteries", description: "Replacement phone batteries", matches: ["Batteries", "Battery"], icon: BatteryCharging },
+  { name: "Other Phone Parts", description: "Any workshop part outside the main shelves", matches: ["Other Phone Parts", "Other"], icon: Package },
 ] as const;
 
-const ACCESSORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Screen Protectors", "Other Accessories"];
+const ACCESSORY_GROUPS = [
+  { name: "Charging", description: "Chargers, cables and charging accessories", matches: ["Chargers", "Cables"], icon: Cable },
+  { name: "Audio", description: "Earphones, headsets and speakers", matches: ["Earphones", "Headsets", "Speakers"], icon: Headphones },
+  { name: "Power", description: "Power banks and portable power", matches: ["Power Banks"], icon: BatteryCharging },
+  { name: "Protection", description: "Screen protectors and phone protection", matches: ["Screen Protectors"], icon: Smartphone },
+  { name: "Wearables", description: "Smartwatches and wearable gadgets", matches: ["Smartwatches"], icon: Package },
+  { name: "Other Accessories", description: "Other counter goods", matches: ["Other Accessories", "Other"], icon: Package },
+] as const;
+
 
 function groupFor(item: InventoryItem): Shelf {
   return item.item_type === "part" || item.category === "Phone Parts" ? "parts" : "accessories";
@@ -31,6 +40,10 @@ function stateFor(item: InventoryItem): Exclude<StockFilter, "all"> {
   if (quantity === 0) return "out";
   if (quantity <= Number(item.minimum_stock || 0)) return "low";
   return "healthy";
+}
+function matchesGroup(item: InventoryItem, matches: readonly string[]) {
+  const value = (item.subcategory || item.category || "").toLowerCase();
+  return matches.some(match => value === match.toLowerCase());
 }
 
 function money(value: number) {
@@ -59,15 +72,16 @@ export default function StockroomPage() {
   const out = items.filter(item => stateFor(item) === "out");
   const stockValue = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.cost_price || 0), 0);
 
+  const selectedGroup = [...PART_GROUPS, ...ACCESSORY_GROUPS].find(group => group.name === category);
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return items.filter(item => {
       const searchable = [item.item_name, item.brand, item.compatible_models, item.sku, item.subcategory, item.category].filter(Boolean).join(" ").toLowerCase();
-      const categoryMatch = !category || item.subcategory === category || item.category === category;
+      const categoryMatch = !selectedGroup || matchesGroup(item, selectedGroup.matches);
       const filterMatch = filter === "all" || stateFor(item) === filter;
       return (!needle || searchable.includes(needle)) && (shelf === "all" || groupFor(item) === shelf) && categoryMatch && filterMatch;
     });
-  }, [items, shelf, category, query, filter]);
+  }, [items, shelf, selectedGroup, query, filter]);
 
   const title = category || (shelf === "parts" ? "Phone Parts" : shelf === "accessories" ? "Gadgets & Accessories" : "All Stock");
 
@@ -98,7 +112,7 @@ export default function StockroomPage() {
           <Metric label="All items" value={items.length} onClick={() => reset()} />
           <Metric label="Phone parts" value={parts.length} active={shelf === "parts" && !category} onClick={() => { setShelf("parts"); setCategory(null); }} />
           <Metric label="Accessories" value={accessories.length} active={shelf === "accessories" && !category} onClick={() => { setShelf("accessories"); setCategory(null); }} />
-          <Metric label="Low stock" value={low.length} tone="amber" onClick={() => setFilter("low")} />
+          <Metric label="Low stock" value={low.length} tone="amber" onClick={() => { setFilter("low"); setCategory(null); }} />
           <div className="rounded-2xl border border-[#dfe6df] bg-[#123b34] p-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#d7a95a]">Stock at cost</p><p className="mt-2 font-heading text-xl font-bold">{money(stockValue)}</p><p className="mt-1 text-[11px] text-[#c7d8d2]">{out.length} currently empty</p></div>
         </section>
 
@@ -117,13 +131,13 @@ export default function StockroomPage() {
 
           {!category && shelf === "parts" && (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PARTS.map(({ name, description, icon: Icon }) => <Category key={name} name={name} count={parts.filter(item => item.subcategory === name).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
+              {PART_GROUPS.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={parts.filter(item => matchesGroup(item, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
             </div>
           )}
 
           {!category && shelf === "accessories" && (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ACCESSORIES.map(name => <Category key={name} name={name} count={accessories.filter(item => item.subcategory === name || item.category === name).length} description="Open this shelf" icon={Package} onClick={() => setCategory(name)} />)}
+              {ACCESSORY_GROUPS.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={accessories.filter(item => matchesGroup(item, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
             </div>
           )}
 
@@ -139,14 +153,14 @@ export default function StockroomPage() {
           <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px]">
             <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" /><input aria-label="Search stockroom" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search product, model, brand or SKU..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" /></div>
             <select aria-label="Stock filter" value={filter} onChange={event => setFilter(event.target.value as StockFilter)} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm"><option value="all">All stock</option><option value="healthy">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option></select>
-            <button type="button" onClick={() => setFilter("out")} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Empty stock ({out.length})</button>
+            <button type="button" onClick={() => { setFilter("out"); setCategory(null); }} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Empty stock ({out.length})</button>
           </div>
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#74837e]"><span><strong className="text-[#182a28]">{visible.length}</strong> items shown</span>{category && <span>· {category}</span>}{query && <span>· “{query}”</span>}</div>
         </section>
 
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
           <div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">{title}</h2></div><span className="text-xs font-semibold text-[#74837e]">{visible.length} shown</span></div>
-          <InventoryTable refreshKey={refreshKey} onEdit={() => {}} itemsOverride={visible} embedded />
+          <InventoryTable refreshKey={refreshKey} onEdit={() => {}} itemsOverride={visible} embedded showActions={false} />
         </section>
       </main>
     </AppLayout>
