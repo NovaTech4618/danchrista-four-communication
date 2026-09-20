@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // NOTE: this is an animated illustration, not a real product screenshot.
 // "No real product demo" is one of the most common tells that a site was
 // vibe-coded rather than built around an actual working product - and
-// NOVATECH has a real, working app behind this landing page. Replacing
+// AMEZING has a real, working app behind this landing page. Replacing
 // this component with an actual screen recording or screenshot of the
 // live dashboard would be a stronger, more honest fix than anything that
 // can be done to this mockup - I can't capture that myself (no browser
@@ -33,7 +33,7 @@ export default function RepairStoryVideo() {
   return (
     <div
       className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.75rem] bg-slate-950 shadow-[0_30px_90px_-45px_rgba(15,23,42,0.7)] sm:aspect-[16/10] lg:aspect-[4/3]"
-      aria-label="NOVATECH repair workflow preview"
+      aria-label="AMEZING repair workflow preview"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(45,212,191,0.24),transparent_30%),radial-gradient(circle_at_15%_80%,rgba(20,184,166,0.12),transparent_32%),linear-gradient(135deg,#0f172a,#111827)]" />
       <div className="absolute -right-20 -top-20 size-64 rounded-full bg-teal-400/6 blur-3xl" />
@@ -41,7 +41,7 @@ export default function RepairStoryVideo() {
 
       <div className="relative flex h-full flex-col p-5 sm:p-8">
         <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 sm:text-xs">
-          <span>NOVATECH repair story</span>
+          <span>AMEZING repair story</span>
           <span className="inline-flex items-center gap-2 text-teal-300">
             <span className="size-1.5 rounded-full bg-teal-300 motion-safe:animate-pulse" />
             Live workflow
