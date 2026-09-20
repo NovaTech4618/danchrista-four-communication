@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Phone Repairs | Amezing Limited",
   description: "Phone repair services from Amezing Limited, including screen, battery, charging and software-related repairs.",
   alternates: { canonical: "/phone-repairs" },
+  keywords: [
+      "\"Amezing Limited\"",
+      "phone repair Kubwa",
+      "phone repair in Kubwa",
+      "phone screen repair Kubwa",
+      "phone battery replacement Kubwa",
+      "phone charging repair Kubwa",
+      "phone repair Abuja"
+  ],
   robots: { index: true, follow: true },
 };
 
