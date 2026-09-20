@@ -3,7 +3,6 @@
 ## Identity — DO NOT CHANGE
 This is a private business management system for **Amezing Limited**, the user's boss's real shop.
 
-It is NOT NOVATECH.
 It is NOT SaaS.
 It is NOT multi-tenant.
 It does NOT need multiple branches.
