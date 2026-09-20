@@ -11,7 +11,7 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: [
 const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const siteUrl = configuredSiteUrl || "https://danchrista-four-communication-nova-tech-repair-suite.vercel.app";
+const siteUrl = configuredSiteUrl || "https://amezing-limited.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-w-0 overflow-x-hidden">
         <a
           href="#main-content"
-          className="sr-only fixed left-3 top-3 z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--danchrista-primary)]"
+          className="sr-only fixed left-3 top-3 z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--amezing-primary)]"
         >
           Skip to main content
         </a>
