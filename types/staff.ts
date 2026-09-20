@@ -1,8 +1,6 @@
 export const STAFF_ROLES = [
   "owner",
-  "branch_manager",
-  "technician",
-  "front_desk",
+  "apprentice",
 ] as const;
 
 export type StaffRole = (typeof STAFF_ROLES)[number];
@@ -49,6 +47,6 @@ export type StaffInvitation = {
 
 export type StaffInvitationInput = {
   email: string;
-  role: Exclude<StaffRole, "owner">;
+  role: "apprentice";
   branch_ids: string[];
 };
