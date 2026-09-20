@@ -183,3 +183,98 @@ $function$;
 revoke execute on function public.get_daily_money_buckets(date) from public;
 revoke execute on function public.get_daily_money_buckets(date) from anon;
 grant execute on function public.get_daily_money_buckets(date) to authenticated;
+
+
+create or replace function public.open_daily_closing(
+  p_business_date date,
+  p_initial_opening_cash numeric default null
+)
+returns public.daily_closings
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_user uuid := auth.uid();
+  v_company uuid;
+  v_timezone text;
+  v_previous public.daily_closings;
+  v_existing public.daily_closings;
+  v_opening numeric;
+  v_source text;
+  v_source_id uuid;
+  v_row public.daily_closings;
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+  if not public.has_permission('daily_closing.reconcile') then raise exception 'Permission denied'; end if;
+  if p_business_date is null then raise exception 'Business date is required'; end if;
+
+  select company_id into v_company
+  from public.profiles
+  where id=v_user and is_active=true;
+  if v_company is null then raise exception 'Active company profile required'; end if;
+
+  select coalesce(timezone,'Africa/Lagos') into v_timezone
+  from public.companies where id=v_company;
+  if v_timezone is null then raise exception 'Company not found'; end if;
+  if p_business_date > ((now() at time zone v_timezone)::date) then
+    raise exception 'Cannot open a future business date';
+  end if;
+
+  select * into v_existing
+  from public.daily_closings
+  where company_id=v_company and business_date=p_business_date
+  for update;
+  if found then
+    if v_existing.status='closed' then raise exception 'Business date is already closed'; end if;
+    return v_existing;
+  end if;
+
+  if exists (
+    select 1 from public.daily_closings d
+    where d.company_id=v_company
+      and d.status='open'
+      and d.business_date < p_business_date
+  ) then
+    raise exception 'An earlier business day is still open. Close it before opening a newer day.';
+  end if;
+
+  select * into v_previous
+  from public.daily_closings
+  where company_id=v_company and status='closed' and business_date < p_business_date
+  order by business_date desc limit 1;
+
+  if v_previous.id is not null then
+    v_opening := v_previous.actual_cash;
+    v_source := 'previous_closing';
+    v_source_id := v_previous.id;
+    if v_opening is null then raise exception 'Previous closing has no actual cash'; end if;
+    if p_initial_opening_cash is not null and round(p_initial_opening_cash,2) <> round(v_opening,2) then
+      raise exception 'Opening cash must equal previous closing actual cash: %', v_opening;
+    end if;
+  else
+    if p_initial_opening_cash is null then raise exception 'Initial opening cash is required'; end if;
+    if p_initial_opening_cash < 0 then raise exception 'Opening cash cannot be negative'; end if;
+    v_opening := round(p_initial_opening_cash,2);
+    v_source := 'initial_manual';
+    v_source_id := null;
+  end if;
+
+  insert into public.daily_closings(
+    company_id,business_date,status,opening_cash,opening_cash_source,
+    opening_cash_source_closing_id,created_by
+  )
+  values(v_company,p_business_date,'open',v_opening,v_source,v_source_id,v_user)
+  returning * into v_row;
+  return v_row;
+exception when unique_violation then
+  select * into v_row from public.daily_closings
+  where company_id=v_company and business_date=p_business_date;
+  if v_row.status='closed' then raise exception 'Business date is already closed'; end if;
+  return v_row;
+end;
+$function$;
+
+revoke execute on function public.open_daily_closing(date,numeric) from public;
+revoke execute on function public.open_daily_closing(date,numeric) from anon;
+grant execute on function public.open_daily_closing(date,numeric) to authenticated;
