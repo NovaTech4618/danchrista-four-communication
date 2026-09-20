@@ -45,6 +45,13 @@ const businessSchema = {
   telephone: "+2348035902087",
   description:
     "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
+  serviceType: [
+    "Mobile phone repair",
+    "Phone parts",
+    "Phone accessories",
+    "Phone software service",
+  ],
+  hasMap: "https://www.google.com/maps/search/?api=1&query=Central+Market+Kubwa+Abuja",
   address: {
     "@type": "PostalAddress",
     streetAddress: "Central Market",

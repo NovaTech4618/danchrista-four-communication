@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   title: "Services | Amezing Limited",
   description: "Explore phone repair, software service, phone parts, accessories and shop support from Amezing Limited.",
   alternates: { canonical: "/services" },
+  keywords: [
+      "Amezing Limited",
+      "phone services Kubwa",
+      "phone repair Kubwa",
+      "phone parts Kubwa",
+      "phone accessories Kubwa",
+      "phone services Abuja"
+  ],
   robots: { index: true, follow: true },
 };
 
