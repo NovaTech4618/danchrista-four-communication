@@ -7,9 +7,7 @@ export type Permission =
 
 const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
   owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings","help"],
-  branch_manager: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","help"],
-  front_desk: ["dashboard","repairs","sales","mobile_sales","invoices","customers","engineer_work","outstanding","whatsapp","search","help"],
-  technician: ["dashboard","repairs","customers","help"],
+  apprentice: ["repairs","sales","inventory","customers","payments","help"],
 };
 
 export function hasPermission(role: StaffRole | null | undefined, permission: Permission) {
@@ -38,5 +36,5 @@ export function permissionForPath(pathname: string): Permission | null {
 }
 
 export const DEFAULT_ROLE_PATH: Record<StaffRole, string> = {
-  owner: "/dashboard", branch_manager: "/dashboard", front_desk: "/engineer-workflow", technician: "/repairs",
+  owner: "/dashboard", apprentice: "/repairs",
 };
