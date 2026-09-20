@@ -1,5 +1,5 @@
 const CACHE_NAME = "amezing-shell-v1";
-const PRECACHE_URLS = ["/offline.html", "/icons/icon-192x192.png", "/icons/icon-512x512.png"];
+const PRECACHE_URLS = ["/offline.html", "/icons/icon-192x192.svg", "/icons/icon-512x512.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
