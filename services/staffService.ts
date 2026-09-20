@@ -76,19 +76,12 @@ export const staffService = {
       return { data: null, error: profileError ?? new Error("Company not found") };
     }
 
-    return await supabase
-      .from("staff_invitations")
-      .insert([
-        {
-          company_id: profile.company_id,
-          email: invitation.email.trim().toLowerCase(),
-          role: invitation.role,
-          branch_ids: invitation.branch_ids,
-          invited_by: user.id,
-        },
-      ])
-      .select()
-      .single();
+    const { data, error } = await supabase.rpc("create_staff_invitation", {
+      p_email: invitation.email.trim().toLowerCase(),
+      p_role: "apprentice",
+      p_branch_ids: invitation.branch_ids,
+    });
+    return { data, error };
   },
 
   async revokeInvitation(id: string) {
