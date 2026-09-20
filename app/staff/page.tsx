@@ -14,14 +14,12 @@ import { permissionsFor, type Permission } from "@/lib/permissions";
 import type { StaffInvitation, StaffMember, StaffRole } from "@/types/staff";
 
 const ROLE_LABELS: Record<StaffRole, string> = {
-  owner: "Owner",
-  branch_manager: "Manager",
-  technician: "Technician",
-  front_desk: "Front Desk",
+  owner: "Boss / Owner",
+  apprentice: "Apprentice",
 };
 
-type ManageableRole = "technician" | "front_desk";
-const MANAGEABLE_ROLES: ManageableRole[] = ["technician", "front_desk"];
+type ManageableRole = "apprentice";
+const MANAGEABLE_ROLES: ManageableRole[] = ["apprentice"];
 const ACCESS_LABELS: Record<Permission, string> = {
   dashboard: "Dashboard", repairs: "Repairs", sales: "Sales", mobile_sales: "Mobile sales", invoices: "Invoices", expenses: "Expenses",
   inventory: "Inventory", customers: "Customers", suppliers: "Suppliers", engineers: "Engineers", engineer_work: "Engineer work", payments: "Money", outstanding: "Debit",
@@ -40,7 +38,7 @@ export default function StaffPage() {
   const [shopBranchId, setShopBranchId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<ManageableRole>("technician");
+  const [inviteRole, setInviteRole] = useState<ManageableRole>("apprentice");
   const [sendingInvite, setSendingInvite] = useState(false);
 
   useEffect(() => { void loadAll(); }, []);
@@ -64,7 +62,7 @@ export default function StaffPage() {
   const canManage = myRole === "owner";
 
   async function handleRoleChange(profileId: string, role: StaffRole) {
-    if (role === "branch_manager" || role === "owner") return;
+    if (role === "owner") return;
     const { error } = await staffService.updateStaffRole(profileId, role);
     if (error) return toast.error(error.message);
     toast.success("Staff role updated.");
@@ -113,7 +111,7 @@ export default function StaffPage() {
         <Card className="border-slate-200 shadow-sm">
           <CardHeader>
             <CardTitle className="font-heading text-lg">Current staff & access</CardTitle>
-            <p className="text-sm text-slate-500">The owner has full access. Staff access is controlled by role.</p>
+            <p className="text-sm text-slate-500">The boss has full access. Apprentices only get the tools needed for daily shop work.</p>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-xl border border-slate-100">
@@ -124,11 +122,10 @@ export default function StaffPage() {
                 <tbody>
                   {staff.map((s) => {
                     const isOwner = s.role === "owner";
-                    const isLegacyManager = s.role === "branch_manager";
                     const access = accessFor(s.role);
                     return <tr key={s.id} className="border-t border-slate-100 align-top">
                       <td className="px-3 py-4 font-medium text-slate-900">{s.full_name || "Unnamed"}</td>
-                      <td className="px-3 py-4">{isOwner || isLegacyManager ? <Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge> : <select value={s.role} onChange={(e) => void handleRoleChange(s.id, e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}</td>
+                      <td className="px-3 py-4">{isOwner ? <Badge variant="secondary">{ROLE_LABELS[s.role]}</Badge> : <select value={s.role} onChange={(e) => void handleRoleChange(s.id, e.target.value as StaffRole)} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-teal-500">{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>}</td>
                       <td className="px-3 py-4"><Badge variant={s.is_active ? "secondary" : "destructive"}>{s.is_active ? "Active" : "Inactive"}</Badge></td>
                       <td className="max-w-xl px-3 py-4"><div className="flex flex-wrap gap-1.5">{access.map((label) => <span key={label} className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{label}</span>)}</div></td>
                       <td className="px-3 py-4 text-right">{isOwner ? <span className="text-xs font-medium text-slate-400">Protected</span> : <button onClick={() => void handleToggleActive(s.id, s.is_active)} className="text-xs font-medium text-slate-500 underline hover:text-slate-800">{s.is_active ? "Deactivate" : "Reactivate"}</button>}</td>
@@ -143,7 +140,7 @@ export default function StaffPage() {
         <Card className="border-slate-200 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2"><UserPlus className="size-4 text-teal-600" /><CardTitle className="font-heading text-lg">Add staff</CardTitle></div>
-            <p className="text-sm text-slate-500">Invite a technician or front-desk staff member to Amezing Limited.</p>
+            <p className="text-sm text-slate-500">Invite an apprentice to Amezing Limited.</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2">
