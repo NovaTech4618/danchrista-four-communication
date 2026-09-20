@@ -51,7 +51,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_24px_60px_rgba(18,59,52,0.10)]">
           <AmezingLogo />
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-            <span className="size-2 animate-pulse rounded-full bg-[var(--novatech-primary)]" aria-hidden="true" />
+            <span className="size-2 animate-pulse rounded-full bg-[var(--amezing-primary)]" aria-hidden="true" />
             Securing your workspace…
           </div>
           <p className="text-xs leading-5 text-slate-400">Checking your session and workspace access.</p>
