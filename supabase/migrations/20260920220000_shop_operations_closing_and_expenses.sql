@@ -74,8 +74,8 @@ begin
 
   if v_company is null then raise exception 'Active company profile required'; end if;
 
-  select ids[1] into v_branch
-  from public.get_my_branch_ids() ids
+  select branch_id into v_branch
+  from public.get_my_branch_ids() branch_id
   limit 1;
 
   insert into public.financial_transactions(
