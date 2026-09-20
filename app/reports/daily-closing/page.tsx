@@ -70,7 +70,7 @@ export default function DailyClosingPage() {
     void (async () => {
       const zone = await getCompanyTimezone(); const role = await staffService.getMyRole(); if (!active) return;
       const date = todayInTimezone(zone); setTimezone(zone); setBusinessDate(date);
-      setCanReopen(hasPermission(role.data, "daily_closing") && (role.data === "owner" || role.data === "branch_manager"));
+      setCanReopen(hasPermission(role.data, "daily_closing") && role.data === "owner");
       await load(date);
     })();
     return () => { active = false; };
