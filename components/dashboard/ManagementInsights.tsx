@@ -102,7 +102,7 @@ export default function ManagementInsights() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] sm:p-6">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--amezing-shadow-card)] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="font-heading text-base font-semibold text-slate-950">Profit trend</h2>
@@ -171,7 +171,7 @@ export default function ManagementInsights() {
           {loading && <p className="mt-3 text-center text-[11px] text-slate-400">Updating profit figures…</p>}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] sm:p-6">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--amezing-shadow-card)] sm:p-6">
           <h2 className="font-heading text-base font-semibold text-slate-950">Management pulse</h2>
           <p className="mt-0.5 text-xs text-slate-500">The figures worth checking first.</p>
           <div className="mt-5 space-y-4">
@@ -189,7 +189,7 @@ export default function ManagementInsights() {
 
 function MetricCard({ title, value, hint, icon: Icon, href }: { title: string; value: string; hint: string; icon: typeof CircleDollarSign; href: string }) {
   return (
-    <Link href={href} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--novatech-shadow-card)] transition-colors hover:border-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]">
+    <Link href={href} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--amezing-shadow-card)] transition-colors hover:border-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12b76a]">
       <div className="flex items-start justify-between gap-3">
         <div><p className="text-xs font-medium text-slate-500">{title}</p><p className={`mt-2 font-heading text-xl font-bold tracking-tight ${title.includes("net profit") && value.startsWith("-") ? "text-rose-700" : "text-slate-950"}`}>{value}</p><p className="mt-1 text-[11px] text-slate-400">{hint}</p></div>
         <div className="flex size-9 items-center justify-center rounded-lg bg-[#eaf8f1] text-[#087443]"><Icon className="size-4" /></div>
