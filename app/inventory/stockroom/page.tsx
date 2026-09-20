@@ -56,7 +56,6 @@ export default function StockroomPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<StockFilter>("all");
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -64,7 +63,7 @@ export default function StockroomPage() {
       if (active) setItems((data || []) as InventoryItem[]);
     });
     return () => { active = false; };
-  }, [refreshKey]);
+  }, []);
 
   const parts = items.filter(item => groupFor(item) === "parts");
   const accessories = items.filter(item => groupFor(item) === "accessories");
@@ -160,7 +159,7 @@ export default function StockroomPage() {
 
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
           <div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">{title}</h2></div><span className="text-xs font-semibold text-[#74837e]">{visible.length} shown</span></div>
-          <InventoryTable refreshKey={refreshKey} onEdit={() => {}} itemsOverride={visible} embedded showActions={false} />
+          <InventoryTable refreshKey={0} onEdit={() => {}} itemsOverride={visible} embedded showActions={false} />
         </section>
       </main>
     </AppLayout>
