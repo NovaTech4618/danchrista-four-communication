@@ -18,7 +18,15 @@ export const saleService = {
       .single();
   },
 
-  async createSale(params: { customerId: string | null; paymentMethod: string; discount: number; staffName: string | null; notes: string | null; items: SaleItemInput[] }) {
+  async createSale(params: {
+    customerId: string | null;
+    paymentMethod: string;
+    discount: number;
+    staffName: string | null;
+    notes: string | null;
+    items: SaleItemInput[];
+    idempotencyKey?: string;
+  }) {
     const result = await supabase.rpc("create_sale", {
       p_customer_id: params.customerId,
       p_payment_method: params.paymentMethod,
@@ -26,9 +34,10 @@ export const saleService = {
       p_staff_name: params.staffName,
       p_notes: params.notes,
       p_items: params.items,
+      p_idempotency_key: params.idempotencyKey ?? null,
     });
     if (!result.error && result.data) {
-      const saleId = Array.isArray(result.data) ? result.data[0]?.id : result.data?.id;
+      const saleId = Array.isArray(result.data) ? result.data[0]?.id : result.data;
       if (saleId) void notifyOwnerOnWhatsApp("sale", saleId).catch((error) => console.error("Sale WhatsApp notification failed", error));
     }
     return result;
