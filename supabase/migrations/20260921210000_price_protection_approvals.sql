@@ -72,8 +72,7 @@ begin
  if r.id is null then raise exception 'Approval request not found'; end if;
  if r.status<>'pending' then raise exception 'Approval request is no longer pending'; end if;
  update public.sale_price_approval_requests set status='approved',approved_by=auth.uid(),decision_note=p_decision_note,decided_at=now() where id=r.id;
- select jsonb_agg(x || jsonb_build_object('price_override',true)) into approved_items from jsonb_array_elements(r.items) x;
- select public.create_sale(r.customer_id,r.payment_method,r.discount,r.staff_name,r.notes,approved_items,r.id) into sale_id;
+ select public.create_sale(r.customer_id,r.payment_method,r.discount,r.staff_name,r.notes,r.items,r.id,r.id) into sale_id;
  update public.sale_price_approval_requests set status='used',sale_id=sale_id,used_at=now() where id=r.id;
  perform public.write_audit_log('sale.price_override_approved_and_used','sale',sale_id,null,null,jsonb_build_object('approval_id',r.id,'approved_by',auth.uid(),'decision_note',p_decision_note));
  return sale_id;
