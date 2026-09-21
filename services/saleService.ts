@@ -58,6 +58,7 @@ export const saleService = {
   async requestRepairRefund(params: { repairId: string; amount: number; paymentMethod: string; reason: string; notes?: string | null }) {
     return await supabase.rpc("request_repair_refund", { p_repair_id: params.repairId, p_amount: params.amount, p_payment_method: params.paymentMethod, p_reason: params.reason, p_notes: params.notes ?? null });
   },
+  async listRepairRefundRequests() { return await supabase.rpc("list_repair_refund_requests"); },
   async approveRepairRefund(id: string, note?: string | null) { return await supabase.rpc("approve_repair_refund", { p_request_id: id, p_decision_note: note ?? null }); },
   async rejectRepairRefund(id: string, note?: string | null) { return await supabase.rpc("reject_repair_refund", { p_request_id: id, p_decision_note: note ?? null }); },
 
