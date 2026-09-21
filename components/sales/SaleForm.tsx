@@ -29,6 +29,8 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [selectedQty, setSelectedQty] = useState("1");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saleAttemptKey, setSaleAttemptKey] = useState<string | null>(null);
+  const [saleAttemptSignature, setSaleAttemptSignature] = useState<string | null>(null);
 
   useEffect(() => { void loadOptions(); }, []);
   async function loadOptions() {
@@ -63,12 +65,50 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     if (discountAmount > subtotal) return toast.error("Discount cannot be greater than the sale.");
     const invalid = cart.find((c) => c.unit_price < c.minimum_selling_price && !c.price_override);
     if (invalid) return toast.error(`${invalid.item_name}: price is below the minimum selling price. Authorised override is required.`);
+    const attemptSignature = JSON.stringify({
+      customerId: customerId || null,
+      paymentMethod,
+      discount: discountAmount,
+      items: cart.map((c) => ({
+        inventory_id: c.inventory_id,
+        quantity: c.quantity,
+        unit_price: c.unit_price,
+        price_override: c.price_override,
+      })),
+    });
+    const idempotencyKey =
+      saleAttemptKey && saleAttemptSignature === attemptSignature
+        ? saleAttemptKey
+        : crypto.randomUUID();
+
+    setSaleAttemptKey(idempotencyKey);
+    setSaleAttemptSignature(attemptSignature);
     setLoading(true);
-    const { error } = await saleService.createSale({ customerId: customerId || null, paymentMethod, discount: discountAmount, staffName: null, notes: null, items: cart.map((c) => ({ inventory_id: c.inventory_id, quantity: c.quantity, unit_price: c.unit_price, price_override: c.price_override })) });
+    const { error } = await saleService.createSale({
+      customerId: customerId || null,
+      paymentMethod,
+      discount: discountAmount,
+      staffName: null,
+      notes: null,
+      items: cart.map((c) => ({
+        inventory_id: c.inventory_id,
+        quantity: c.quantity,
+        unit_price: c.unit_price,
+        price_override: c.price_override,
+      })),
+      idempotencyKey,
+    });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Sale recorded. Stock reduced automatically.");
-    setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); void loadOptions(); onSaleCompleted();
+    setCart([]);
+    setCustomerId("");
+    setDiscount("0");
+    setShowCustomer(false);
+    setSaleAttemptKey(null);
+    setSaleAttemptSignature(null);
+    void loadOptions();
+    onSaleCompleted();
   }
 
   return <section className="rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
