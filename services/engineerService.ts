@@ -50,8 +50,12 @@ export const engineerService = {
     return await supabase.rpc("engineer_parts_out", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_unit_price: unitPrice ?? null, p_notes: notes ?? null });
   },
 
-  async recordPartsIn(engineerId: string, inventoryId: string, quantity: number, unitPrice: number, notes?: string | null) {
-    return await supabase.rpc("engineer_parts_in", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_unit_price: unitPrice, p_notes: notes ?? null });
+  async recordPartsIn(engineerId: string, inventoryId: string, quantity: number, condition: "normal" | "faulty", notes?: string | null) {
+    return await supabase.rpc("engineer_part_return", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_condition: condition, p_notes: notes ?? null });
+  },
+
+  async recordReplacement(faultyReturnId: string, inventoryId: string, quantity: number, notes?: string | null) {
+    return await supabase.rpc("engineer_replacement_part", { p_faulty_return_id: faultyReturnId, p_inventory_id: inventoryId, p_quantity: quantity, p_notes: notes ?? null });
   },
 
   async recordWork(engineerId: string, amount: number, description: string, notes?: string | null) {

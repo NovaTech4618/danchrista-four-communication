@@ -66,7 +66,7 @@ export default function EngineerWorkflowPage() {
         <div className="mt-4 space-y-3">
           <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = items.find((i) => i.id === e.target.value); setPartPrice(item ? String(item.selling_price ?? 0) : ""); }} className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"><option value="">Select returned part</option>{items.map((i) => <option key={i.id} value={i.id}>{i.item_name}</option>)}</select>
           <div className="grid grid-cols-2 gap-3"><input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="Qty returned" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /><input type="number" min="0" value={partPrice} onChange={(e) => setPartPrice(e.target.value)} placeholder="Return value" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /></div>
-          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsIn(engineerId, inventoryId, Number(quantity), Number(partPrice), notes))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Record returned part</button>
+          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsIn(engineerId, inventoryId, Number(quantity), "normal", notes))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Record returned part</button>
         </div>
       </section>
 

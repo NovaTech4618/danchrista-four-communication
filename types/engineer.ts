@@ -28,7 +28,9 @@ export type EngineerTransactionType =
   | "payment_out"
   | "opening_balance"
   | "adjustment_debit"
-  | "adjustment_credit";
+  | "adjustment_credit"
+  | "faulty_return"
+  | "replacement";
 
 export type EngineerPaymentMethod = "cash" | "transfer" | "pos" | "other";
 
