@@ -9,6 +9,7 @@ import type { StaffRole } from "@/types/staff";
 import SalesTable from "@/components/sales/SalesTable";
 import SalePriceApprovals from "@/components/sales/SalePriceApprovals";
 import SaleReturnsPanel from "@/components/sales/SaleReturnsPanel";
+import ReturnApprovalPanel from "@/components/sales/ReturnApprovalPanel";
 import { saleService } from "@/services/saleService";
 
 export default function SalesPage() {
@@ -28,6 +29,7 @@ export default function SalesPage() {
         <h1 className="text-3xl font-bold">Sales</h1>
         <SaleForm onSaleCompleted={handleSaleCompleted} />
         {myRole === "owner" && <SalePriceApprovals />}
+        <ReturnApprovalPanel />
         <SaleReturnsPanel sales={sales} />
         <SalesTable refreshKey={refreshKey} canViewSummary={myRole === "owner"} />
       </div>
