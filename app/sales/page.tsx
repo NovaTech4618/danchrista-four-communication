@@ -8,12 +8,14 @@ import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
 import SalesTable from "@/components/sales/SalesTable";
 import SalePriceApprovals from "@/components/sales/SalePriceApprovals";
+import SaleReturnsPanel from "@/components/sales/SaleReturnsPanel";
+import { saleService } from "@/services/saleService";
 
 export default function SalesPage() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [myRole, setMyRole] = useState<StaffRole | null>(null);
+  const [myRole, setMyRole] = useState<StaffRole | null>(null);\n  const [sales, setSales] = useState<any[]>([]);
 
-  useEffect(() => { void staffService.getMyRole().then(({ data }) => setMyRole(data)); }, []);
+  useEffect(() => { void staffService.getMyRole().then(({ data }) => setMyRole(data)); void saleService.getSales().then(({ data }) => setSales((data ?? []) as any[])); }, []);
 
   function handleSaleCompleted() {
     setRefreshKey((prev) => prev + 1);
