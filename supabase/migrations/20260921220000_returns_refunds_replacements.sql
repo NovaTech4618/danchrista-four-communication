@@ -146,3 +146,10 @@ grant execute on function public.reject_sale_return(uuid,text) to authenticated;
 grant execute on function public.request_repair_refund(uuid,numeric,text,text,text) to authenticated;
 grant execute on function public.approve_repair_refund(uuid,text) to authenticated;
 grant execute on function public.reject_repair_refund(uuid,text) to authenticated;
+create or replace function public.list_repair_refund_requests()
+returns table(id uuid,repair_id uuid,status text,amount numeric,payment_method text,reason text,notes text,requested_at timestamptz,requested_by uuid)
+language sql security definer set search_path='public' as $$
+select r.id,r.repair_id,r.status,r.amount,r.payment_method,r.reason,r.notes,r.requested_at,r.requested_by from public.repair_refund_requests r
+where r.company_id=public.get_my_company_id() and (public.has_permission('sales.return_manage') or r.requested_by=auth.uid()) order by r.requested_at desc $$;
+revoke all on function public.list_repair_refund_requests() from public,anon,authenticated;
+grant execute on function public.list_repair_refund_requests() to authenticated;
