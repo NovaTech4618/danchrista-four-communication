@@ -25,7 +25,7 @@ const transactionLabel: Record<string, string> = {
 };
 
 const emptyEngineer: EngineerInput = { name: "", phone: "", business_name: "", address: "", notes: "" };
-type Action = "parts" | "return" | "payment" | "payment-out" | "opening" | null;
+type Action = "parts" | "return" | "replacement" | "payment" | "payment-out" | "opening" | null;
 type Period = "all" | "day" | "week" | "month" | "year";
 
 function periodStart(period: Period) {
@@ -73,6 +73,8 @@ export default function EngineersPage() {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [notes, setNotes] = useState("");
+  const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
+  const [faultyReturnId, setFaultyReturnId] = useState("");
 
   const balanceMap = useMemo(() => new Map(balances.map((item) => [item.engineer_id, item])), [balances]);
   const selectedEngineer = engineers.find((engineer) => engineer.id === selectedId);
@@ -150,6 +152,8 @@ export default function EngineersPage() {
     setAmount("");
     setPaymentMethod("cash");
     setNotes("");
+    setReturnCondition("normal");
+    setFaultyReturnId("");
   }
 
   function openCreate() {
@@ -222,21 +226,22 @@ export default function EngineersPage() {
     setMessage("");
 
     let result;
-    if (action === "parts" || action === "return") {
+    if (action === "parts" || action === "return" || action === "replacement") {
       if (!inventoryId || quantity < 1) {
         setError("Select a part and enter a valid quantity.");
         setSaving(false);
         return;
       }
-      const price = Number(unitPrice);
-      if (!Number.isFinite(price) || price < 0) {
-        setError("Enter a valid unit price.");
-        setSaving(false);
-        return;
+      if (action === "replacement") {
+        if (!faultyReturnId) { setError("Select the faulty return this replacement is for."); setSaving(false); return; }
+        result = await engineerService.recordReplacement(faultyReturnId, inventoryId, quantity, notes.trim() || null);
+      } else if (action === "parts") {
+        const price = Number(unitPrice);
+        if (!Number.isFinite(price) || price < 0) { setError("Enter a valid unit price."); setSaving(false); return; }
+        result = await engineerService.recordPartsOut(selectedId, inventoryId, quantity, price, notes.trim() || null);
+      } else {
+        result = await engineerService.recordPartsIn(selectedId, inventoryId, quantity, returnCondition, notes.trim() || null);
       }
-      result = action === "parts"
-        ? await engineerService.recordPartsOut(selectedId, inventoryId, quantity, price, notes.trim() || null)
-        : await engineerService.recordPartsIn(selectedId, inventoryId, quantity, price, notes.trim() || null);
     } else if (action === "payment" || action === "payment-out") {
       const value = Number(amount);
       if (!Number.isFinite(value) || value <= 0) {
@@ -267,7 +272,9 @@ export default function EngineersPage() {
       action === "parts"
         ? "Parts collection recorded successfully."
         : action === "return"
-          ? "Parts return recorded successfully. Inventory and engineer balance have been updated."
+          ? returnCondition === "faulty" ? "Faulty return recorded. It was kept out of sellable stock and credited back to the engineer." : "Parts return recorded successfully. Inventory and engineer balance have been updated."
+          : action === "replacement"
+            ? "Replacement recorded. No extra engineer debt was created."
           : action === "payment"
             ? "Payment received from engineer recorded successfully."
             : action === "payment-out"
@@ -292,6 +299,7 @@ export default function EngineersPage() {
     return: "Record parts returned",
     payment: "Receive payment",
     "payment-out": "Pay engineer",
+    replacement: "Issue replacement for faulty part",
     opening: "Opening balance",
   };
 
@@ -446,6 +454,7 @@ export default function EngineersPage() {
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Button size="sm" onClick={() => setAction("parts")}>Record parts collected</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("return")}>Record parts returned</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("replacement")}>Replace faulty part</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Receive payment</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("payment-out")}>Pay engineer</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("opening")}>Opening balance</Button>
@@ -458,13 +467,15 @@ export default function EngineersPage() {
                     <div className="mb-4 flex items-center justify-between">
                       <div>
                         <h3 className="font-heading font-semibold text-slate-900">{actionLabels[action]}</h3>
-                        {action === "return" && <p className="mt-1 text-xs text-slate-500">Returned stock is added back to inventory and credited to the engineer account.</p>}
+                        {action === "return" && <p className="mt-1 text-xs text-slate-500">Normal return goes back to sellable stock. Faulty return is kept separately and does not increase sellable stock.</p>}
+                        {action === "replacement" && <p className="mt-1 text-xs text-slate-500">A replacement consumes stock but adds ₦0 debt to the engineer and links back to the faulty return.</p>}
+                        {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
                         {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
                       </div>
                       <button type="button" onClick={resetAction} className="text-sm font-medium text-slate-500 hover:text-slate-800">Cancel</button>
                     </div>
 
-                    {(action === "parts" || action === "return") ? (
+                    {(action === "parts" || action === "return" || action === "replacement") ? (
                       <div className="grid gap-4 md:grid-cols-3">
                         <label className="text-sm font-medium text-slate-700 md:col-span-2">Part
                           <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = inventory.find((x) => x.id === e.target.value); setUnitPrice(item ? String(item.selling_price) : ""); }} className={inputClass}>
@@ -473,7 +484,9 @@ export default function EngineersPage() {
                           </select>
                         </label>
                         <label className="text-sm font-medium text-slate-700">Quantity<input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className={inputClass} /></label>
-                        <label className="text-sm font-medium text-slate-700">Unit price<input type="number" min="0" step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputClass} /></label>
+                        {action === "return" && <label className="text-sm font-medium text-slate-700">Condition<select value={returnCondition} onChange={(e) => setReturnCondition(e.target.value as "normal" | "faulty")} className={inputClass}><option value="normal">Normal — back to stock</option><option value="faulty">Faulty — keep separate</option></select></label>}
+                        {action === "parts" && <label className="text-sm font-medium text-slate-700">Unit price<input type="number" min="0" step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputClass} /></label>}
+                        {action === "replacement" && <label className="text-sm font-medium text-slate-700 md:col-span-2">Faulty return<select required value={faultyReturnId} onChange={(e) => setFaultyReturnId(e.target.value)} className={inputClass}><option value="">Select the faulty return</option>{transactions.filter((t) => t.transaction_type === "faulty_return").map((t) => <option key={t.reference_id ?? t.id} value={t.reference_id ?? ""}>{t.description} · {new Date(t.transaction_date).toLocaleDateString()}</option>)}</select></label>}
                         <label className="text-sm font-medium text-slate-700 md:col-span-2">Notes<input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" className={inputClass} /></label>
                       </div>
                     ) : (
