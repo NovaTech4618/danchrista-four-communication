@@ -13,7 +13,8 @@ import { saleService } from "@/services/saleService";
 
 export default function SalesPage() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [myRole, setMyRole] = useState<StaffRole | null>(null);\n  const [sales, setSales] = useState<any[]>([]);
+  const [myRole, setMyRole] = useState<StaffRole | null>(null);
+  const [sales, setSales] = useState<any[]>([]);
 
   useEffect(() => { void staffService.getMyRole().then(({ data }) => setMyRole(data)); void saleService.getSales().then(({ data }) => setSales((data ?? []) as any[])); }, []);
 
@@ -27,6 +28,7 @@ export default function SalesPage() {
         <h1 className="text-3xl font-bold">Sales</h1>
         <SaleForm onSaleCompleted={handleSaleCompleted} />
         {myRole === "owner" && <SalePriceApprovals />}
+        <SaleReturnsPanel sales={sales} />
         <SalesTable refreshKey={refreshKey} canViewSummary={myRole === "owner"} />
       </div>
     </AppLayout>
