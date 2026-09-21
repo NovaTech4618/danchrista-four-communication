@@ -14,6 +14,7 @@ export type InventoryItem = {
   minimum_selling_price: number;
   cost_price: number | null;
   quantity: number;
+  faulty_quantity?: number;
   minimum_stock: number;
   supplier: string | null;
   shelf_location: string | null;
