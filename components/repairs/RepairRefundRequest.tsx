@@ -1,0 +1,10 @@
+"use client";
+import {useState} from "react";
+import {toast} from "sonner";
+import {saleService} from "@/services/saleService";
+import {Button} from "@/components/ui/button";
+export default function RepairRefundRequest({repairId,balance}:{repairId:string;balance:number}){
+ const [amount,setAmount]=useState("");const [method,setMethod]=useState("cash");const [reason,setReason]=useState("");const [busy,setBusy]=useState(false);
+ async function submit(){const n=Number(amount);if(n<=0||n>balance||!reason.trim())return toast.error("Enter a valid refund amount and reason.");setBusy(true);const {error}=await saleService.requestRepairRefund({repairId,amount:n,paymentMethod:method,reason});setBusy(false);if(error)return toast.error(error.message);toast.success("Refund request sent to the Boss.");setAmount("");setReason("");}
+ return <section className="rounded-2xl border border-amber-100 bg-amber-50/40 p-5"><p className="font-semibold text-slate-900">Refund request</p><p className="mt-1 text-xs text-slate-500">Request a Boss-approved refund for money already received on this repair.</p><div className="mt-4 grid gap-3 sm:grid-cols-[1fr_150px]"><input aria-label="Refund amount" type="number" min="0" max={balance} value={amount} onChange={e=>setAmount(e.target.value)} placeholder="Refund amount" className="h-11 rounded-xl border px-3 text-sm"/><select value={method} onChange={e=>setMethod(e.target.value)} className="h-11 rounded-xl border px-3 text-sm"><option>cash</option><option>transfer</option><option>pos</option><option>other</option></select></div><div className="mt-3 flex gap-3"><input aria-label="Refund reason" value={reason} onChange={e=>setReason(e.target.value)} placeholder="Reason" className="h-11 flex-1 rounded-xl border px-3 text-sm"/><Button disabled={busy||balance<=0||!reason.trim()} onClick={()=>void submit()}>{busy?"Sending…":"Request refund"}</Button></div></section>;
+}

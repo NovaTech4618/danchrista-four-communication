@@ -8,12 +8,16 @@ import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
 import SalesTable from "@/components/sales/SalesTable";
 import SalePriceApprovals from "@/components/sales/SalePriceApprovals";
+import SaleReturnsPanel from "@/components/sales/SaleReturnsPanel";
+import ReturnApprovalPanel from "@/components/sales/ReturnApprovalPanel";
+import { saleService } from "@/services/saleService";
 
 export default function SalesPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [myRole, setMyRole] = useState<StaffRole | null>(null);
+  const [sales, setSales] = useState<any[]>([]);
 
-  useEffect(() => { void staffService.getMyRole().then(({ data }) => setMyRole(data)); }, []);
+  useEffect(() => { void staffService.getMyRole().then(({ data }) => setMyRole(data)); void saleService.getSales().then(({ data }) => setSales((data ?? []) as any[])); }, []);
 
   function handleSaleCompleted() {
     setRefreshKey((prev) => prev + 1);
@@ -25,6 +29,8 @@ export default function SalesPage() {
         <h1 className="text-3xl font-bold">Sales</h1>
         <SaleForm onSaleCompleted={handleSaleCompleted} />
         {myRole === "owner" && <SalePriceApprovals />}
+        <ReturnApprovalPanel />
+        <SaleReturnsPanel sales={sales} />
         <SalesTable refreshKey={refreshKey} canViewSummary={myRole === "owner"} />
       </div>
     </AppLayout>

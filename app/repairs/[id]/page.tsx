@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import AppLayout from "@/components/layout/AppLayout";
 import RepairOperationsPanel from "@/components/repairs/RepairOperationsPanel";
 import RepairPartsPanel from "@/components/repairs/RepairPartsPanel";
+import RepairRefundRequest from "@/components/repairs/RepairRefundRequest";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,6 +181,8 @@ export default function RepairDetailPage() {
     <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"><div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-teal-50/80 to-transparent"/><div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><Badge variant={statusVariant(repair.status)}>{repair.status}</Badge><Badge variant={slaLabel(repair) === "Closed" ? "secondary" : slaLabel(repair).includes("overdue") ? "destructive" : "outline"}>{slaLabel(repair)}</Badge>{ticket && <Link href={`/tickets/${ticket.id}`} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-teal-200 hover:text-teal-700">{ticket.ticket_number}</Link>}</div><h1 className="mt-3 truncate font-heading text-2xl font-bold tracking-tight text-slate-950 sm:text-4xl">{device?.brand} {device?.model}</h1><p className="mt-1 text-sm text-slate-500">{repair.issue || "Repair job"}</p></div><div className="flex flex-wrap gap-2"><Link href={`/devices/${repair.device_id}`}><Button variant="outline"><Wrench className="mr-2 size-4"/>Device</Button></Link>{ticket && <Link href={`/tickets/${ticket.id}`}><Button variant="outline"><ClipboardList className="mr-2 size-4"/>Ticket</Button></Link>}{repair.status === "Testing" && <Button onClick={complete} disabled={busy !== null}><CheckCircle2 className="mr-2 size-4"/>{busy === "complete" ? "Completing..." : "Mark Completed"}</Button>}</div></div></section>
 
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Kpi label="Repair value" value={money(total)}/><Kpi label="Paid" value={money(paid)}/><Kpi label="Outstanding" value={money(balance)}/><Kpi label="Gross profit" value={money(gross)} hint={`${margin.toFixed(1)}% margin`}/></section>
+
+    <RepairRefundRequest repairId={repair.id} balance={paid} />
 
     <RepairOperationsPanel repairId={repair.id} companyId={repair.company_id} branchId={repair.branch_id} customerId={customer?.id ?? null} status={repair.status} expectedCompletionDate={repair.expected_completion_date}/>
 
