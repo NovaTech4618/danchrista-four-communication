@@ -63,8 +63,38 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   async function complete() {
     if (!cart.length) return toast.error("Add an item to the sale.");
     if (discountAmount > subtotal) return toast.error("Discount cannot be greater than the sale.");
-    const invalid = cart.find((c) => c.unit_price < c.minimum_selling_price && !c.price_override);
-    if (invalid) return toast.error(`${invalid.item_name}: price is below the minimum selling price. Authorised override is required.`);
+    const belowLineFloor = cart.some((c) => c.unit_price < c.minimum_selling_price);
+    const minimumSubtotal = cart.reduce((sum, c) => sum + c.quantity * c.minimum_selling_price, 0);
+    const needsApproval = belowLineFloor || total < minimumSubtotal;
+    if (needsApproval) {
+      setLoading(true);
+      const { error } = await saleService.requestPriceOverride({
+        customerId: customerId || null,
+        paymentMethod,
+        discount: discountAmount,
+        staffName: null,
+        notes: null,
+        items: cart.map((c) => ({
+          inventory_id: c.inventory_id,
+          quantity: c.quantity,
+          unit_price: c.unit_price,
+          price_override: true,
+        })),
+        reason: "Sale price is below the stored minimum selling price.",
+      });
+      setLoading(false);
+      if (error) return toast.error(error.message);
+      toast.success("Boss approval requested. The sale has not been recorded yet.");
+      setCart([]);
+      setCustomerId("");
+      setDiscount("0");
+      setShowCustomer(false);
+      setSaleAttemptKey(null);
+      setSaleAttemptSignature(null);
+      void loadOptions();
+      onSaleCompleted();
+      return;
+    }
     const attemptSignature = JSON.stringify({
       customerId: customerId || null,
       paymentMethod,
@@ -116,13 +146,13 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     <div className="space-y-5 p-5 sm:p-6">
       <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4"><div className="flex flex-col gap-3 sm:flex-row"><select aria-label="Select item" className={`${selectClass} flex-1`} value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)}><option value="">Search / choose product…</option>{inventory.filter((i) => Number(i.quantity) > 0).map((i) => <option key={i.id} value={i.id}>{i.item_name} · {money(Number(i.selling_price))} · {i.quantity} left</option>)}</select><div className="flex gap-2"><Input aria-label="Quantity" type="number" min="1" step="1" value={selectedQty} onChange={(e) => setSelectedQty(e.target.value)} className="h-11 w-24 rounded-xl"/><Button type="button" onClick={addToCart} className="h-11 rounded-xl bg-[#123b34] px-5 hover:bg-[#1d6a54]">Add</Button></div></div></div>
 
-      {cart.length > 0 ? <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]"><Table><TableHeader><TableRow className="bg-[#f7f8f5]"><TableHead>Goods</TableHead><TableHead>Qty</TableHead><TableHead>Unit price</TableHead><TableHead>Minimum</TableHead><TableHead>Total</TableHead><TableHead /></TableRow></TableHeader><TableBody>{cart.map((c) => { const belowFloor = c.unit_price < c.minimum_selling_price; return <TableRow key={c.inventory_id}><TableCell className="min-w-[190px] font-medium">{c.item_name}{belowFloor && <p className="mt-1 text-[11px] font-semibold text-amber-700">Below minimum — authorisation required</p>}</TableCell><TableCell>{c.quantity}</TableCell><TableCell className="min-w-[130px]"><Input aria-label={`Price for ${c.item_name}`} type="number" min="0" step="0.01" value={c.unit_price} onChange={(e) => updateLine(c.inventory_id, { unit_price: Number(e.target.value) || 0, price_override: false })} className="h-9 w-28 rounded-lg" /></TableCell><TableCell className="whitespace-nowrap text-xs text-slate-500">{money(c.minimum_selling_price)}</TableCell><TableCell className="font-semibold">{money(c.quantity * c.unit_price)}</TableCell><TableCell><div className="flex items-center gap-2"><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setCart(cart.filter((x) => x.inventory_id !== c.inventory_id))}>Remove</Button></div></TableCell></TableRow>; })}</TableBody></Table>{cart.some((c) => c.unit_price < c.minimum_selling_price) && <div className="border-t border-amber-100 bg-amber-50 px-4 py-3">{cart.filter((c) => c.unit_price < c.minimum_selling_price).map((c) => <label key={c.inventory_id} className="flex items-center gap-2 text-xs font-semibold text-amber-900"><input type="checkbox" checked={c.price_override} onChange={(e) => updateLine(c.inventory_id, { price_override: e.target.checked })} /> Authorised override for {c.item_name}</label>)}<p className="mt-2 text-[11px] text-amber-800">Only an authorised owner/manager account can complete a sale below the stored minimum. The database checks this too.</p></div>}</div> : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><ShoppingCartIcon /><p className="mt-2 text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Choose the item above. The sale is kept this simple for walk-in customers.</p></div>}
+      {cart.length > 0 ? <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]"><Table><TableHeader><TableRow className="bg-[#f7f8f5]"><TableHead>Goods</TableHead><TableHead>Qty</TableHead><TableHead>Unit price</TableHead><TableHead>Minimum</TableHead><TableHead>Total</TableHead><TableHead /></TableRow></TableHeader><TableBody>{cart.map((c) => { const belowFloor = c.unit_price < c.minimum_selling_price; return <TableRow key={c.inventory_id}><TableCell className="min-w-[190px] font-medium">{c.item_name}{belowFloor && <p className="mt-1 text-[11px] font-semibold text-amber-700">Below minimum — authorisation required</p>}</TableCell><TableCell>{c.quantity}</TableCell><TableCell className="min-w-[130px]"><Input aria-label={`Price for ${c.item_name}`} type="number" min="0" step="0.01" value={c.unit_price} onChange={(e) => updateLine(c.inventory_id, { unit_price: Number(e.target.value) || 0, price_override: false })} className="h-9 w-28 rounded-lg" /></TableCell><TableCell className="whitespace-nowrap text-xs text-slate-500">{money(c.minimum_selling_price)}</TableCell><TableCell className="font-semibold">{money(c.quantity * c.unit_price)}</TableCell><TableCell><div className="flex items-center gap-2"><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setCart(cart.filter((x) => x.inventory_id !== c.inventory_id))}>Remove</Button></div></TableCell></TableRow>; })}</TableBody></Table>{cart.some((c) => c.unit_price < c.minimum_selling_price) && <div className="border-t border-amber-100 bg-amber-50 px-4 py-3"><p className="text-xs font-semibold text-amber-900">Boss approval required</p><p className="mt-1 text-[11px] text-amber-800">This price is below the stored minimum. Tapping the button will send an approval request; no sale or stock movement is recorded until the Boss approves it.</p></div>}</div> : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><ShoppingCartIcon /><p className="mt-2 text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Choose the item above. The sale is kept this simple for walk-in customers.</p></div>}
 
       <div className="grid gap-3 md:grid-cols-[1fr_180px]"><label className="text-xs font-semibold text-[#687974]">Payment<select className={`${selectClass} mt-1`} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>{PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}</select></label><label className="text-xs font-semibold text-[#687974]">Discount<select className={`${selectClass} mt-1`} value={discount} onChange={(e) => setDiscount(e.target.value)}><option value="0">No discount</option><option value="500">₦500</option><option value="1000">₦1,000</option><option value="2000">₦2,000</option></select></label></div>
 
       <div className="border-t border-[#edf0ed] pt-4"><button type="button" onClick={() => setShowCustomer((v) => !v)} className="text-xs font-bold text-[#1d6a54]">{showCustomer ? "− Hide customer details" : "+ Add customer details (optional)"}</button>{showCustomer && <div className="mt-3"><select className={selectClass} value={customerId} onChange={(e) => setCustomerId(e.target.value)}><option value="">Select saved customer</option>{customers.map((c) => <option key={c.id} value={c.id}>{c.full_name}{c.phone ? ` · ${c.phone}` : ""}</option>)}</select><p className="mt-1 text-[11px] text-[#87958f]">Only use this when the customer needs a record. Walk-in sales can stay anonymous.</p></div>}</div>
 
-      <div className="flex flex-col gap-4 rounded-2xl bg-[#123b34] p-4 text-white sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><p className="text-xs text-[#c7d8d2]">{cart.length} item{cart.length === 1 ? "" : "s"} · Subtotal {money(subtotal)}</p><p className="mt-1 font-heading text-2xl font-bold">{money(total)}</p></div><Button onClick={complete} disabled={loading || !cart.length} className="h-12 rounded-xl bg-[#d7a95a] px-7 font-bold text-[#123b34] hover:bg-[#e5bc75]">{loading ? "Recording…" : "Complete sale"}</Button></div>
+      <div className="flex flex-col gap-4 rounded-2xl bg-[#123b34] p-4 text-white sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><p className="text-xs text-[#c7d8d2]">{cart.length} item{cart.length === 1 ? "" : "s"} · Subtotal {money(subtotal)}</p><p className="mt-1 font-heading text-2xl font-bold">{money(total)}</p></div><Button onClick={complete} disabled={loading || !cart.length} className="h-12 rounded-xl bg-[#d7a95a] px-7 font-bold text-[#123b34] hover:bg-[#e5bc75]">{loading ? "Processing…" : cart.some((c) => c.unit_price < c.minimum_selling_price) || total < cart.reduce((s, c) => s + c.quantity * c.minimum_selling_price, 0) ? "Request Boss approval" : "Complete sale"}</Button></div>
     </div>
   </section>;
 }
