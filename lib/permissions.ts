@@ -7,7 +7,7 @@ export type Permission =
 
 const ROLE_PERMISSIONS: Record<StaffRole, readonly Permission[]> = {
   owner: ["dashboard","repairs","sales","mobile_sales","invoices","expenses","inventory","customers","suppliers","engineers","engineer_work","payments","outstanding","profit","daily_closing","whatsapp","assistant","staff","search","settings","help"],
-  apprentice: ["repairs","sales","inventory","customers","help"],
+  apprentice: ["repairs","sales","inventory","customers","engineer_work","daily_closing","expenses","help"],
 };
 
 export function hasPermission(role: StaffRole | null | undefined, permission: Permission) {
