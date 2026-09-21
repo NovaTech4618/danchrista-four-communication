@@ -22,6 +22,8 @@ const transactionLabel: Record<string, string> = {
   opening_balance: "Opening balance",
   adjustment_debit: "Debit adjustment",
   adjustment_credit: "Credit adjustment",
+  faulty_return: "Faulty part returned",
+  replacement: "Faulty-part replacement",
 };
 
 const emptyEngineer: EngineerInput = { name: "", phone: "", business_name: "", address: "", notes: "" };
