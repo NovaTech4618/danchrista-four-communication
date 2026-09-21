@@ -26,7 +26,7 @@ security definer
 set search_path to 'public'
 as $function$
 declare
-  v_company_id uuid; v_user uuid; v_sale uuid; v_subtotal numeric := 0; v_total numeric;
+  v_company_id uuid; v_user uuid; v_sale uuid; v_subtotal numeric := 0; v_min_subtotal numeric := 0; v_total numeric;
   v_item jsonb; v_inventory_id uuid; v_qty integer; v_unit numeric; v_cost numeric;
   v_available integer; v_floor numeric; v_override boolean; v_has_override boolean := false;
   v_branch uuid; v_sale_branch uuid; v_existing uuid;
@@ -81,11 +81,18 @@ begin
     elsif v_branch is distinct from v_sale_branch then raise exception 'A sale cannot combine stock from different branches'; end if;
 
     v_subtotal := v_subtotal + (v_qty * v_unit);
+    v_min_subtotal := v_min_subtotal + (v_qty * coalesce(v_floor, 0));
   end loop;
 
   if coalesce(p_discount, 0) < 0 then raise exception 'Discount cannot be negative'; end if;
   v_total := v_subtotal - coalesce(p_discount, 0);
   if v_total < 0 then raise exception 'Sale total cannot be negative'; end if;
+  if v_total < v_min_subtotal and not v_has_override then
+    raise exception 'Discount would take the sale below the minimum selling prices.';
+  end if;
+  if v_total < v_min_subtotal and not public.has_permission('sales.price_override') then
+    raise exception 'Authorised override is required for a discounted sale below minimum selling prices.';
+  end if;
 
   insert into public.sales(
     company_id, branch_id, customer_id, sale_date, payment_method,
