@@ -116,8 +116,9 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     if (!recipient?.trim()) return toast.error("Recipient name is required.");
     const phone = window.prompt("Recipient phone (optional)", handover?.recipient_phone ?? "") ?? "";
     const condition = window.prompt("Device condition at handover (optional)", handover?.device_condition ?? "") ?? "";
+    const notes = window.prompt("Boss approval note (only needed if collecting with an outstanding balance; otherwise leave blank)", "")?.trim() ?? "";
     setBusy(true);
-    const { error } = await repairOperationsService.recordHandover({ repairId, recipientName: recipient.trim(), recipientPhone: phone || null, deviceCondition: condition || null });
+    const { error } = await repairOperationsService.recordHandover({ repairId, recipientName: recipient.trim(), recipientPhone: phone || null, deviceCondition: condition || null, notes: notes || null });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Device collected and handover recorded.");
