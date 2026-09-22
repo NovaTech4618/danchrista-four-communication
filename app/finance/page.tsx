@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
 import { financeService } from "@/services/financeService";
@@ -21,11 +21,7 @@ const labels: Record<string, string> = {
 
 export default function FinancePage() {
   const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
-  const [direction, setDirection] = useState<FinancialDirection>("out");
-  const [category, setCategory] = useState<FinancialCategory>("other");
-  const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState("cash");
-  const [description, setDescription] = useState("");
+
   const [period, setPeriod] = useState("month");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -62,36 +58,7 @@ export default function FinancePage() {
     { in: 0, out: 0 },
   );
 
-  async function submitMoney(event: FormEvent) {
-    event.preventDefault();
-    const value = Number(amount);
-    if (!value || value <= 0 || !description.trim()) {
-      setMessage("Enter an amount and description.");
-      return;
-    }
 
-    setSaving(true);
-    setMessage("");
-    const result = await financeService.createTransaction({
-      direction,
-      category,
-      amount: value,
-      payment_method: method,
-      description,
-    });
-
-    if (result.error) {
-      setMessage(result.error.message);
-      setSaving(false);
-      return;
-    }
-
-    setAmount("");
-    setDescription("");
-    setMessage("Money movement recorded.");
-    await load();
-    setSaving(false);
-  }
 
   return (
     <AppLayout>
@@ -126,84 +93,27 @@ export default function FinancePage() {
           </div>
         )}
 
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white">
-            <div className="flex flex-col gap-3 border-b border-[#edf0ed] p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Cash book</p>
-                <h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Recent money movement</h2>
-              </div>
-              <select value={period} onChange={(event) => setPeriod(event.target.value)} className="h-10 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
-                <option value="day">Today</option>
-                <option value="week">This week</option>
-                <option value="month">This month</option>
-                <option value="all">All time</option>
-              </select>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[620px] text-left text-sm">
-                <thead className="bg-[#f7f8f5]">
-                  <tr>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Date</th>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Description</th>
-                    <th className="px-5 py-3 text-[10px] uppercase tracking-wide text-[#74837e]">Type</th>
-                    <th className="px-5 py-3 text-right text-[10px] uppercase tracking-wide text-[#74837e]">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((transaction) => (
-                    <tr key={transaction.id} className="border-t border-[#edf0ed]">
-                      <td className="px-5 py-4 text-xs text-[#74837e]">{new Date(transaction.occurred_at).toLocaleDateString("en-NG")}</td>
-                      <td className="px-5 py-4 font-medium">{transaction.description}</td>
-                      <td className="px-5 py-4 text-xs text-[#53635d]">{labels[transaction.category] ?? transaction.category}</td>
-                      <td className={`px-5 py-4 text-right font-bold ${transaction.direction === "in" ? "text-emerald-700" : "text-red-700"}`}>
-                        {transaction.direction === "in" ? "+" : "−"}{money(Number(transaction.amount))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filtered.length === 0 && <div className="py-12 text-center text-sm text-[#74837e]">No money movement in this period.</div>}
-            </div>
-          </section>
-
+        <section className="grid gap-5 lg:grid-cols-2">
           <section className="rounded-2xl border border-[#dfe6df] bg-white p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Cash book entry</p>
-            <h2 className="mt-1 font-heading text-lg font-bold">Record movement</h2>
-            <form onSubmit={submitMoney} className="mt-5 space-y-4">
-              <label className="block text-xs font-bold text-[#53635d]">
-                Direction
-                <select value={direction} onChange={(event) => setDirection(event.target.value as FinancialDirection)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
-                  <option value="out">Money out</option>
-                  <option value="in">Money in</option>
-                </select>
-              </label>
-              <label className="block text-xs font-bold text-[#53635d]">
-                Category
-                <select value={category} onChange={(event) => setCategory(event.target.value as FinancialCategory)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
-                  <option value="other">Other</option>
-                  <option value="part_purchase">Part purchase</option>
-                  <option value="salary">Salary</option>
-                  <option value="rent">Rent</option>
-                  <option value="utility">Utility</option>
-                </select>
-              </label>
-              <Field label="Amount" value={amount} onChange={setAmount} placeholder="₦0" type="number" />
-              <label className="block text-xs font-bold text-[#53635d]">
-                Payment method
-                <select value={method} onChange={(event) => setMethod(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
-                  <option value="cash">Cash</option>
-                  <option value="transfer">Transfer</option>
-                  <option value="pos">POS</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <Field label="Description" value={description} onChange={setDescription} placeholder="e.g. shop electricity" />
-              <button disabled={saving} className="h-11 w-full rounded-xl bg-[#123b34] px-4 text-sm font-bold text-white disabled:opacity-50">
-                {saving ? "Saving…" : "Record movement"}
-              </button>
-            </form>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Authoritative ledger</p>
+            <h2 className="mt-1 font-heading text-lg font-bold">Where money movements come from</h2>
+            <p className="mt-3 text-sm leading-6 text-[#53635d]">This screen shows the financial ledger. Staff should not create arbitrary ledger entries here because the ledger is populated by real business events.</p>
+            <ul className="mt-4 space-y-2 text-sm text-[#53635d]">
+              <li>• Sales and repair payments create money received.</li>
+              <li>• Engineer payments and legitimate shop expenses create recorded money outflows.</li>
+              <li>• Daily Closing reconciles the recorded movements against the physical cash position.</li>
+            </ul>
           </section>
+          <section className="rounded-2xl border border-[#dfe6df] bg-white p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Quick links</p>
+            <h2 className="mt-1 font-heading text-lg font-bold">Record the real event</h2>
+            <div className="mt-4 grid gap-2">
+              <Link href="/sales" className="rounded-xl border border-[#dfe6df] px-4 py-3 text-sm font-bold text-[#123b34] hover:bg-[#f7f8f5]">New Sale →</Link>
+              <Link href="/repairs" className="rounded-xl border border-[#dfe6df] px-4 py-3 text-sm font-bold text-[#123b34] hover:bg-[#f7f8f5]">Repair payments →</Link>
+              <Link href="/reports/daily-closing" className="rounded-xl border border-[#dfe6df] px-4 py-3 text-sm font-bold text-[#123b34] hover:bg-[#f7f8f5]">Daily Closing / Expenses →</Link>
+            </div>
+          </section>
+        </section>
         </section>
       </main>
     </AppLayout>
