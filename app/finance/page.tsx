@@ -4,26 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
 import { financeService } from "@/services/financeService";
-import type { FinancialCategory, FinancialDirection, FinancialTransaction } from "@/types/finance";
+import type { FinancialTransaction } from "@/types/finance";
 
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
-const labels: Record<string, string> = {
-  sales: "Sales",
-  customer_payment: "Customer payment",
-  engineer_payment: "Engineer payment",
-  repair_payment: "Repair payment",
-  part_purchase: "Part purchase",
-  salary: "Salary",
-  rent: "Rent",
-  utility: "Utility",
-  other: "Other",
-};
 
 export default function FinancePage() {
   const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
-
   const [period, setPeriod] = useState("month");
-  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   async function load() {
@@ -57,8 +44,6 @@ export default function FinancePage() {
     },
     { in: 0, out: 0 },
   );
-
-
 
   return (
     <AppLayout>
@@ -114,7 +99,6 @@ export default function FinancePage() {
             </div>
           </section>
         </section>
-        </section>
       </main>
     </AppLayout>
   );
@@ -126,14 +110,5 @@ function Metric({ label, value, tone = "green" }: { label: string; value: string
       <p className="text-xs font-semibold text-[#74837e]">{label}</p>
       <p className={`mt-2 font-heading text-2xl font-bold ${tone === "red" ? "text-red-700" : "text-[#123b34]"}`}>{value}</p>
     </div>
-  );
-}
-
-function Field({ label, value, onChange, placeholder, type = "text" }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; type?: string }) {
-  return (
-    <label className="block text-xs font-bold text-[#53635d]">
-      {label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} min={type === "number" ? "0" : undefined} className="mt-1 h-11 w-full rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-normal outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" />
-    </label>
   );
 }
