@@ -12,7 +12,17 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 type InventoryTableProps = { refreshKey: number; onEdit: (item: InventoryItem) => void; itemsOverride?: InventoryItem[]; embedded?: boolean; showActions?: boolean };
 
 function groupLabel(item: InventoryItem) {
-  return item.item_type === "part" || item.category === "Phone Parts" ? "Phone Parts" : "Gadgets & Accessories";
+  return item.item_type === "part" || item.category === "Phone Parts" ? "Phone Parts" : "Accessories & Gadgets";
+}
+
+function friendlySubcategory(value: string | null | undefined) {
+  const map: Record<string, string> = {
+    Downboards: "Charging Port", "Charging Boards": "Charging Port", "Charging Flex": "Charging Port",
+    "Power Flex": "Battery", "Power Button Flex": "Battery", "Earpiece Flex": "Speaker / Earpiece", "Earpiece / Speaker Flex": "Speaker / Earpiece",
+    "Other Phone Parts": "Other Parts", Chargers: "Charger", Cables: "Cable", Earphones: "Earphone / AirPods", Headsets: "Earphone / AirPods",
+    "Power Banks": "Power Bank", Speakers: "Speaker / Earpiece", "Screen Protectors": "Screen Protector",
+  };
+  return value ? map[value] || value : "Other Accessories";
 }
 
 function stockLabel(item: InventoryItem) {
@@ -36,31 +46,31 @@ export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embe
   const source = itemsOverride ?? items;
 
   async function handleDeactivate(id: string) {
-    if (!confirm("Hide this item from active stock? Its sales and movement history will be kept.")) return;
+    if (!confirm("Hide this item from the stock list? Its sales history will be kept.")) return;
     const { error } = await inventoryService.deactivateInventoryItem(id);
     if (error) return toast.error(error.message);
-    toast.success("Item hidden from active inventory.");
+    toast.success("Item hidden from stock list.");
     const result = await inventoryService.getInventory();
     setItems((result.data || []) as InventoryItem[]);
   }
 
   return (
     <div className={embedded ? "" : "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"}>
-      {!embedded && <h2 className="mb-4 text-xl font-bold">Inventory</h2>}
+      {!embedded && <h2 className="mb-4 text-xl font-bold">My Stock</h2>}
       {source.length === 0 ? (
         <div className="px-5 py-14 text-center"><p className="font-semibold text-slate-900">No stock matches this view</p><p className="mt-1 text-sm text-slate-500">Try another category, search term, or stock filter.</p></div>
       ) : (
         <>
           <div className="hidden overflow-x-auto md:block">
             <Table>
-              <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Type</TableHead><TableHead>Brand / phone</TableHead><TableHead>Where</TableHead><TableHead>How many</TableHead><TableHead>Faulty</TableHead><TableHead>Sell for</TableHead><TableHead>Lowest price</TableHead><TableHead>Shop paid</TableHead>{showActions && <TableHead>Actions</TableHead>}</TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Group</TableHead><TableHead>Brand / phone</TableHead><TableHead>Where</TableHead><TableHead>How many</TableHead><TableHead>Faulty</TableHead><TableHead>Sell for</TableHead><TableHead>Lowest price</TableHead><TableHead>Shop paid</TableHead>{showActions && <TableHead>Actions</TableHead>}</TableRow></TableHeader>
               <TableBody>
                 {source.map(item => <TableRow key={item.id}>
-                  <TableCell><div className="flex items-center gap-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0"><div className="font-semibold text-slate-900">{item.item_name}</div><div className="mt-0.5 text-xs text-slate-500">{item.subcategory || "Uncategorized"}{item.sku ? ` · ${item.sku}` : ""}</div></div></div></TableCell>
-                  <TableCell><div className="space-y-1"><Badge variant="secondary">{groupLabel(item)}</Badge><div className="text-xs text-slate-500">{item.subcategory || "—"}</div></div></TableCell>
+                  <TableCell><div className="flex items-center gap-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0"><div className="font-semibold text-slate-900">{item.item_name}</div><div className="mt-0.5 text-xs text-slate-500">{friendlySubcategory(item.subcategory)}{item.sku ? ` · ${item.sku}` : ""}</div></div></div></TableCell>
+                  <TableCell><div className="space-y-1"><Badge variant="secondary">{groupLabel(item)}</Badge><div className="text-xs text-slate-500">{friendlySubcategory(item.subcategory)}</div></div></TableCell>
                   <TableCell><div className="font-medium text-slate-800">{item.brand || "—"}</div><div className="text-xs text-slate-500">{item.compatible_models || "No model specified"}</div></TableCell>
                   <TableCell>{item.shelf_location || "—"}</TableCell>
-                  <TableCell><div className="font-semibold text-slate-900">{item.quantity} units</div><div className={`text-xs ${item.quantity === 0 ? "text-red-700" : item.quantity <= item.minimum_stock ? "text-amber-700" : "text-slate-500"}`}>{stockLabel(item)}</div></TableCell><TableCell className="text-xs font-semibold text-rose-700">{Number(item.faulty_quantity ?? 0)} units</TableCell>
+                  <TableCell><div className="font-semibold text-slate-900">{item.quantity} available</div><div className={`text-xs ${item.quantity === 0 ? "text-red-700" : item.quantity <= item.minimum_stock ? "text-amber-700" : "text-slate-500"}`}>{stockLabel(item)}</div></TableCell><TableCell className="text-xs font-semibold text-rose-700">{Number(item.faulty_quantity ?? 0)} units</TableCell>
                   <TableCell className="font-semibold">₦{Number(item.selling_price).toLocaleString()}</TableCell><TableCell className="text-xs font-semibold text-amber-700">₦{Number((item as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? item.selling_price).toLocaleString()}</TableCell><TableCell className="text-xs text-slate-500">{item.cost_price == null ? "—" : `₦${Number(item.cost_price).toLocaleString()}`}</TableCell>
                   {showActions && <TableCell><div className="flex gap-2"><Button size="sm" onClick={() => onEdit(item)}>Edit</Button><Button variant="destructive" size="sm" onClick={() => handleDeactivate(item.id)}>Hide</Button></div></TableCell>}
                 </TableRow>)}
@@ -70,7 +80,7 @@ export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embe
 
           <div className="divide-y divide-slate-100 md:hidden">
             {source.map(item => <article key={item.id} className="p-4">
-              <div className="flex gap-3"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-slate-950">{item.item_name}</h3><p className="mt-0.5 text-xs text-slate-500">{item.brand || "Unknown brand"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p></div><div className="text-right"><span className="shrink-0 text-sm font-bold text-slate-900">₦{Number(item.selling_price).toLocaleString()}</span><span className="block text-[10px] text-amber-700">floor ₦{Number((item as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? item.selling_price).toLocaleString()}</span></div></div><div className="mt-3 flex flex-wrap gap-2"><Badge variant="secondary">{groupLabel(item)}</Badge><Badge variant="secondary">{item.subcategory || "Uncategorized"}</Badge><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.quantity === 0 ? "bg-red-50 text-red-700" : item.quantity <= item.minimum_stock ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}>{item.quantity} units · {stockLabel(item)}</span></div><div className="mt-3 grid grid-cols-3 gap-2 text-xs text-slate-500"><span>Location <strong className="block text-slate-800">{item.shelf_location || "Not set"}</strong></span><span>SKU <strong className="block text-slate-800">{item.sku || "Not set"}</strong></span><span>Faulty <strong className="block text-rose-700">{Number(item.faulty_quantity ?? 0)} units</strong></span></div>{showActions && <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => onEdit(item)} className="flex-1">Edit</Button><Button variant="outline" size="sm" onClick={() => handleDeactivate(item.id)}>Hide</Button></div>}</div></div>
+              <div className="flex gap-3"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-slate-950">{item.item_name}</h3><p className="mt-0.5 text-xs text-slate-500">{item.brand || "Unknown brand"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p></div><div className="text-right"><span className="shrink-0 text-sm font-bold text-slate-900">₦{Number(item.selling_price).toLocaleString()}</span><span className="block text-[10px] text-amber-700">floor ₦{Number((item as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? item.selling_price).toLocaleString()}</span></div></div><div className="mt-3 flex flex-wrap gap-2"><Badge variant="secondary">{groupLabel(item)}</Badge><Badge variant="secondary">{item.subcategory || "Uncategorized"}</Badge><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.quantity === 0 ? "bg-red-50 text-red-700" : item.quantity <= item.minimum_stock ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-700"}`}>{item.quantity} available · {stockLabel(item)}</span></div><div className="mt-3 grid grid-cols-3 gap-2 text-xs text-slate-500"><span>Location <strong className="block text-slate-800">{item.shelf_location || "Not set"}</strong></span><span>Code <strong className="block text-slate-800">{item.sku || "Not set"}</strong></span><span>Faulty <strong className="block text-rose-700">{Number(item.faulty_quantity ?? 0)} units</strong></span></div>{showActions && <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => onEdit(item)} className="flex-1">Edit</Button><Button variant="outline" size="sm" onClick={() => handleDeactivate(item.id)}>Hide</Button></div>}</div></div>
             </article>)}
           </div>
         </>
