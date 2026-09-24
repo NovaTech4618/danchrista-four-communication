@@ -71,7 +71,7 @@ END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='profiles' AND t.tgname='prevent_profile_authorization_escalation' AND NOT t.tgisinternal) THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='profiles' AND t.tgname='trg_prevent_self_role_escalation' AND NOT t.tgisinternal) THEN
     RAISE EXCEPTION 'Role escalation regression: profile authorization trigger is missing';
   END IF;
   IF NOT has_function_privilege('authenticated','public.update_staff_role(uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'update_staff_role is not executable by authenticated users'; END IF;
