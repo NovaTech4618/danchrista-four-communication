@@ -124,7 +124,7 @@ DO $$
 BEGIN
   IF NOT has_function_privilege('authenticated','public.record_inventory_movement(uuid,text,integer,numeric,text,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_inventory_movement is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_inventory_movement(uuid,text,integer,numeric,text,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_inventory_movement must not be executable by anon'; END IF;
-  IF NOT has_function_privilege('authenticated','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt is not executable by authenticated users'; END IF;
+  IF has_function_privilege('authenticated','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt must remain internal and not be executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt must not be executable by anon'; END IF;
   IF NOT has_function_privilege('authenticated','public.change_repair_status(uuid,text,text)','EXECUTE') THEN RAISE EXCEPTION 'change_repair_status is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.change_repair_status(uuid,text,text)','EXECUTE') THEN RAISE EXCEPTION 'change_repair_status must not be executable by anon'; END IF;
