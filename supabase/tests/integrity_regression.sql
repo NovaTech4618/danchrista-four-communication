@@ -9,7 +9,7 @@ BEGIN
   IF v_count<>0 THEN RAISE EXCEPTION 'RLS regression: % public tables have RLS disabled',v_count; END IF;
 END $$;
 
-DO $
+DO $reg$
 DECLARE v_table text;
 BEGIN
   -- Public/anonymous access is allowed only where explicitly intended. Sensitive
@@ -42,7 +42,7 @@ BEGIN
       RAISE EXCEPTION 'RLS regression: % exposes a permissive public/anonymous write policy',v_table;
     END IF;
   END LOOP;
-END $;
+END $reg$;
 
 DO $$
 DECLARE v_count integer;
@@ -80,10 +80,10 @@ BEGIN
       RAISE EXCEPTION 'Direct-write regression: % still has a permissive authenticated write policy',v_table;
     END IF;
   END LOOP;
-END $;
+END $reg$;
 
 -- Authoritative ledgers must not grant direct table writes to authenticated clients.
-DO $
+DO $reg$
 DECLARE v_table text;
 BEGIN
   FOREACH v_table IN ARRAY ARRAY['customer_debt_ledger','engineer_transactions','engineer_payments','inventory_stock_movements'] LOOP
@@ -93,9 +93,9 @@ BEGIN
       RAISE EXCEPTION 'Ledger table % still grants direct authenticated DML privileges',v_table;
     END IF;
   END LOOP;
-END $;
+END $reg$;
 
-DO $
+DO $reg$
 BEGIN
   IF NOT has_function_privilege('authenticated','public.record_repair_part_usage(uuid,uuid,integer,text)'(uuid,uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'record_repair_part_usage is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_repair_part_usage(uuid,uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'record_repair_part_usage must not be executable by anon'; END IF;
