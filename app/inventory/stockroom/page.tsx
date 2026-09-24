@@ -46,9 +46,30 @@ function stateFor(item: InventoryItem): Exclude<StockFilter, "all"> {
   if (quantity <= Number(item.minimum_stock || 0)) return "low";
   return "healthy";
 }
+function friendlySubcategory(value: string | null | undefined) {
+  const map: Record<string, string> = {
+    Downboards: "Charging Port",
+    "Charging Boards": "Charging Port",
+    "Charging Flex": "Charging Port",
+    "Power Flex": "Battery",
+    "Power Button Flex": "Battery",
+    "Earpiece Flex": "Speaker / Earpiece",
+    Audio: "Speaker / Earpiece",
+    Speakers: "Speaker / Earpiece",
+    "Other Phone Parts": "Other Parts",
+    Chargers: "Charger",
+    Cables: "Cable",
+    Earphones: "Earphone / AirPods",
+    Headsets: "Earphone / AirPods",
+    "Power Banks": "Power Bank",
+    "Screen Protectors": "Screen Protector",
+    Smartwatches: "Smartwatch",
+  };
+  return value ? map[value] || value : "";
+}
 function matchesGroup(item: InventoryItem, matches: readonly string[]) {
-  const value = (item.subcategory || item.category || "").toLowerCase();
-  return matches.some(match => value === match.toLowerCase());
+  const value = friendlySubcategory(item.subcategory) || item.category || "";
+  return matches.some(match => value.toLowerCase() === match.toLowerCase());
 }
 
 function money(value: number) {
@@ -80,7 +101,7 @@ export default function StockroomPage() {
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return items.filter(item => {
-      const searchable = [item.item_name, item.brand, item.compatible_models, item.sku, item.subcategory, item.category].filter(Boolean).join(" ").toLowerCase();
+      const searchable = [item.item_name, item.brand, item.compatible_models, item.sku, friendlySubcategory(item.subcategory), item.category].filter(Boolean).join(" ").toLowerCase();
       const categoryMatch = !selectedGroup || matchesGroup(item, selectedGroup.matches);
       const filterMatch = filter === "all" || stateFor(item) === filter;
       return (!needle || searchable.includes(needle)) && (shelf === "all" || groupFor(item) === shelf) && categoryMatch && filterMatch;
