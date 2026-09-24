@@ -43,7 +43,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
     const normalizedCategory = editingItem.category === "Phone Parts" || editingItem.category === "Gadgets & Accessories" ? editingItem.category : normalizedType === "part" ? "Phone Parts" : "Gadgets & Accessories";
     const floor = Number((editingItem as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? editingItem.selling_price);
     setItemName(editingItem.item_name); setCategory(normalizedCategory);
-    setSubcategory(editingItem.subcategory || (normalizedCategory === "Phone Parts" ? "Other Phone Parts" : "Other Gadgets & Accessories"));
+    setSubcategory(editingItem.subcategory || (normalizedCategory === "Phone Parts" ? "Other Phone Parts" : "Chargers & Cables"));
     setItemType(normalizedType); setBrand(editingItem.brand || ""); setCompatibleModels(editingItem.compatible_models || ""); setSku(editingItem.sku || "");
     setSellingPrice(String(editingItem.selling_price)); setMinimumSellingPrice(String(floor)); setCostPrice(editingItem.cost_price != null ? String(editingItem.cost_price) : ""); setQuantity(String(editingItem.quantity)); setMinimumStock(String(editingItem.minimum_stock));
     setSupplier(editingItem.supplier || ""); setShelfLocation(editingItem.shelf_location || ""); setNotes(editingItem.notes || ""); setImageUrl(editingItem.image_url || null); setImageFile(null); setRemoveImage(false);
