@@ -12,15 +12,15 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: [
 const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const siteUrl = configuredSiteUrl || "https://amezing-limited.vercel.app";
+const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Amezing Limited", template: "%s · Amezing Limited" },
-  description: "Amezing Limited in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
+  title: { default: "Danchrista Four Communication", template: "%s · Danchrista Four Communication" },
+  description: "Danchrista Four Communication in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   keywords: [
-    "Amezing Limited",
-    "Amezing Limited Kubwa",
+    "Danchrista Four Communication",
+    "Danchrista Four Communication Kubwa",
     "phone repair Kubwa",
     "phone repair in Kubwa",
     "phone parts Kubwa",
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     "phone parts Abuja",
     "mobile phone repair Abuja",
   ],
-  applicationName: "Amezing Limited",
+  applicationName: "Danchrista Four Communication",
   category: "business",
   manifest: "/manifest.webmanifest",
   robots: { index: true, follow: true },
   appleWebApp: {
     capable: true,
-    title: "Amezing Limited",
+    title: "Danchrista Four Communication",
     statusBarStyle: "default",
   },
   icons: {
