@@ -22,7 +22,7 @@ const groups: { label: string; items: NavItem[] }[] = [
   ] },
   { label: "Money", items: [
     { title: "Engineer Parts", url: "/engineer-workflow", icon: UserRound, permission: "engineer_work" },
-    { title: "Expenses / Money", url: "/expenses", icon: WalletCards, permission: "expenses" },
+    { title: "Money", url: "/finance", icon: WalletCards, permission: "profit" },
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
     { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
   ] },
