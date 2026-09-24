@@ -14,19 +14,29 @@ import type { StaffRole } from "@/types/staff";
 import type { InventoryItem } from "@/types/inventory";
 
 type Shelf = "all" | "parts" | "accessories";
-type PartCategory = "Charging Boards" | "Charging Flex" | "Power Button Flex" | "Earpiece / Speaker Flex" | "Back Glass" | "Other Phone Parts";
+type PartCategory = "Screen" | "Charging Port" | "Battery" | "Speaker / Earpiece" | "Camera" | "Back Glass" | "Other Parts";
 
 const PARTS: { name: PartCategory; icon: typeof Package; description: string; brands?: string[] }[] = [
-  { name: "Charging Boards", icon: Smartphone, description: "Charging boards and lower boards", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
-  { name: "Charging Flex", icon: Cable, description: "Charging and USB flex cables", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
-  { name: "Power Button Flex", icon: BatteryCharging, description: "Power and side-button flexes", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
-  { name: "Earpiece / Speaker Flex", icon: Headphones, description: "Earpiece and speaker flexes", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
+  { name: "Screen", icon: Smartphone, description: "Phone screens", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
+  { name: "Charging Port", icon: Cable, description: "Charging ports and charging parts", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
+  { name: "Battery", icon: BatteryCharging, description: "Phone batteries", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
+  { name: "Speaker / Earpiece", icon: Headphones, description: "Speakers and earpieces", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
+  { name: "Camera", icon: Smartphone, description: "Phone cameras", brands: ["iPhone","Samsung","Tecno","Infinix","Redmi","Other"] },
   { name: "Back Glass", icon: Smartphone, description: "Phone back glass and covers", brands: ["iPhone","Samsung","Tecno","Infinix","Redmi","Other"] },
-  { name: "Other Phone Parts", icon: Package, description: "Other repair parts" },
+  { name: "Other Parts", icon: Package, description: "Other repair parts" },
 ];
 
-const ACCESSORIES = ["Chargers","Cables","Earphones","Headsets","Power Banks","Speakers","Screen Protectors","Other Accessories"];
+const ACCESSORIES = ["Charger","Earphone / AirPods","Power Bank","Screen Protector","Cable","Phone Stand","Mouse / Keyboard","Smartwatch","Router","TV Box","Other Accessories"];
 
+function friendlySubcategory(value: string | null | undefined) {
+  const map: Record<string, string> = {
+    Downboards: "Charging Port", "Charging Boards": "Charging Port", "Charging Flex": "Charging Port",
+    "Power Flex": "Battery", "Power Button Flex": "Battery", "Earpiece Flex": "Speaker / Earpiece", "Earpiece / Speaker Flex": "Speaker / Earpiece",
+    "Other Phone Parts": "Other Parts", Chargers: "Charger", Cables: "Cable", Earphones: "Earphone / AirPods", Headsets: "Earphone / AirPods",
+    "Power Banks": "Power Bank", Speakers: "Speaker / Earpiece", "Screen Protectors": "Screen Protector",
+  };
+  return value ? map[value] || value : "Other Accessories";
+}
 function groupFor(item: InventoryItem): Shelf {
   return item.item_type === "part" || item.category === "Phone Parts" ? "parts" : "accessories";
 }
@@ -67,7 +77,7 @@ export default function InventoryPage() {
   const visibleItems = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return items.filter(item => {
-      const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${item.subcategory || ""} ${item.category || ""}`.toLowerCase();
+      const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${friendlySubcategory(item.subcategory)} ${item.category || ""}`.toLowerCase();
       return (!needle || text.includes(needle))
         && (shelf === "all" || groupFor(item) === shelf)
         && (!category || item.subcategory === category || item.category === category)
@@ -133,13 +143,13 @@ export default function InventoryPage() {
           ) : shelf === "parts" && !category ? (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {PARTS.map(({ name, icon: Icon, description }) => (
-                <CategoryCard key={name} label={name} count={parts.filter(i => (i.subcategory === name || (name === "Charging Boards" && i.subcategory === "Downboards") || (name === "Power Button Flex" && i.subcategory === "Power Flex") || (name === "Earpiece / Speaker Flex" && i.subcategory === "Earpiece Flex"))).length} description={description} icon={Icon} onClick={() => { setCategory(name); setBrand(null); }} />
+                <CategoryCard key={name} label={name} count={parts.filter(i => friendlySubcategory(i.subcategory) === name).length} description={description} icon={Icon} onClick={() => { setCategory(name); setBrand(null); }} />
               ))}
             </div>
           ) : shelf === "accessories" && !category ? (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {ACCESSORIES.map(name => (
-                <CategoryCard key={name} label={name} count={accessories.filter(i => (i.subcategory === name || (name === "Charging Boards" && i.subcategory === "Downboards") || (name === "Power Button Flex" && i.subcategory === "Power Flex") || (name === "Earpiece / Speaker Flex" && i.subcategory === "Earpiece Flex")) || i.category === name).length} description="Browse this stock shelf" icon={Package} onClick={() => setCategory(name)} />
+                <CategoryCard key={name} label={name} count={accessories.filter(i => friendlySubcategory(i.subcategory) === name || i.category === name).length} description="Browse this stock shelf" icon={Package} onClick={() => setCategory(name)} />
               ))}
             </div>
           ) : category && (currentPart || accessoryCategory) ? (
@@ -151,7 +161,7 @@ export default function InventoryPage() {
               {currentPart?.brands && (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                   {currentPart.brands.map(b => (
-                    <CategoryCard key={b} label={b} count={parts.filter(i => i.subcategory === category && (i.brand || "").toLowerCase() === b.toLowerCase()).length} description="View this brand" icon={Smartphone} onClick={() => setBrand(b === "Other" ? "__other" : b)} active={brand === b || (b === "Other" && brand === "__other")} />
+                    <CategoryCard key={b} label={b} count={parts.filter(i => friendlySubcategory(i.subcategory) === category && (i.brand || "").toLowerCase() === b.toLowerCase()).length} description="View this brand" icon={Smartphone} onClick={() => setBrand(b === "Other" ? "__other" : b)} active={brand === b || (b === "Other" && brand === "__other")} />
                   ))}
                 </div>
               )}
@@ -161,7 +171,7 @@ export default function InventoryPage() {
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d6a54]">Shelf</p>
                     <p className="mt-2 text-lg font-bold text-[#182a28]">{accessoryCategory}</p>
                     <p className="mt-1 text-sm text-[#74837e]">Products currently grouped in this accessory category.</p>
-                    <p className="mt-4 text-2xl font-bold text-[#1d6a54]">{accessories.filter(i => i.subcategory === accessoryCategory || i.category === accessoryCategory).length}</p>
+                    <p className="mt-4 text-2xl font-bold text-[#1d6a54]">{accessories.filter(i => friendlySubcategory(i.subcategory) === accessoryCategory || i.category === accessoryCategory).length}</p>
                     <p className="text-xs text-[#74837e]">items</p>
                   </div>
                 </div>
