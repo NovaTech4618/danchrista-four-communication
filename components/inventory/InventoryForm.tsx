@@ -11,8 +11,8 @@ import InventoryImage from "@/components/inventory/InventoryImage";
 
 type Props = { editingItem: InventoryItem | null; onSaved: () => void; onCancelEdit: () => void };
 
-const PART_SUBCATEGORIES = ["Downboards", "Charging Flex", "Power Flex", "Earpiece Flex", "Back Glass", "Other Phone Parts"];
-const GOODS_SUBCATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Phone Accessories", "Other Gadgets & Accessories"];
+const PART_SUBCATEGORIES = ["Displays", "Charging", "Power", "Audio", "Back Glass / Housing", "Camera", "Other Phone Parts"];
+const GOODS_SUBCATEGORIES = ["Computer & Laptop", "Networking", "Storage", "Chargers & Cables", "Audio", "Phone Accessories", "Smartwatch & Wearables", "Car Accessories", "TV & Display", "Media", "Grooming", "Portable", "Telephones"];
 
 export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Props) {
   const [itemName, setItemName] = useState("");
@@ -43,7 +43,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
     const normalizedCategory = editingItem.category === "Phone Parts" || editingItem.category === "Gadgets & Accessories" ? editingItem.category : normalizedType === "part" ? "Phone Parts" : "Gadgets & Accessories";
     const floor = Number((editingItem as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? editingItem.selling_price);
     setItemName(editingItem.item_name); setCategory(normalizedCategory);
-    setSubcategory(editingItem.subcategory || (normalizedCategory === "Phone Parts" ? "Other Phone Parts" : "Other Gadgets & Accessories"));
+    setSubcategory(editingItem.subcategory || (normalizedCategory === "Phone Parts" ? "Other Phone Parts" : "Chargers & Cables"));
     setItemType(normalizedType); setBrand(editingItem.brand || ""); setCompatibleModels(editingItem.compatible_models || ""); setSku(editingItem.sku || "");
     setSellingPrice(String(editingItem.selling_price)); setMinimumSellingPrice(String(floor)); setCostPrice(editingItem.cost_price != null ? String(editingItem.cost_price) : ""); setQuantity(String(editingItem.quantity)); setMinimumStock(String(editingItem.minimum_stock));
     setSupplier(editingItem.supplier || ""); setShelfLocation(editingItem.shelf_location || ""); setNotes(editingItem.notes || ""); setImageUrl(editingItem.image_url || null); setImageFile(null); setRemoveImage(false);
@@ -55,7 +55,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
 
   function handleCategoryChange(value: string) {
     const nextIsParts = value === "Phone Parts";
-    setCategory(value); setSubcategory(nextIsParts ? "Other Phone Parts" : "Other Gadgets & Accessories");
+    setCategory(value); setSubcategory(nextIsParts ? "Other Phone Parts" : "Chargers & Cables");
     if (nextIsParts) setItemType("part"); else if (itemType === "part") setItemType("accessory");
   }
 

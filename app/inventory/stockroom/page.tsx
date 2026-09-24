@@ -12,22 +12,29 @@ type Shelf = "all" | "parts" | "accessories";
 type StockFilter = "all" | "healthy" | "low" | "out";
 
 const PART_GROUPS = [
-  { name: "Displays", description: "LCD, OLED and replacement screens", matches: ["Displays"], icon: Smartphone },
-  { name: "Charging & Power", description: "Downboards, charging flexes and power flexes", matches: ["Downboards", "Charging Flex", "Power Flex", "Charging", "Power"], icon: Cable },
-  { name: "Audio", description: "Earpiece, speaker and audio flex parts", matches: ["Earpiece Flex", "Audio"], icon: Headphones },
-  { name: "Housing & Glass", description: "Back glass, housings and covers", matches: ["Back Glass", "Housing", "Back Glass/Housing"], icon: Smartphone },
-  { name: "Camera", description: "Camera modules and camera flex parts", matches: ["Camera"], icon: Smartphone },
-  { name: "Batteries", description: "Replacement phone batteries", matches: ["Batteries", "Battery"], icon: BatteryCharging },
-  { name: "Other Phone Parts", description: "Any workshop part outside the main shelves", matches: ["Other Phone Parts", "Other"], icon: Package },
+  { name: "Displays", description: "Phone screens and display assemblies", matches: ["Displays"], icon: Smartphone },
+  { name: "Charging", description: "Downboards, charging flexes and charging parts", matches: ["Charging"], icon: Cable },
+  { name: "Power", description: "Power and side-button parts", matches: ["Power"], icon: BatteryCharging },
+  { name: "Audio", description: "Earpieces, speakers and audio parts", matches: ["Audio"], icon: Headphones },
+  { name: "Back Glass / Housing", description: "Phone back glass and housings", matches: ["Back Glass / Housing"], icon: Smartphone },
+  { name: "Camera", description: "Phone camera parts and modules", matches: ["Camera"], icon: Smartphone },
+  { name: "Other Phone Parts", description: "Other repair parts", matches: ["Other Phone Parts"], icon: Package },
 ] as const;
 
 const ACCESSORY_GROUPS = [
-  { name: "Charging", description: "Chargers, cables and charging accessories", matches: ["Chargers", "Cables"], icon: Cable },
-  { name: "Audio", description: "Earphones, headsets and speakers", matches: ["Earphones", "Headsets", "Speakers"], icon: Headphones },
-  { name: "Power", description: "Power banks and portable power", matches: ["Power Banks"], icon: BatteryCharging },
-  { name: "Protection", description: "Screen protectors and phone protection", matches: ["Screen Protectors"], icon: Smartphone },
-  { name: "Wearables", description: "Smartwatches and wearable gadgets", matches: ["Smartwatches"], icon: Package },
-  { name: "Other Accessories", description: "Other counter goods", matches: ["Other Accessories", "Other"], icon: Package },
+  { name: "Computer & Laptop", description: "Computer and laptop accessories", matches: ["Computer & Laptop"], icon: Package },
+  { name: "Networking", description: "Routers, adapters and networking cables", matches: ["Networking"], icon: Cable },
+  { name: "Storage", description: "Memory cards, flash storage and drive cases", matches: ["Storage"], icon: Package },
+  { name: "Chargers & Cables", description: "Chargers, cables and charging accessories", matches: ["Chargers & Cables"], icon: Cable },
+  { name: "Audio", description: "Earphones, headsets and microphones", matches: ["Audio"], icon: Headphones },
+  { name: "Phone Accessories", description: "Phone holders, screen guards, OTG and card readers", matches: ["Phone Accessories"], icon: Smartphone },
+  { name: "Smartwatch & Wearables", description: "Smartwatches, straps and pouches", matches: ["Smartwatch & Wearables"], icon: Package },
+  { name: "Car Accessories", description: "Car Bluetooth, dash cameras and holders", matches: ["Car Accessories"], icon: Package },
+  { name: "TV & Display", description: "TV boxes and display connectors/converters", matches: ["TV & Display"], icon: Package },
+  { name: "Media", description: "MP3 players and media devices", matches: ["Media"], icon: Package },
+  { name: "Grooming", description: "Clippers and trimmers", matches: ["Grooming"], icon: Package },
+  { name: "Portable", description: "Hand fans and portable devices", matches: ["Portable"], icon: Package },
+  { name: "Telephones", description: "Table phones", matches: ["Telephones"], icon: Package },
 ] as const;
 
 

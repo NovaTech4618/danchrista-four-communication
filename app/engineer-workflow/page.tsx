@@ -16,6 +16,7 @@ export default function EngineerWorkflowPage() {
   const [inventoryId, setInventoryId] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [partPrice, setPartPrice] = useState("");
+  const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
   const [workAmount, setWorkAmount] = useState("");
   const [workDescription, setWorkDescription] = useState("");
   const [notes, setNotes] = useState("");
@@ -25,7 +26,7 @@ export default function EngineerWorkflowPage() {
   async function load() {
     const [people, stock] = await Promise.all([
       engineerService.getEngineers(),
-      supabase.from("inventory").select("id,item_name,quantity,selling_price").gt("quantity", 0).order("item_name"),
+      supabase.from("inventory").select("id,item_name,quantity,selling_price").eq("is_active", true).order("item_name"),
     ]);
     setEngineers((people.data ?? []).filter((e) => e.status === "active") as Engineer[]);
     setItems((stock.data ?? []) as InventoryItem[]);
@@ -36,7 +37,7 @@ export default function EngineerWorkflowPage() {
     setBusy(true); setMessage("");
     const result = await action();
     setMessage(result.error ? result.error.message || "Could not save this record." : "Recorded successfully. The original record remains in the ledger.");
-    if (!result.error) { setNotes(""); setQuantity("1"); setPartPrice(""); setWorkAmount(""); setWorkDescription(""); await load(); }
+    if (!result.error) { setNotes(""); setQuantity("1"); setPartPrice(""); setReturnCondition("normal"); setWorkAmount(""); setWorkDescription(""); await load(); }
     setBusy(false);
   }
 
@@ -64,9 +65,9 @@ export default function EngineerWorkflowPage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div><h2 className="font-semibold text-slate-950">Part returned</h2><p className="mt-1 text-sm text-slate-500">Never delete the original collection. Record the quantity that came back.</p></div>
         <div className="mt-4 space-y-3">
-          <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = items.find((i) => i.id === e.target.value); setPartPrice(item ? String(item.selling_price ?? 0) : ""); }} className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"><option value="">Select returned part</option>{items.map((i) => <option key={i.id} value={i.id}>{i.item_name}</option>)}</select>
-          <div className="grid grid-cols-2 gap-3"><input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="Qty returned" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /><input type="number" min="0" value={partPrice} onChange={(e) => setPartPrice(e.target.value)} placeholder="Return value" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /></div>
-          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsIn(engineerId, inventoryId, Number(quantity), "normal", notes))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Record returned part</button>
+          <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = items.find((i) => i.id === e.target.value); setPartPrice(item ? String(item.selling_price ?? 0) : ""); }} className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"><option value="">Select returned part</option>{items.map((i) => <option key={i.id} value={i.id}>{i.item_name} · {i.quantity} sellable</option>)}</select>
+          <div className="grid grid-cols-2 gap-3"><input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="Qty returned" className="h-11 rounded-xl border border-slate-200 px-3 text-sm" /><select value={returnCondition} onChange={(e) => setReturnCondition(e.target.value as "normal" | "faulty")} className="h-11 rounded-xl border border-slate-200 px-3 text-sm"><option value="normal">Normal / reusable</option><option value="faulty">Faulty / damaged</option></select></div>
+          <button disabled={busy || !engineerId || !inventoryId} onClick={() => run(() => engineerService.recordPartsIn(engineerId, inventoryId, Number(quantity), returnCondition, notes))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 disabled:cursor-not-allowed disabled:opacity-50">Record {returnCondition === "faulty" ? "faulty" : "normal"} return</button>
         </div>
       </section>
 
