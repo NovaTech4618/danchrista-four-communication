@@ -14,19 +14,33 @@ import type { StaffRole } from "@/types/staff";
 import type { InventoryItem } from "@/types/inventory";
 
 type Shelf = "all" | "parts" | "accessories";
-type PartCategory = "Downboards" | "Charging Flex" | "Power Flex" | "Earpiece Flex" | "Back Glass" | "Other Phone Parts";
+type PartCategory = "Displays" | "Charging" | "Power" | "Audio" | "Back Glass / Housing" | "Camera" | "Other Phone Parts";
 
 const PARTS: { name: PartCategory; icon: typeof Package; description: string; brands?: string[] }[] = [
-  { name: "Downboards", icon: Smartphone, description: "Charging boards and lower boards", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","Huawei","iPhone","Other"] },
-  { name: "Charging Flex", icon: Cable, description: "Charging and USB flex cables", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
-  { name: "Power Flex", icon: BatteryCharging, description: "Power and side-button flexes", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
-  { name: "Earpiece Flex", icon: Headphones, description: "Earpiece and speaker flexes", brands: ["Tecno","Infinix","itel","Samsung","Redmi","Nokia","iPhone","Other"] },
-  { name: "Back Glass", icon: Smartphone, description: "Phone back glass and covers", brands: ["iPhone","Samsung","Tecno","Infinix","Redmi","Other"] },
+  { name: "Displays", icon: Smartphone, description: "Phone screens and display assemblies", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Nokia","Huawei","Other"] },
+  { name: "Charging", icon: Cable, description: "Downboards, charging flexes and charging parts", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Nokia","Huawei","Other"] },
+  { name: "Power", icon: BatteryCharging, description: "Power and side-button parts", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Nokia","Huawei","Other"] },
+  { name: "Audio", icon: Headphones, description: "Earpieces, speakers and audio parts", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Nokia","Huawei","Other"] },
+  { name: "Back Glass / Housing", icon: Smartphone, description: "Phone back glass and housings", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Other"] },
+  { name: "Camera", icon: Smartphone, description: "Phone camera parts and modules", brands: ["iPhone","Samsung","Tecno","Infinix","itel","Redmi","Nokia","Other"] },
   { name: "Other Phone Parts", icon: Package, description: "Other repair parts" },
 ];
 
-const ACCESSORIES = ["Chargers","Cables","Earphones","Headsets","Power Banks","Speakers","Screen Protectors","Other Accessories"];
-
+const ACCESSORIES = [
+  "Computer & Laptop",
+  "Networking",
+  "Storage",
+  "Chargers & Cables",
+  "Audio",
+  "Phone Accessories",
+  "Smartwatch & Wearables",
+  "Car Accessories",
+  "TV & Display",
+  "Media",
+  "Grooming",
+  "Portable",
+  "Telephones",
+];
 function groupFor(item: InventoryItem): Shelf {
   return item.item_type === "part" || item.category === "Phone Parts" ? "parts" : "accessories";
 }
