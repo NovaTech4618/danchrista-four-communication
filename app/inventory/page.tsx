@@ -137,7 +137,7 @@ export default function InventoryPage() {
 
           {shelf === "all" && !category ? (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <ShelfCard title="Phone Parts" count={parts.length} description="Downboards, flexes, back glass and repair parts" icon={Smartphone} onClick={() => { setShelf("parts"); setCategory(null); }} />
+              <ShelfCard title="Phone Parts" count={parts.length} description="Screens, charging parts, batteries, speakers, cameras and back glass" icon={Smartphone} onClick={() => { setShelf("parts"); setCategory(null); }} />
               <ShelfCard title="Accessories" count={accessories.length} description="Chargers, cables, earphones and other shop goods" icon={Package} onClick={() => { setShelf("accessories"); setCategory(null); }} />
             </div>
           ) : shelf === "parts" && !category ? (
