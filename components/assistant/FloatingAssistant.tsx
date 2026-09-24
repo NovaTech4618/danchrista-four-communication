@@ -8,7 +8,7 @@ export default function FloatingAssistant() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6">
       {open && (
         <div className="mb-3 w-[min(320px,calc(100vw-2rem))] max-h-[58svh] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/15">
           <div className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white">
