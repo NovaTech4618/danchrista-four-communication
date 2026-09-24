@@ -114,7 +114,7 @@ export default function Header() {
                   <MoreHorizontal className="size-4" /> More <ChevronDown className="size-3.5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56 rounded-2xl border-[#dfe6df] p-1.5">
-                  {visibleMore.map((item) => <DropdownMenuItem key={item.url} asChild><Link href={item.url} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5"><item.icon className="size-4" /><span>{item.title}</span></Link></DropdownMenuItem>)}
+                  {visibleMore.map((item) => <DropdownMenuItem key={item.url} render={<Link href={item.url} />}><item.icon className="size-4" /><span>{item.title}</span></DropdownMenuItem>)}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -130,7 +130,7 @@ export default function Header() {
                 <ChevronDown className="size-3.5 text-[#74837e]" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-2xl border-[#dfe6df] p-1.5">
-                <DropdownMenuItem asChild><Link href="/settings" className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5"><Settings className="size-4" />Settings</Link></DropdownMenuItem>
+                <DropdownMenuItem render={<Link href="/settings" />}><Settings className="size-4" />Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-xl px-3 py-2.5"><LogOut className="mr-3 size-4" />Log out</DropdownMenuItem>
               </DropdownMenuContent>
@@ -148,7 +148,7 @@ export default function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-[#687873] outline-none"><MoreHorizontal className="size-4" /><span>More</span></DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" className="mb-2 w-56 rounded-2xl border-[#dfe6df] p-1.5">
-              {visibleMore.map((item) => <DropdownMenuItem key={item.url} asChild><Link href={item.url} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5"><item.icon className="size-4" /><span>{item.title}</span></Link></DropdownMenuItem>)}
+              {visibleMore.map((item) => <DropdownMenuItem key={item.url} render={<Link href={item.url} />}><item.icon className="size-4" /><span>{item.title}</span></DropdownMenuItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
