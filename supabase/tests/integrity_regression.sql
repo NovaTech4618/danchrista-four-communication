@@ -126,12 +126,12 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='customer_debt_one_sided_entry') THEN RAISE EXCEPTION 'Missing customer_debt_one_sided_entry constraint'; END IF;
 END $$;
 
-DO $
+DO $invreg$
 DECLARE v_count integer;
 BEGIN
   SELECT count(*) INTO v_count FROM pg_policies WHERE schemaname='public' AND tablename='inventory_stock_movements' AND policyname IN ('inventory_stock_movements_no_direct_insert','inventory_stock_movements_no_update','inventory_stock_movements_no_delete');
   IF v_count<>3 THEN RAISE EXCEPTION 'Inventory ledger regression: expected 3 direct-write blocking policies, found %',v_count; END IF;
-END $;
+END $invreg$;
 
 -- Authoritative ledgers must not grant direct table writes to authenticated clients.
 DO $reg$
