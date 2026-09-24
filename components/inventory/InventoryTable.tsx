@@ -16,9 +16,9 @@ function groupLabel(item: InventoryItem) {
 }
 
 function stockLabel(item: InventoryItem) {
-  if (item.quantity === 0) return "Out of stock";
-  if (item.quantity <= item.minimum_stock) return "Low stock";
-  return "In stock";
+  if (item.quantity === 0) return "Finished";
+  if (item.quantity <= item.minimum_stock) return "Running low";
+  return "Available";
 }
 
 export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embedded = false, showActions = true }: InventoryTableProps) {
@@ -53,7 +53,7 @@ export default function InventoryTable({ refreshKey, onEdit, itemsOverride, embe
         <>
           <div className="hidden overflow-x-auto md:block">
             <Table>
-              <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Brand / model</TableHead><TableHead>Location</TableHead><TableHead>Stock</TableHead><TableHead>Faulty</TableHead><TableHead>Price</TableHead><TableHead>Floor</TableHead><TableHead>Cost</TableHead>{showActions && <TableHead>Actions</TableHead>}</TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Type</TableHead><TableHead>Brand / phone</TableHead><TableHead>Where</TableHead><TableHead>How many</TableHead><TableHead>Faulty</TableHead><TableHead>Sell for</TableHead><TableHead>Lowest price</TableHead><TableHead>Shop paid</TableHead>{showActions && <TableHead>Actions</TableHead>}</TableRow></TableHeader>
               <TableBody>
                 {source.map(item => <TableRow key={item.id}>
                   <TableCell><div className="flex items-center gap-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0"><div className="font-semibold text-slate-900">{item.item_name}</div><div className="mt-0.5 text-xs text-slate-500">{item.subcategory || "Uncategorized"}{item.sku ? ` · ${item.sku}` : ""}</div></div></div></TableCell>
