@@ -17,7 +17,7 @@ const GOODS_SUBCATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Pow
 export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Props) {
   const [itemName, setItemName] = useState("");
   const [category, setCategory] = useState("Phone Parts");
-  const [subcategory, setWhich type?] = useState("Other Phone Parts");
+  const [subcategory, setSubcategory] = useState("Other Phone Parts");
   const [itemType, setItemType] = useState<"part" | "accessory" | "gadget">("part");
   const [brand, setBrand] = useState("");
   const [compatibleModels, setCompatibleModels] = useState("");
