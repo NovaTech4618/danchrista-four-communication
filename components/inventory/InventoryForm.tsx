@@ -25,9 +25,9 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
   const [sellingPrice, setSellingPrice] = useState("");
   const [minimumSellingPrice, setMinimumSellingPrice] = useState("");
   const [costPrice, setCostPrice] = useState("");
-  const [quantity, setHow many do we have?] = useState("0");
+  const [quantity, setQuantity] = useState("0");
   const [minimumStock, setMinimumStock] = useState("5");
-  const [supplier, setWhere did we get it? (supplier)] = useState("");
+  const [supplier, setSupplier] = useState("");
   const [shelfLocation, setShelfLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
       <CardHeader className="pb-3"><CardTitle className="text-lg">{editingItem ? "Edit item" : "Add a new item"}</CardTitle><p className="text-sm text-slate-500">Use simple names you and the other workers will recognize.</p></CardHeader>
       <CardContent><form onSubmit={handleSubmit} className="space-y-4">
         <Input placeholder="What is it? — e.g. Tecno Spark 10 Charging Board" value={itemName} onChange={e => setItemName(e.target.value)} />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">What kind of item?</span><select value={category} onChange={e => handleCategoryChange(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option>Phone Parts</option><option>Gadgets & Accessories</option></select></label><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Subcategory</span><select value={subcategory} onChange={e => setSubcategory(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">{subcategories.map(value => <option key={value}>{value}</option>)}</select></label></div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">What kind of item?</span><select value={category} onChange={e => handleCategoryChange(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option>Phone Parts</option><option>Gadgets & Accessories</option></select></label><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Which type?</span><select value={subcategory} onChange={e => setSubcategory(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">{subcategories.map(value => <option key={value}>{value}</option>)}</select></label></div>
         {category === "Gadgets & Accessories" && <label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Is it an accessory or gadget?</span><select value={itemType} onChange={e => setItemType(e.target.value as "accessory" | "gadget")} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="accessory">Accessory</option><option value="gadget">Gadget / Device</option></select></label>}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><Input placeholder="Brand" value={brand} onChange={e => setBrand(e.target.value)} /><Input placeholder="Item code (optional)" value={sku} onChange={e => setSku(e.target.value)} /></div>
         <Input placeholder={category === "Phone Parts" ? "Which phone does it fit? — e.g. Spark 10, KJ5" : "Compatible model / details (optional)"} value={compatibleModels} onChange={e => setCompatibleModels(e.target.value)} />
