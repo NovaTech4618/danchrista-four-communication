@@ -89,7 +89,7 @@ BEGIN
   IF NOT has_function_privilege('authenticated','public.create_invoice(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text)','EXECUTE') OR has_function_privilege('anon','public.create_invoice(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text)','EXECUTE') THEN RAISE EXCEPTION 'create_invoice execute boundary regression'; END IF;
   IF NOT has_function_privilege('authenticated','public.create_invoice_with_item(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text,text,numeric,numeric)','EXECUTE') OR has_function_privilege('anon','public.create_invoice_with_item(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text,text,numeric,numeric)','EXECUTE') THEN RAISE EXCEPTION 'create_invoice_with_item execute boundary regression'; END IF;
   IF NOT has_function_privilege('authenticated','public.add_invoice_item(uuid,text,numeric,numeric)','EXECUTE') OR has_function_privilege('anon','public.add_invoice_item(uuid,text,numeric,numeric)','EXECUTE') THEN RAISE EXCEPTION 'add_invoice_item execute boundary regression'; END IF;
-  IF NOT has_function_privilege('authenticated','public.record_invoice_payment(uuid,numeric,text,text,uuid)','EXECUTE') OR has_function_privilege('anon','public.record_invoice_payment(uuid,numeric,text,text,uuid)','EXECUTE') THEN RAISE EXCEPTION 'record_invoice_payment execute boundary regression'; END IF;
+  IF NOT has_function_privilege('authenticated','public.record_invoice_payment(uuid,numeric,text,text,uuid,timestamp with time zone)','EXECUTE') OR has_function_privilege('anon','public.record_invoice_payment(uuid,numeric,text,text,uuid,timestamp with time zone)','EXECUTE') THEN RAISE EXCEPTION 'record_invoice_payment execute boundary regression'; END IF;
 END $$;
 
 DO $$
