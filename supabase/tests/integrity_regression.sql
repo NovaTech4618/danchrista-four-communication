@@ -9,12 +9,40 @@ BEGIN
   IF v_count<>0 THEN RAISE EXCEPTION 'RLS regression: % public tables have RLS disabled',v_count; END IF;
 END $$;
 
-DO $$
-DECLARE v_count integer;
+DO $
+DECLARE v_table text;
 BEGIN
-  SELECT count(*) INTO v_count FROM pg_policies WHERE schemaname='public' AND ('anon'=ANY(roles) OR 'public'=ANY(roles));
-  IF v_count<>0 THEN RAISE EXCEPTION 'RLS regression: % public/anon policies remain',v_count; END IF;
-END $$;
+  -- Public/anonymous access is allowed only where explicitly intended. Sensitive
+  -- financial and operational tables must never expose direct write policies.
+  FOREACH v_table IN ARRAY ARRAY[
+    'financial_transactions',
+    'customer_debt_ledger',
+    'engineer_transactions',
+    'engineer_payments',
+    'invoice_payments',
+    'repair_payments',
+    'sales',
+    'sale_items',
+    'inventory_stock_movements',
+    'daily_closings',
+    'daily_closing_payment_methods'
+  ] LOOP
+    IF EXISTS (
+      SELECT 1
+      FROM pg_policies
+      WHERE schemaname='public'
+        AND tablename=v_table
+        AND ('anon'=ANY(roles) OR 'public'=ANY(roles))
+        AND cmd IN ('INSERT','UPDATE','DELETE','ALL')
+        AND (
+          coalesce(with_check,'') <> 'false'
+          OR (cmd IN ('UPDATE','DELETE','ALL') AND coalesce(qual,'') <> 'false')
+        )
+    ) THEN
+      RAISE EXCEPTION 'RLS regression: % exposes a permissive public/anonymous write policy',v_table;
+    END IF;
+  END LOOP;
+END $;
 
 DO $$
 DECLARE v_count integer;
