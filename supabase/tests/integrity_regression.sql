@@ -35,8 +35,16 @@ BEGIN
         AND ('anon'=ANY(roles) OR 'public'=ANY(roles))
         AND cmd IN ('INSERT','UPDATE','DELETE','ALL')
         AND (
-          coalesce(with_check,'') <> 'false'
-          OR (cmd IN ('UPDATE','DELETE','ALL') AND coalesce(qual,'') <> 'false')
+          (cmd = 'INSERT' AND coalesce(with_check,'') <> 'false')
+          OR (cmd = 'UPDATE' AND (
+            coalesce(with_check,'') <> 'false'
+            OR coalesce(qual,'') <> 'false'
+          ))
+          OR (cmd = 'DELETE' AND coalesce(qual,'') <> 'false')
+          OR (cmd = 'ALL' AND (
+            coalesce(with_check,'') <> 'false'
+            OR coalesce(qual,'') <> 'false'
+          ))
         )
     ) THEN
       RAISE EXCEPTION 'RLS regression: % exposes a permissive public/anonymous write policy',v_table;
