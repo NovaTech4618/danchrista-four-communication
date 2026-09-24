@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BatteryCharging, Cable, Clock3, MapPin, MessageCircle, Package, Smartphone, Wrench } from "lucide-react";
-import { DanchristaLogo } from "@/components/brand/DanchristaLogo";
+import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  "https://danchrista-four-communication.vercel.app";
+  "https://amezing-limited.vercel.app";
 
 export const metadata: Metadata = {
-  title: "Danchrista Four Communication | Phone Repairs, Parts & Accessories in Kubwa",
+  title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
   description:
-    "Danchrista Four Communication in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
+    "Amezing Limited in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   keywords: [
-    "Danchrista Four Communication",
+    "Amezing Limited",
     "phone repair Kubwa",
     "phone parts Kubwa",
     "phone accessories Kubwa",
@@ -22,16 +22,16 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Danchrista Four Communication | Kubwa, Abuja",
+    title: "Amezing Limited | Kubwa, Abuja",
     description:
       "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
     url: "/",
-    siteName: "Danchrista Four Communication",
+    siteName: "Amezing Limited",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Danchrista Four Communication | Kubwa, Abuja",
+    title: "Amezing Limited | Kubwa, Abuja",
     description:
       "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
   },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const businessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Danchrista Four Communication",
+  name: "Amezing Limited",
   url: siteUrl,
   telephone: "+2348035902087",
   description:
@@ -100,8 +100,8 @@ export default function HomePage() {
 
       <nav className="border-b border-white/10 bg-[#0b1512]/95 backdrop-blur-xl">
         <div className="mx-auto flex min-h-[72px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-7">
-          <Link href="/" aria-label="Danchrista home">
-            <DanchristaLogo />
+          <Link href="/" aria-label="Amezing home">
+            <AmezingLogo />
           </Link>
 
           <div className="hidden items-center gap-5 md:flex">
@@ -129,7 +129,7 @@ export default function HomePage() {
               Your phone. Fixed, supplied and supported.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">
-              Danchrista Four Communication serves customers from Central Market, Kubwa,
+              Amezing Limited serves customers from Central Market, Kubwa,
               with practical phone repairs, phone parts, accessories and software services.
             </p>
 
@@ -213,7 +213,7 @@ export default function HomePage() {
       <footer className="border-t border-white/10 px-5 py-10 sm:px-7">
         <div className="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <span className="font-semibold text-[#f4f1ea]">Danchrista Four Communication</span>
+            <span className="font-semibold text-[#f4f1ea]">Amezing Limited</span>
             <span className="ml-3 text-xs text-[#5c6b64]">Kubwa, Abuja · Phone repairs · Parts · Accessories</span>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#6b7d74]">
