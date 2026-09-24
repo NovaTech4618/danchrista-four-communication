@@ -52,11 +52,24 @@ BEGIN
       RAISE EXCEPTION 'Direct-write regression: % still has a permissive authenticated write policy',v_table;
     END IF;
   END LOOP;
-END $$;
+END $;
 
-DO $$
+-- Authoritative ledgers must not grant direct table writes to authenticated clients.
+DO $
+DECLARE v_table text;
 BEGIN
-  IF NOT has_function_privilege('authenticated','public.record_repair_part_usage(uuid,uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'record_repair_part_usage is not executable by authenticated users'; END IF;
+  FOREACH v_table IN ARRAY ARRAY['customer_debt_ledger','engineer_transactions','engineer_payments','inventory_stock_movements'] LOOP
+    IF has_table_privilege('authenticated','public.'||v_table,'INSERT')
+       OR has_table_privilege('authenticated','public.'||v_table,'UPDATE')
+       OR has_table_privilege('authenticated','public.'||v_table,'DELETE') THEN
+      RAISE EXCEPTION 'Ledger table % still grants direct authenticated DML privileges',v_table;
+    END IF;
+  END LOOP;
+END $;
+
+DO $
+BEGIN
+  IF NOT has_function_privilege('authenticated','public.record_repair_part_usage(uuid,uuid,integer,text)'(uuid,uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'record_repair_part_usage is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_repair_part_usage(uuid,uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'record_repair_part_usage must not be executable by anon'; END IF;
   IF NOT has_function_privilege('authenticated','public.return_repair_part_usage(uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'return_repair_part_usage is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.return_repair_part_usage(uuid,integer,text)','EXECUTE') THEN RAISE EXCEPTION 'return_repair_part_usage must not be executable by anon'; END IF;
