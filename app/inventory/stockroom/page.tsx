@@ -12,21 +12,26 @@ type Shelf = "all" | "parts" | "accessories";
 type StockFilter = "all" | "healthy" | "low" | "out";
 
 const PART_GROUPS = [
-  { name: "Displays", description: "LCD, OLED and replacement screens", matches: ["Displays"], icon: Smartphone },
-  { name: "Charging & Power", description: "Downboards, charging flexes and power flexes", matches: ["Downboards", "Charging Flex", "Power Flex", "Charging", "Power"], icon: Cable },
-  { name: "Audio", description: "Earpiece, speaker and audio flex parts", matches: ["Earpiece Flex", "Audio"], icon: Headphones },
-  { name: "Housing & Glass", description: "Back glass, housings and covers", matches: ["Back Glass", "Housing", "Back Glass/Housing"], icon: Smartphone },
-  { name: "Camera", description: "Camera modules and camera flex parts", matches: ["Camera"], icon: Smartphone },
-  { name: "Batteries", description: "Replacement phone batteries", matches: ["Batteries", "Battery"], icon: BatteryCharging },
-  { name: "Other Phone Parts", description: "Any workshop part outside the main shelves", matches: ["Other Phone Parts", "Other"], icon: Package },
+  { name: "Screen", description: "Phone screens", matches: ["Screen", "Displays"], icon: Smartphone },
+  { name: "Charging Port", description: "Charging ports and charging parts", matches: ["Charging Port", "Downboards", "Charging Boards", "Charging Flex", "Charging"], icon: Cable },
+  { name: "Battery", description: "Phone batteries", matches: ["Battery", "Batteries", "Power Flex", "Power Button Flex"], icon: BatteryCharging },
+  { name: "Speaker / Earpiece", description: "Speakers and earpieces", matches: ["Speaker / Earpiece", "Earpiece Flex", "Audio", "Speakers"], icon: Headphones },
+  { name: "Camera", description: "Phone cameras", matches: ["Camera"], icon: Smartphone },
+  { name: "Back Glass", description: "Phone back glass and covers", matches: ["Back Glass", "Housing", "Back Glass/Housing"], icon: Smartphone },
+  { name: "Other Parts", description: "Other repair parts", matches: ["Other Parts", "Other Phone Parts", "Other"], icon: Package },
 ] as const;
 
 const ACCESSORY_GROUPS = [
-  { name: "Charging", description: "Chargers, cables and charging accessories", matches: ["Chargers", "Cables"], icon: Cable },
-  { name: "Audio", description: "Earphones, headsets and speakers", matches: ["Earphones", "Headsets", "Speakers"], icon: Headphones },
-  { name: "Power", description: "Power banks and portable power", matches: ["Power Banks"], icon: BatteryCharging },
-  { name: "Protection", description: "Screen protectors and phone protection", matches: ["Screen Protectors"], icon: Smartphone },
-  { name: "Wearables", description: "Smartwatches and wearable gadgets", matches: ["Smartwatches"], icon: Package },
+  { name: "Charger", description: "Phone and device chargers", matches: ["Charger", "Chargers"], icon: Cable },
+  { name: "Earphone / AirPods", description: "Earphones, headsets and AirPods", matches: ["Earphone / AirPods", "Earphones", "Headsets"], icon: Headphones },
+  { name: "Power Bank", description: "Portable power banks", matches: ["Power Bank", "Power Banks"], icon: BatteryCharging },
+  { name: "Screen Protector", description: "Screen protectors", matches: ["Screen Protector", "Screen Protectors"], icon: Smartphone },
+  { name: "Cable", description: "Charging and other cables", matches: ["Cable", "Cables"], icon: Cable },
+  { name: "Phone Stand", description: "Phone stands and holders", matches: ["Phone Stand"], icon: Package },
+  { name: "Mouse / Keyboard", description: "Computer accessories", matches: ["Mouse / Keyboard"], icon: Package },
+  { name: "Smartwatch", description: "Smartwatches and wearable gadgets", matches: ["Smartwatch", "Smartwatches"], icon: Package },
+  { name: "Router", description: "Wi-Fi routers and network gadgets", matches: ["Router"], icon: Package },
+  { name: "TV Box", description: "TV boxes and media devices", matches: ["TV Box"], icon: Package },
   { name: "Other Accessories", description: "Other counter goods", matches: ["Other Accessories", "Other"], icon: Package },
 ] as const;
 
@@ -97,9 +102,9 @@ export default function StockroomPage() {
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Link href="/inventory" className="mb-3 inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]"><ArrowLeft className="size-3.5" /> Inventory</Link>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Workshop stockroom</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Stockroom</p>
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Inventory Stock</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Browse the shop shelves the way you would in the physical stockroom.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Browse your shop stock by simple shelves and categories.</p>
           </div>
           <div className="flex gap-2">
             <Link href="/inventory/movements" className="inline-flex min-h-11 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>
@@ -143,14 +148,14 @@ export default function StockroomPage() {
           {category && (
             <div className="mt-5">
               <div className="mb-4 flex items-center gap-2 text-xs text-[#74837e]"><button type="button" onClick={() => setCategory(null)} className="font-bold text-[#1d6a54]">{shelf === "parts" ? "Phone Parts" : "Accessories"}</button><ChevronRight className="size-3.5" /><span>{category}</span></div>
-              <div className="rounded-2xl bg-[#f7f8f5] p-4 text-sm text-[#53635d]">Showing <strong>{visible.length}</strong> stock item{visible.length === 1 ? "" : "s"} in this shelf. Use the search below to find a model or SKU.</div>
+              <div className="rounded-2xl bg-[#f7f8f5] p-4 text-sm text-[#53635d]">Showing <strong>{visible.length}</strong> item{visible.length === 1 ? "" : "s"} in this shelf. Use search to find a model or code.</div>
             </div>
           )}
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px]">
-            <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" /><input aria-label="Search stockroom" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search product, model, brand or SKU..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" /></div>
+            <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" /><input aria-label="Search stockroom" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search item, phone model, brand or code..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" /></div>
             <select aria-label="Stock filter" value={filter} onChange={event => setFilter(event.target.value as StockFilter)} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm"><option value="all">All stock</option><option value="healthy">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option></select>
             <button type="button" onClick={() => { setFilter("out"); setCategory(null); }} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Empty stock ({out.length})</button>
           </div>
