@@ -80,7 +80,7 @@ export default function InventoryPage() {
       const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${friendlySubcategory(item.subcategory)} ${item.category || ""}`.toLowerCase();
       return (!needle || text.includes(needle))
         && (shelf === "all" || groupFor(item) === shelf)
-        && (!category || item.subcategory === category || item.category === category)
+        && (!category || friendlySubcategory(item.subcategory) === category || item.category === category)
         && (!brand || (brand === "__other" ? !item.brand?.trim() : (item.brand || "").toLowerCase() === brand.toLowerCase()))
         && (stockFilter === "all" || stockState(item) === stockFilter);
     });
