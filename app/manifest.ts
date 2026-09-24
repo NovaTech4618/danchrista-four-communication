@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Danchrista Four Communication",
-    short_name: "Danchrista",
+    name: "Amezing Limited",
+    short_name: "Amezing",
     description: "Business management for customers, repairs, inventory, sales and finances.",
     start_url: "/dashboard",
     scope: "/",
