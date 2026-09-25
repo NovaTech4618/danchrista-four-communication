@@ -50,7 +50,11 @@ export default function OpeningStockPanel({ items, onSaved }: { items: Inventory
             <InventoryImage src={selected?.image_url || null} alt={selected?.item_name || "Inventory item"} size="sm" />
             <select value={itemId} onChange={(e) => setItemId(e.target.value)} className="h-11 min-w-0 flex-1 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm outline-none focus:border-[#1d6a54]">
               <option value="">Select item with no opening stock</option>
-              {candidates.map((item) => <option key={item.id} value={item.id}>{item.item_name}{item.compatible_models ? \` · \${item.compatible_models}\` : ""}</option>)}
+              {candidates.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.item_name}{item.compatible_models ? " · " + item.compatible_models : ""}
+                </option>
+              ))}
             </select>
           </div>
           {selected && <p className="mt-2 text-xs text-[#74837e]">{selected.brand || "No brand"} · {selected.subcategory || selected.category}</p>}
