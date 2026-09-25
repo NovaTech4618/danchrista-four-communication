@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Boxes, ClipboardList, HandCoins, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench, UserRound } from "lucide-react";
+import { BarChart3, Bell, Bot, ClipboardList, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench, UserRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { staffService } from "@/services/staffService";
 import { companyService } from "@/services/companyService";
@@ -14,25 +14,24 @@ import { AmezingLogo } from "@/components/brand/AmezingLogo";
 type Icon = typeof LayoutDashboard;
 type NavItem = { title: string; url: string; icon: Icon; permission: Permission };
 const groups: { label: string; items: NavItem[] }[] = [
-  { label: "Daily books", items: [
-    { title: "Sales", url: "/sales", icon: ShoppingCart, permission: "sales" },
+  { label: "Shop", items: [
+    { title: "Customers", url: "/customers", icon: Users, permission: "customers" },
     { title: "Repairs", url: "/repairs", icon: Wrench, permission: "repairs" },
     { title: "Inventory", url: "/inventory", icon: Package, permission: "inventory" },
+    { title: "Sales", url: "/sales", icon: ShoppingCart, permission: "sales" },
   ] },
-  { label: "Owing & owed", items: [
-    { title: "Debit · people owe us", url: "/outstanding", icon: HandCoins, permission: "outstanding" },
-    { title: "Credit · we owe people", url: "/credit", icon: WalletCards, permission: "payments" },
-  ] },
-  { label: "Owner control", items: [
+  { label: "Money", items: [
+    { title: "Engineer Parts", url: "/engineer-workflow", icon: UserRound, permission: "engineer_work" },
+    { title: "Money", url: "/finance", icon: WalletCards, permission: "profit" },
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
-    { title: "Daily closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
-    { title: "Alerts", url: "/alerts", icon: Boxes, permission: "inventory" },
+    { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
   ] },
-  { label: "People & tools", items: [
-    { title: "Engineers", url: "/engineers", icon: UserRound, permission: "engineers" },
-    { title: "Staff", url: "/staff", icon: Users, permission: "staff" },
-    { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle, permission: "whatsapp" },
+  { label: "More", items: [
+    { title: "Alerts", url: "/alerts", icon: Bell, permission: "profit" },
     { title: "Search", url: "/search", icon: Search, permission: "search" },
+    { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle, permission: "whatsapp" },
+    { title: "Shop Assistant", url: "/assistant", icon: Bot, permission: "assistant" },
+    { title: "Staff", url: "/staff", icon: Users, permission: "staff" },
   ] },
 ];
 

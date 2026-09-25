@@ -9,12 +9,25 @@ BEGIN
   IF v_count<>0 THEN RAISE EXCEPTION 'RLS regression: % public tables have RLS disabled',v_count; END IF;
 END $$;
 
-DO $$
-DECLARE v_count integer;
+DO $reg$
+DECLARE v_table text;
 BEGIN
-  SELECT count(*) INTO v_count FROM pg_policies WHERE schemaname='public' AND ('anon'=ANY(roles) OR 'public'=ANY(roles));
-  IF v_count<>0 THEN RAISE EXCEPTION 'RLS regression: % public/anon policies remain',v_count; END IF;
-END $$;
+  FOREACH v_table IN ARRAY ARRAY['financial_transactions','customer_debt_ledger','engineer_transactions','engineer_payments','invoice_payments','repair_payments','sales','sale_items','inventory_stock_movements','daily_closings','daily_closing_payment_methods'] LOOP
+    IF EXISTS (
+      SELECT 1 FROM pg_policies
+      WHERE schemaname='public' AND tablename=v_table
+        AND ('anon'=ANY(roles) OR 'public'=ANY(roles))
+        AND cmd IN ('INSERT','UPDATE','DELETE','ALL')
+        AND (
+          (cmd = 'INSERT' AND coalesce(with_check,'') <> 'false')
+          OR (cmd = 'UPDATE' AND (coalesce(with_check,'') <> 'false' OR coalesce(qual,'') <> 'false'))
+          OR (cmd = 'DELETE' AND coalesce(qual,'') <> 'false')
+          OR (cmd = 'ALL' AND (coalesce(with_check,'') <> 'false' OR coalesce(qual,'') <> 'false'))
+        )
+    ) THEN RAISE EXCEPTION 'RLS regression: % exposes a permissive public/anonymous write policy',v_table;
+    END IF;
+  END LOOP;
+END $reg$;
 
 DO $$
 DECLARE v_count integer;
@@ -35,7 +48,7 @@ END $$;
 
 DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='profiles' AND t.tgname='prevent_profile_authorization_escalation' AND NOT t.tgisinternal) THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='profiles' AND t.tgname='trg_prevent_self_role_escalation' AND NOT t.tgisinternal) THEN
     RAISE EXCEPTION 'Role escalation regression: profile authorization trigger is missing';
   END IF;
   IF NOT has_function_privilege('authenticated','public.update_staff_role(uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'update_staff_role is not executable by authenticated users'; END IF;
@@ -76,7 +89,7 @@ BEGIN
   IF NOT has_function_privilege('authenticated','public.create_invoice(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text)','EXECUTE') OR has_function_privilege('anon','public.create_invoice(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text)','EXECUTE') THEN RAISE EXCEPTION 'create_invoice execute boundary regression'; END IF;
   IF NOT has_function_privilege('authenticated','public.create_invoice_with_item(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text,text,numeric,numeric)','EXECUTE') OR has_function_privilege('anon','public.create_invoice_with_item(text,uuid,uuid,uuid,numeric,numeric,numeric,timestamptz,text,text,numeric,numeric)','EXECUTE') THEN RAISE EXCEPTION 'create_invoice_with_item execute boundary regression'; END IF;
   IF NOT has_function_privilege('authenticated','public.add_invoice_item(uuid,text,numeric,numeric)','EXECUTE') OR has_function_privilege('anon','public.add_invoice_item(uuid,text,numeric,numeric)','EXECUTE') THEN RAISE EXCEPTION 'add_invoice_item execute boundary regression'; END IF;
-  IF NOT has_function_privilege('authenticated','public.record_invoice_payment(uuid,numeric,text,text,uuid)','EXECUTE') OR has_function_privilege('anon','public.record_invoice_payment(uuid,numeric,text,text,uuid)','EXECUTE') THEN RAISE EXCEPTION 'record_invoice_payment execute boundary regression'; END IF;
+  IF NOT has_function_privilege('authenticated','public.record_invoice_payment(uuid,numeric,text,text,uuid,timestamp with time zone)','EXECUTE') OR has_function_privilege('anon','public.record_invoice_payment(uuid,numeric,text,text,uuid,timestamp with time zone)','EXECUTE') THEN RAISE EXCEPTION 'record_invoice_payment execute boundary regression'; END IF;
 END $$;
 
 DO $$
@@ -113,18 +126,31 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='customer_debt_one_sided_entry') THEN RAISE EXCEPTION 'Missing customer_debt_one_sided_entry constraint'; END IF;
 END $$;
 
-DO $$
+DO $invreg$
 DECLARE v_count integer;
 BEGIN
   SELECT count(*) INTO v_count FROM pg_policies WHERE schemaname='public' AND tablename='inventory_stock_movements' AND policyname IN ('inventory_stock_movements_no_direct_insert','inventory_stock_movements_no_update','inventory_stock_movements_no_delete');
   IF v_count<>3 THEN RAISE EXCEPTION 'Inventory ledger regression: expected 3 direct-write blocking policies, found %',v_count; END IF;
-END $$;
+END $invreg$;
+
+-- Authoritative ledgers must not grant direct table writes to authenticated clients.
+DO $reg$
+DECLARE v_table text;
+BEGIN
+  FOREACH v_table IN ARRAY ARRAY['customer_debt_ledger','engineer_transactions','engineer_payments','inventory_stock_movements'] LOOP
+    IF has_table_privilege('authenticated','public.'||v_table,'INSERT')
+       OR has_table_privilege('authenticated','public.'||v_table,'UPDATE')
+       OR has_table_privilege('authenticated','public.'||v_table,'DELETE') THEN
+      RAISE EXCEPTION 'Ledger table % still grants direct authenticated DML privileges',v_table;
+    END IF;
+  END LOOP;
+END $reg$;
 
 DO $$
 BEGIN
   IF NOT has_function_privilege('authenticated','public.record_inventory_movement(uuid,text,integer,numeric,text,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_inventory_movement is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_inventory_movement(uuid,text,integer,numeric,text,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_inventory_movement must not be executable by anon'; END IF;
-  IF NOT has_function_privilege('authenticated','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt is not executable by authenticated users'; END IF;
+  IF has_function_privilege('authenticated','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt must not be directly executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.record_customer_debt(uuid,text,uuid,numeric,numeric,uuid,uuid,text)','EXECUTE') THEN RAISE EXCEPTION 'record_customer_debt must not be executable by anon'; END IF;
   IF NOT has_function_privilege('authenticated','public.change_repair_status(uuid,text,text)','EXECUTE') THEN RAISE EXCEPTION 'change_repair_status is not executable by authenticated users'; END IF;
   IF has_function_privilege('anon','public.change_repair_status(uuid,text,text)','EXECUTE') THEN RAISE EXCEPTION 'change_repair_status must not be executable by anon'; END IF;
