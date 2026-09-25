@@ -95,6 +95,16 @@ export const inventoryService = {
     }
     return updated;
   },
+  async setOpeningStock(inventoryId: string, quantity: number, costPrice: number, sellingPrice: number, minimumSellingPrice: number, minimumStock = 5) {
+    return await supabase.rpc("set_inventory_opening_stock", {
+      p_inventory_id: inventoryId,
+      p_quantity: quantity,
+      p_cost_price: costPrice,
+      p_selling_price: sellingPrice,
+      p_minimum_selling_price: minimumSellingPrice,
+      p_minimum_stock: minimumStock,
+    });
+  },
   async createInventoryTransfer(inventoryId: string, toBranchId: string, quantity: number, notes?: string | null) {
     return await supabase.rpc("create_inventory_transfer", { p_inventory_id: inventoryId, p_to_branch_id: toBranchId, p_quantity: quantity, p_notes: notes?.trim() || null });
   },

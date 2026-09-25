@@ -8,6 +8,7 @@ import InventoryForm from "@/components/inventory/InventoryForm";
 import InventoryTable from "@/components/inventory/InventoryTable";
 import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
 import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
+import OpeningStockPanel from "@/components/inventory/OpeningStockPanel";
 import { inventoryService } from "@/services/inventoryService";
 import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
@@ -188,6 +189,8 @@ export default function InventoryPage() {
             {(query || category || brand || stockFilter !== "all") && <button type="button" onClick={() => { setQuery(""); setCategory(null); setBrand(null); setStockFilter("all"); }} className="font-bold text-[#1d6a54]">Clear filters</button>}
           </div>
         </section>
+
+        {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
 
         {isOwner && <section className="grid gap-6 xl:grid-cols-2">
           <InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} />
