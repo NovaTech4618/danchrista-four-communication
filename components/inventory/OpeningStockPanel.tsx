@@ -31,7 +31,7 @@ export default function OpeningStockPanel({ items, onSaved }: { items: Inventory
     const { error } = await inventoryService.setOpeningStock(selected.id, q, cp, sp, floor, min);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success(\`Opening stock established for \${selected.item_name}.\`);
+    toast.success(`Opening stock established for ${selected.item_name}.`);
     setItemId(""); setQuantity(""); setCostPrice(""); setSellingPrice(""); setMinimumSellingPrice("");
     onSaved();
   }
