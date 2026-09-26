@@ -5,7 +5,7 @@ import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  "https://amezing-limited.vercel.app";
+  "https://danchrista-four-communication.vercel.app";
 
 export const metadata: Metadata = {
   title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
