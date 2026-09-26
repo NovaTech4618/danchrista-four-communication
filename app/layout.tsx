@@ -12,7 +12,7 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: [
 const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const siteUrl = configuredSiteUrl || "https://amezing-limited.vercel.app";
+const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
