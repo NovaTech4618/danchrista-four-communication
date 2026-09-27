@@ -559,7 +559,7 @@ export default function EngineersPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         {action === "work" && <label className="text-sm font-medium text-slate-700 md:col-span-2">Software service<input required value={workDescription} onChange={(e) => setWorkDescription(e.target.value)} placeholder="e.g. FRP / flashing / unlocking" className={inputClass} /></label>}
                         <label className="text-sm font-medium text-slate-700">Amount<input required type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className={inputClass} /></label>
-                        {(action === "payment" || action === "payment-out") && (
+                        {(action === "payment" || action === "payment-out" || action === "part-paid") && (
                           <label className="text-sm font-medium text-slate-700">Payment method
                             <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className={inputClass}>
                               <option value="cash">Cash</option>
