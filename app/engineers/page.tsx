@@ -27,7 +27,23 @@ const transactionLabel: Record<string, string> = {
 };
 
 const emptyEngineer: EngineerInput = { name: "", phone: "", business_name: "", address: "", notes: "" };
-type Action = "parts" | "return" | "replacement" | "payment" | "payment-out" | "opening" | null;
+
+function isEngineerPart(item: InventoryItem) {
+  const text = [item.item_name, item.category, item.subcategory, item.brand, item.compatible_models]
+    .filter(Boolean).join(" ").toLowerCase();
+
+  const screenGuard = /screen\\s*guard|tempered|protector/.test(text);
+  if (screenGuard) return true;
+
+  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia/.test(text);
+  const samsung = /samsung/.test(text);
+  const androidPart = /down\\s*board|power\\s*flex/.test(text);
+  const iphone = /iphone|apple/.test(text);
+  const iphonePart = /charging\\s*flex|back\\s*glass|earpiece\\s*flex/.test(text);
+
+  return (androidBrands && androidPart) || (samsung && androidPart) || (iphone && iphonePart);
+}
+type Action = "parts" | "return" | "replacement" | "payment" | "payment-out" | "work" | "opening" | null;
 type Period = "all" | "day" | "week" | "month" | "year";
 
 function periodStart(period: Period) {
@@ -75,6 +91,7 @@ export default function EngineersPage() {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [notes, setNotes] = useState("");
+  const [workDescription, setWorkDescription] = useState("");
   const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
   const [faultyReturnId, setFaultyReturnId] = useState("");
 
@@ -154,6 +171,7 @@ export default function EngineersPage() {
     setAmount("");
     setPaymentMethod("cash");
     setNotes("");
+    setWorkDescription("");
     setReturnCondition("normal");
     setFaultyReturnId("");
   }
@@ -254,6 +272,14 @@ export default function EngineersPage() {
       result = action === "payment"
         ? await engineerService.recordPaymentIn(selectedId, value, paymentMethod, notes.trim() || null)
         : await engineerService.recordPaymentOut(selectedId, value, paymentMethod, notes.trim() || null);
+    } else if (action === "work") {
+      const value = Number(amount);
+      if (!Number.isFinite(value) || value <= 0 || !workDescription.trim()) {
+        setError("Enter the service amount and description.");
+        setSaving(false);
+        return;
+      }
+      result = await engineerService.recordWork(selectedId, value, workDescription.trim(), notes.trim() || null);
     } else {
       const value = Number(amount);
       if (!Number.isFinite(value) || value <= 0) {
@@ -279,6 +305,8 @@ export default function EngineersPage() {
             ? "Replacement recorded. No extra engineer debt was created."
           : action === "payment"
             ? "Payment received from engineer recorded successfully."
+            : action === "work"
+              ? "Software service recorded successfully."
             : action === "payment-out"
               ? "Payment to engineer recorded successfully. Engineer balance has been updated."
               : "Opening balance recorded successfully.";
@@ -297,10 +325,11 @@ export default function EngineersPage() {
   }
 
   const actionLabels: Record<NonNullable<Action>, string> = {
-    parts: "Record parts collected",
+    parts: "Record allowed parts collected",
     return: "Record parts returned",
     payment: "Receive payment",
     "payment-out": "Pay engineer",
+    work: "Record software service",
     replacement: "Issue replacement for faulty part",
     opening: "Opening balance",
   };
@@ -454,10 +483,11 @@ export default function EngineersPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Button size="sm" onClick={() => setAction("parts")}>Record parts collected</Button>
+                    <Button size="sm" onClick={() => setAction("parts")}>Collect parts</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("return")}>Record parts returned</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("replacement")}>Replace faulty part</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Receive payment</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Paid</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("work")}>Software service</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("payment-out")}>Pay engineer</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("opening")}>Opening balance</Button>
                   </div>
@@ -472,6 +502,7 @@ export default function EngineersPage() {
                         {action === "return" && <p className="mt-1 text-xs text-slate-500">Normal return goes back to sellable stock. Faulty return is kept separately and does not increase sellable stock.</p>}
                         {action === "replacement" && <p className="mt-1 text-xs text-slate-500">A replacement consumes stock but adds ₦0 debt to the engineer and links back to the faulty return.</p>}
                         {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
+                        {action === "work" && <p className="mt-1 text-xs text-slate-500">Software services are recorded separately from physical parts and screen guards.</p>}
                         {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
                       </div>
                       <button type="button" onClick={resetAction} className="text-sm font-medium text-slate-500 hover:text-slate-800">Cancel</button>
@@ -481,8 +512,8 @@ export default function EngineersPage() {
                       <div className="grid gap-4 md:grid-cols-3">
                         <label className="text-sm font-medium text-slate-700 md:col-span-2">Part
                           <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = inventory.find((x) => x.id === e.target.value); setUnitPrice(item ? String(item.selling_price) : ""); }} className={inputClass}>
-                            <option value="">Select part</option>
-                            {inventory.map((item) => <option key={item.id} value={item.id}>{item.item_name} — {money(item.selling_price)} (stock: {item.quantity})</option>)}
+                            <option value="">Select allowed engineer part</option>
+                            {inventory.filter(isEngineerPart).map((item) => <option key={item.id} value={item.id}>{item.item_name} — {money(item.selling_price)} (stock: {item.quantity})</option>)}
                           </select>
                         </label>
                         <label className="text-sm font-medium text-slate-700">Quantity<input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className={inputClass} /></label>
@@ -493,6 +524,7 @@ export default function EngineersPage() {
                       </div>
                     ) : (
                       <div className="grid gap-4 md:grid-cols-2">
+                        {action === "work" && <label className="text-sm font-medium text-slate-700 md:col-span-2">Software service<input required value={workDescription} onChange={(e) => setWorkDescription(e.target.value)} placeholder="e.g. FRP / flashing / unlocking" className={inputClass} /></label>}
                         <label className="text-sm font-medium text-slate-700">Amount<input required type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className={inputClass} /></label>
                         {(action === "payment" || action === "payment-out") && (
                           <label className="text-sm font-medium text-slate-700">Payment method
