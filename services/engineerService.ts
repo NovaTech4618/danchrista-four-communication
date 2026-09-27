@@ -47,23 +47,18 @@ export const engineerService = {
   async getTransactions(engineerId: string) { return await supabase.from("engineer_transactions").select("*").eq("engineer_id", engineerId).order("transaction_date", { ascending: false }); },
   async getPartLedger(engineerId: string) {
     const [out, returned, used, paid] = await Promise.all([
-      supabase.from("engineer_parts_out").select("id,inventory_id,quantity,unit_price,created_at,notes,inventory:item_id(item_name)").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
-      supabase.from("engineer_parts_in").select("id,inventory_id,quantity,unit_price,created_at,return_condition,notes,inventory:item_id(item_name)").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
-      supabase.from("engineer_parts_used").select("id,inventory_id,quantity,unit_price,created_at,notes,inventory:item_id(item_name)").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
-      supabase.from("engineer_parts_paid").select("id,inventory_id,quantity,unit_price,created_at,payment_method,notes,inventory:item_id(item_name)").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
+      supabase.from("engineer_parts_out").select("id,inventory_id,quantity,unit_price,created_at,notes").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
+      supabase.from("engineer_parts_in").select("id,inventory_id,quantity,unit_price,created_at,return_condition,notes").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
+      supabase.from("engineer_parts_used").select("id,inventory_id,quantity,unit_price,created_at,notes").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
+      supabase.from("engineer_parts_paid").select("id,inventory_id,quantity,unit_price,created_at,payment_method,notes").eq("engineer_id", engineerId).order("created_at",{ascending:false}),
     ]);
-    return { out: out.data ?? [], returned: returned.data ?? [], used: used.data ?? [], paid: paid.data ?? [], error: out.error ?? returned.error ?? used.error ?? paid.error ?? null };
+    const rows = [...(out.data ?? []), ...(returned.data ?? []), ...(used.data ?? []), ...(paid.data ?? [])];
+    const ids = [...new Set(rows.map((r) => r.inventory_id))];
+    const inv = ids.length ? await supabase.from("inventory").select("id,item_name").in("id", ids) : { data: [], error: null };
+    const names = new Map((inv.data ?? []).map((i) => [i.id, i.item_name]));
+    const withNames = (items: any[]) => items.map((item) => ({ ...item, item_name: names.get(item.inventory_id) ?? "Unknown item" }));
+    return { out: withNames(out.data ?? []), returned: withNames(returned.data ?? []), used: withNames(used.data ?? []), paid: withNames(paid.data ?? []), error: out.error ?? returned.error ?? used.error ?? paid.error ?? inv.error ?? null };
   },
-  async recordPartUsed(engineerId: string, inventoryId: string, quantity: number, notes?: string | null) {
-    return await supabase.rpc("engineer_part_used", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_notes: notes ?? null });
-  },
-  async recordPartPaid(engineerId: string, inventoryId: string, quantity: number, paymentMethod: string, notes?: string | null) {
-    return await supabase.rpc("engineer_part_paid", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_payment_method: paymentMethod, p_notes: notes ?? null });
-  },
-  async getDailyCollectionSummary(date?: string) {
-    return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? new Date().toLocaleDateString("en-CA") });
-  },
-
   async recordPartsOut(engineerId: string, inventoryId: string, quantity: number, unitPrice?: number, notes?: string | null) {
     return await supabase.rpc("engineer_parts_out", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_unit_price: unitPrice ?? null, p_notes: notes ?? null });
   },
