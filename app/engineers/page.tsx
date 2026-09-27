@@ -24,6 +24,7 @@ const transactionLabel: Record<string, string> = {
   adjustment_credit: "Credit adjustment",
   faulty_return: "Faulty part returned",
   replacement: "Faulty-part replacement",
+  parts_used: "Part used",
 };
 
 const emptyEngineer: EngineerInput = { name: "", phone: "", business_name: "", address: "", notes: "" };
@@ -43,7 +44,7 @@ function isEngineerPart(item: InventoryItem) {
 
   return (androidBrands && androidPart) || (samsung && androidPart) || (iphone && iphonePart);
 }
-type Action = "parts" | "return" | "replacement" | "payment" | "payment-out" | "work" | "opening" | null;
+type Action = "parts" | "return" | "replacement" | "used" | "part-paid" | "payment" | "payment-out" | "work" | "opening" | null;
 type Period = "all" | "day" | "week" | "month" | "year";
 
 function periodStart(period: Period) {
@@ -94,6 +95,8 @@ export default function EngineersPage() {
   const [workDescription, setWorkDescription] = useState("");
   const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
   const [faultyReturnId, setFaultyReturnId] = useState("");
+  const [partLedger, setPartLedger] = useState<any>({ out: [], returned: [], used: [], paid: [] });
+  const [dailySummary, setDailySummary] = useState<any[]>([]);
 
   const balanceMap = useMemo(() => new Map(balances.map((item) => [item.engineer_id, item])), [balances]);
   const selectedEngineer = engineers.find((engineer) => engineer.id === selectedId);
@@ -133,10 +136,11 @@ export default function EngineersPage() {
   async function load() {
     setLoading(true);
     setError("");
-    const [engineersRes, balancesRes, inventoryRes] = await Promise.all([
+    const [engineersRes, balancesRes, inventoryRes, dailyRes] = await Promise.all([
       engineerService.getEngineers(),
       engineerService.getBalances(),
       inventoryService.getInventory(),
+      engineerService.getDailyCollectionSummary(),
     ]);
     if (engineersRes.error) setError(engineersRes.error.message);
     else setEngineers((engineersRes.data ?? []) as Engineer[]);
@@ -144,6 +148,8 @@ export default function EngineersPage() {
     else setBalances((balancesRes.data ?? []) as EngineerBalance[]);
     if (inventoryRes.error) setError(inventoryRes.error.message);
     else setInventory((inventoryRes.data ?? []) as InventoryItem[]);
+    if (dailyRes.error) setError(dailyRes.error.message);
+    else setDailySummary((dailyRes.data ?? []) as any[]);
     setLoading(false);
   }
 
@@ -153,9 +159,11 @@ export default function EngineersPage() {
     setMessage("");
     setError("");
     setDetailLoading(true);
-    const result = await engineerService.getTransactions(id);
+    const [result, ledger] = await Promise.all([engineerService.getTransactions(id), engineerService.getPartLedger(id)]);
     if (result.error) setError(result.error.message);
     else setTransactions((result.data ?? []) as EngineerTransaction[]);
+    if (ledger.error) setError(ledger.error.message);
+    else setPartLedger(ledger);
     setDetailLoading(false);
   }
 
@@ -246,7 +254,7 @@ export default function EngineersPage() {
     setMessage("");
 
     let result;
-    if (action === "parts" || action === "return" || action === "replacement") {
+    if (action === "parts" || action === "return" || action === "replacement" || action === "used" || action === "part-paid") {
       if (!inventoryId || quantity < 1) {
         setError("Select a part and enter a valid quantity.");
         setSaving(false);
@@ -255,6 +263,10 @@ export default function EngineersPage() {
       if (action === "replacement") {
         if (!faultyReturnId) { setError("Select the faulty return this replacement is for."); setSaving(false); return; }
         result = await engineerService.recordReplacement(faultyReturnId, inventoryId, quantity, notes.trim() || null);
+      } else if (action === "used") {
+        result = await engineerService.recordPartUsed(selectedId, inventoryId, quantity, notes.trim() || null);
+      } else if (action === "part-paid") {
+        result = await engineerService.recordPartPaid(selectedId, inventoryId, quantity, paymentMethod, notes.trim() || null);
       } else if (action === "parts") {
         const price = Number(unitPrice);
         if (!Number.isFinite(price) || price < 0) { setError("Enter a valid unit price."); setSaving(false); return; }
@@ -303,6 +315,10 @@ export default function EngineersPage() {
           ? returnCondition === "faulty" ? "Faulty return recorded. It was kept out of sellable stock and credited back to the engineer." : "Parts return recorded successfully. Inventory and engineer balance have been updated."
           : action === "replacement"
             ? "Replacement recorded. No extra engineer debt was created."
+          : action === "used"
+            ? "Part usage recorded successfully."
+          : action === "part-paid"
+            ? "Part payment recorded successfully."
           : action === "payment"
             ? "Payment received from engineer recorded successfully."
             : action === "work"
@@ -331,6 +347,8 @@ export default function EngineersPage() {
     "payment-out": "Pay engineer",
     work: "Record software service",
     replacement: "Issue replacement for faulty part",
+    used: "Mark collected part as used",
+    "part-paid": "Mark collected part as paid",
     opening: "Opening balance",
   };
 
@@ -484,14 +502,29 @@ export default function EngineersPage() {
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Button size="sm" onClick={() => setAction("parts")}>Collect parts</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAction("return")}>Record parts returned</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("return")}>Return</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("replacement")}>Replace faulty part</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Paid</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Pay account</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("work")}>Software service</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("payment-out")}>Pay engineer</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("opening")}>Opening balance</Button>
                   </div>
-                  <div className="mt-3"><EngineerShareStatementButton engineer={selectedEngineer} balance={selectedBalance} transactions={filteredTransactions} /></div>
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between gap-3"><h3 className="font-semibold text-slate-900">Currently out</h3><span className="text-sm font-semibold text-rose-600">{money(partLedger.out.reduce((s:number,x:any)=>s+Number(x.quantity)*Number(x.unit_price),0)-partLedger.returned.reduce((s:number,x:any)=>s+Number(x.quantity)*Number(x.unit_price),0)-partLedger.used.reduce((s:number,x:any)=>s+Number(x.quantity)*Number(x.unit_price),0)-partLedger.paid.reduce((s:number,x:any)=>s+Number(x.quantity)*Number(x.unit_price),0))}</span></div>
+                    <div className="mt-3 space-y-2">
+                      {inventory.filter(isEngineerPart).map((item) => {
+                        const out=partLedger.out.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);
+                        const ret=partLedger.returned.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);
+                        const used=partLedger.used.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);
+                        const paid=partLedger.paid.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);
+                        const left=out-ret-used-paid;
+                        if(left<=0)return null;
+                        return <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white p-3 border border-slate-200"><div><p className="text-sm font-semibold">{item.item_name}</p><p className="text-xs text-slate-500">Qty out: {left} · {money(left*Number(item.selling_price))}</p></div><div className="flex gap-1.5"><Button size="sm" variant="outline" type="button" onClick={()=>{setInventoryId(item.id);setQuantity(1);setAction("return");}}>Return</Button><Button size="sm" variant="outline" type="button" onClick={()=>{setInventoryId(item.id);setQuantity(1);setAction("used");}}>Used</Button><Button size="sm" type="button" onClick={()=>{setInventoryId(item.id);setQuantity(1);setPaymentMethod("cash");setAction("part-paid");}}>Paid</Button></div></div>;
+                      })}
+                      {!inventory.some((item)=>{const o=partLedger.out.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);const r=partLedger.returned.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);const u=partLedger.used.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);const p=partLedger.paid.filter((x:any)=>x.inventory_id===item.id).reduce((s:number,x:any)=>s+Number(x.quantity),0);return o-r-u-p>0;}) && <p className="text-sm text-slate-500">Nothing currently outstanding.</p>}
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-xl border border-teal-100 bg-teal-50 p-4"><div className="flex items-center justify-between"><div><p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Today</p><p className="font-semibold text-slate-900">Engineer collections</p></div><p className="text-xl font-bold text-slate-950">{money(dailySummary.reduce((s:number,x:any)=>s+Number(x.total_out||0),0))}</p></div><div className="mt-2 text-xs text-slate-600">{dailySummary.filter((x:any)=>Number(x.total_out)>0).map((x:any)=><span key={x.engineer_id} className="mr-3">{x.engineer_name}: {money(Number(x.total_out))}</span>)}</div></div>                  <div className="mt-3"><EngineerShareStatementButton engineer={selectedEngineer} balance={selectedBalance} transactions={filteredTransactions} /></div>
                 </div>
 
                 {action && (
@@ -508,7 +541,7 @@ export default function EngineersPage() {
                       <button type="button" onClick={resetAction} className="text-sm font-medium text-slate-500 hover:text-slate-800">Cancel</button>
                     </div>
 
-                    {(action === "parts" || action === "return" || action === "replacement") ? (
+                    {(action === "parts" || action === "return" || action === "replacement" || action === "used" || action === "part-paid") ? (
                       <div className="grid gap-4 md:grid-cols-3">
                         <label className="text-sm font-medium text-slate-700 md:col-span-2">Part
                           <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = inventory.find((x) => x.id === e.target.value); setUnitPrice(item ? String(item.selling_price) : ""); }} className={inputClass}>
@@ -518,7 +551,7 @@ export default function EngineersPage() {
                         </label>
                         <label className="text-sm font-medium text-slate-700">Quantity<input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className={inputClass} /></label>
                         {action === "return" && <label className="text-sm font-medium text-slate-700">Condition<select value={returnCondition} onChange={(e) => setReturnCondition(e.target.value as "normal" | "faulty")} className={inputClass}><option value="normal">Normal — back to stock</option><option value="faulty">Faulty — keep separate</option></select></label>}
-                        {action === "parts" && <label className="text-sm font-medium text-slate-700">Unit price<input type="number" min="0" step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputClass} /></label>}
+                        {(action === "parts") && <label className="text-sm font-medium text-slate-700">Unit price<input type="number" min="0" step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputClass} /></label>}
                         {action === "replacement" && <label className="text-sm font-medium text-slate-700 md:col-span-2">Faulty return<select required value={faultyReturnId} onChange={(e) => setFaultyReturnId(e.target.value)} className={inputClass}><option value="">Select the faulty return</option>{transactions.filter((t) => t.transaction_type === "faulty_return").map((t) => <option key={t.reference_id ?? t.id} value={t.reference_id ?? ""}>{t.description} · {new Date(t.transaction_date).toLocaleDateString()}</option>)}</select></label>}
                         <label className="text-sm font-medium text-slate-700 md:col-span-2">Notes<input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" className={inputClass} /></label>
                       </div>
