@@ -95,9 +95,9 @@ export default function InventoryPage() {
       <main className="mx-auto w-full max-w-[1500px] space-y-6">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Stock Center</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop stock</p>
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Inventory</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">One place for every product, phone part, quantity and stock movement.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Find stock quickly, check quantity and issue parts without digging through menus.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>
