@@ -15,15 +15,15 @@ import type { InventoryItem } from "@/types/inventory";
 
 const money = (value: number) => `₦${Number(value || 0).toLocaleString()}`;
 const transactionLabel: Record<string, string> = {
-  parts_out: "Parts collected",
+  parts_out: "Parts given",
   parts_in: "Parts returned",
-  payment_in: "Payment received",
-  payment_out: "Payment to engineer",
-  opening_balance: "Opening balance",
-  adjustment_debit: "Debit adjustment",
-  adjustment_credit: "Credit adjustment",
+  payment_in: "Engineer payment",
+  payment_out: "Shop paid engineer",
+  opening_balance: "Starting balance",
+  adjustment_debit: "Debit",
+  adjustment_credit: "Credit",
   faulty_return: "Faulty part returned",
-  replacement: "Faulty-part replacement",
+  replacement: "Replacement part",
   parts_used: "Part used",
 };
 
@@ -322,10 +322,10 @@ export default function EngineersPage() {
           : action === "payment"
             ? "Payment received from engineer recorded successfully."
             : action === "work"
-              ? "Software service recorded successfully."
+              ? "Software work recorded successfully."
             : action === "payment-out"
               ? "Payment to engineer recorded successfully. Engineer balance has been updated."
-              : "Opening balance recorded successfully.";
+              : "Starting balance recorded successfully.";
     setMessage(successMessage);
     resetAction();
     await Promise.all([load(), selectEngineer(selectedId)]);
@@ -341,14 +341,14 @@ export default function EngineersPage() {
   }
 
   const actionLabels: Record<NonNullable<Action>, string> = {
-    parts: "Record allowed parts collected",
-    return: "Record parts returned",
-    payment: "Receive payment",
+    parts: "Give parts to engineer",
+    return: "Return parts",
+    payment: "Record engineer payment",
     "payment-out": "Pay engineer",
-    work: "Record software service",
-    replacement: "Issue replacement for faulty part",
-    used: "Mark collected part as used",
-    "part-paid": "Mark collected part as paid",
+    work: "Record software work",
+    replacement: "Give replacement part",
+    used: "Mark part used",
+    "part-paid": "Mark part paid",
     opening: "Opening balance",
   };
 
@@ -381,7 +381,7 @@ export default function EngineersPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600">Workshop operations</p>
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-950">Engineers</h1>
-            <p className="mt-1 text-sm text-slate-500">Track contract technicians, parts collected, returns and payments.</p>
+            <p className="mt-1 text-sm text-slate-500">Give out parts, record returns and track what each engineer owes.</p>
           </div>
           <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm hover:border-teal-200 hover:text-teal-700">
             <ArrowLeft className="size-4" /> Back to dashboard
@@ -485,7 +485,7 @@ export default function EngineersPage() {
             {!selectedEngineer ? (
               <div className="flex min-h-[420px] flex-col items-center justify-center gap-2 p-8 text-center text-slate-500">
                 <Wallet className="size-6 text-slate-300" />
-                Select an engineer to view their ledger.
+                Choose an engineer to see parts and payments.
               </div>
             ) : (
               <>
@@ -496,15 +496,15 @@ export default function EngineersPage() {
                       <p className="text-sm text-slate-500">{selectedEngineer.phone || "No phone number"}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Current balance</p>
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Engineer owes</p>
                       <p className={`font-heading text-2xl font-bold ${Number(selectedBalance?.balance ?? 0) > 0 ? "text-rose-600" : "text-slate-950"}`}>{money(Number(selectedBalance?.balance ?? 0))}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Button size="sm" onClick={() => setAction("parts")}>Collect parts</Button>
+                    <Button size="sm" onClick={() => setAction("parts")}>Give parts</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("return")}>Return</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("replacement")}>Replace faulty part</Button>
-                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Pay account</Button>
+                    <Button size="sm" variant="outline" onClick={() => setAction("payment")}>Record payment</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("work")}>Software service</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("payment-out")}>Pay engineer</Button>
                     <Button size="sm" variant="outline" onClick={() => setAction("opening")}>Opening balance</Button>
@@ -534,8 +534,8 @@ export default function EngineersPage() {
                         <h3 className="font-heading font-semibold text-slate-900">{actionLabels[action]}</h3>
                         {action === "return" && <p className="mt-1 text-xs text-slate-500">Normal return goes back to sellable stock. Faulty return is kept separately and does not increase sellable stock.</p>}
                         {action === "replacement" && <p className="mt-1 text-xs text-slate-500">A replacement consumes stock but adds ₦0 debt to the engineer and links back to the faulty return.</p>}
-                        {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
-                        {action === "work" && <p className="mt-1 text-xs text-slate-500">Software services are recorded separately from physical parts and screen guards.</p>}
+                        {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money the shop paid to the engineer.</p>}
+                        {action === "work" && <p className="mt-1 text-xs text-slate-500">Software work is recorded separately from physical parts.</p>}
                         {action === "payment-out" && <p className="mt-1 text-xs text-slate-500">This records money paid by the shop to the engineer and reduces the engineer&apos;s outstanding balance.</p>}
                       </div>
                       <button type="button" onClick={resetAction} className="text-sm font-medium text-slate-500 hover:text-slate-800">Cancel</button>
