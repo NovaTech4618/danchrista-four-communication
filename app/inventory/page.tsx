@@ -202,7 +202,7 @@ export default function InventoryPage() {
           <PurchaseStockPanel items={items} onSaved={refresh} />
         </section>}
 
-        {isOwner && <EngineerPartIssuePanel items={items} onSaved={refresh} />}
+        <EngineerPartIssuePanel items={items} onSaved={refresh} />
 
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe6df] px-5 py-4">
