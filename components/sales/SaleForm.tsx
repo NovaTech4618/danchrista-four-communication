@@ -44,7 +44,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   }
 
   const phoneParts = useMemo(() => inventory.filter((i) => i.category === "Phone Parts" && ["Charging Flex", "Earpiece Flex", "Back Glass / Housing"].includes(i.subcategory || "")), [inventory]);
-  const models = useMemo(() => Array.from(new Set(phoneParts.filter((i) => i.subcategory === selectedPartType).map((i) => i.compatible_models).filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true })), [phoneParts, selectedPartType]);
+  const models = useMemo(() => Array.from(new Set(phoneParts.filter((i) => i.subcategory === selectedPartType).map((i) => i.compatible_models).filter((model): model is string => Boolean(model)))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), [phoneParts, selectedPartType]);
   const modelItems = useMemo(() => phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === selectedModel), [phoneParts, selectedPartType, selectedModel]);
   const variants = useMemo(() => Array.from(new Set(modelItems.map((i) => i.item_name.match(/ - (.+)$/)?.[1]).filter(Boolean))), [modelItems]);
   function choosePartType(type: "Charging Flex" | "Earpiece Flex" | "Back Glass / Housing") { setSelectedPartType(type); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
