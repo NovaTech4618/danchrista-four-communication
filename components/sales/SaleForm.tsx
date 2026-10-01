@@ -10,6 +10,7 @@ import type { InventoryItem } from "@/types/inventory";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import InventoryImage from "@/components/inventory/InventoryImage";
 
 type CartLine = { inventory_id: string; item_name: string; quantity: number; unit_price: number; available: number; cost: number; selling_price: number; minimum_selling_price: number; price_override: boolean };
 type SaleFormProps = { onSaleCompleted: () => void };
@@ -26,6 +27,9 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [discount, setDiscount] = useState("0");
   const [selectedItemId, setSelectedItemId] = useState("");
+  const [selectedPartType, setSelectedPartType] = useState<"Charging Flex" | "Earpiece Flex" | "Back Glass / Housing">("Charging Flex");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedQty, setSelectedQty] = useState("1");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,6 +42,14 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     if (c.data) setCustomers(c.data);
     if (i.data) setInventory(i.data);
   }
+
+  const phoneParts = useMemo(() => inventory.filter((i) => i.category === "Phone Parts" && ["Charging Flex", "Earpiece Flex", "Back Glass / Housing"].includes(i.subcategory || "")), [inventory]);
+  const models = useMemo(() => Array.from(new Set(phoneParts.filter((i) => i.subcategory === selectedPartType).map((i) => i.compatible_models).filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true })), [phoneParts, selectedPartType]);
+  const modelItems = useMemo(() => phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === selectedModel), [phoneParts, selectedPartType, selectedModel]);
+  const variants = useMemo(() => Array.from(new Set(modelItems.map((i) => i.item_name.match(/ - (.+)$/)?.[1]).filter(Boolean))), [modelItems]);
+  function choosePartType(type: "Charging Flex" | "Earpiece Flex" | "Back Glass / Housing") { setSelectedPartType(type); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
+  function chooseModel(model: string) { setSelectedModel(model); setSelectedVariant(""); const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); setSelectedItemId(selectedPartType === "Back Glass / Housing" ? "" : items[0]?.id || ""); }
+  function chooseVariant(variant: string) { setSelectedVariant(variant); setSelectedItemId(modelItems.find((i) => i.item_name.endsWith(" - " + variant))?.id || ""); }
 
   function addToCart() {
     const item = inventory.find((i) => i.id === selectedItemId) as PriceControlledInventory | undefined;
@@ -144,7 +156,17 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   return <section className="rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
     <header className="border-b border-[#edf0ed] px-5 py-5 sm:px-6"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Walk-in first</p><h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">New sale</h2><p className="mt-1 text-xs leading-5 text-[#74837e]">For normal sales, choose the goods, quantity and payment. No customer name is required.</p></div><div className="rounded-xl bg-[#f7f8f5] px-4 py-2.5 text-right"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#74837e]">Estimated profit</p><p className="font-heading text-lg font-bold text-[#182a28]">{money(estimatedGrossProfit)}</p></div></div></header>
     <div className="space-y-5 p-5 sm:p-6">
-      <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4"><div className="flex flex-col gap-3 sm:flex-row"><select aria-label="Select item" className={`${selectClass} flex-1`} value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)}><option value="">Search / choose product…</option>{inventory.filter((i) => Number(i.quantity) > 0).map((i) => <option key={i.id} value={i.id}>{i.item_name} · {money(Number(i.selling_price))} · {i.quantity} left</option>)}</select><div className="flex gap-2"><Input aria-label="Quantity" type="number" min="1" step="1" value={selectedQty} onChange={(e) => setSelectedQty(e.target.value)} className="h-11 w-24 rounded-xl"/><Button type="button" onClick={addToCart} className="h-11 rounded-xl bg-[#123b34] px-5 hover:bg-[#1d6a54]">Add</Button></div></div></div>
+      <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {(["Charging Flex", "Earpiece Flex", "Back Glass / Housing"] as const).map((type) => <button key={type} type="button" onClick={() => choosePartType(type)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedPartType === type ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{type}</button>)}
+        </div>
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Choose model</p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">
+          {models.map((model) => { const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); const inStock = items.some((i) => i.quantity > 0); return <button key={model} type="button" disabled={!inStock} onClick={() => chooseModel(model)} className={`rounded-xl border p-3 text-sm font-bold ${selectedModel === model ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:cursor-not-allowed disabled:opacity-35`}>{model}<span className="mt-1 block text-[10px] font-medium text-slate-400">{inStock ? "In stock" : "Out of stock"}</span></button>; })}
+        </div>
+        {selectedPartType === "Back Glass / Housing" && selectedModel && <><p className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Choose colour</p><div className="flex flex-wrap gap-2">{variants.map((variant) => { const item = modelItems.find((i) => i.item_name.endsWith(" - " + variant)); return <button key={variant} type="button" disabled={!item || item.quantity <= 0} onClick={() => chooseVariant(variant)} className={`rounded-xl border px-3 py-2 text-sm font-semibold ${selectedVariant === variant ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:opacity-35`}>{variant}</button>; })}</div></>}
+        {selectedItemId && (() => { const item = inventory.find((i) => i.id === selectedItemId); return item ? <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dfe6df] bg-white p-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.item_name}</p><p className="text-xs text-slate-500">₦{Number(item.selling_price).toLocaleString()} · {item.quantity} in stock</p></div><Input aria-label="Quantity" type="number" min="1" step="1" value={selectedQty} onChange={(e) => setSelectedQty(e.target.value)} className="h-11 w-24 rounded-xl"/><Button type="button" onClick={addToCart} className="h-11 rounded-xl bg-[#123b34] px-5 hover:bg-[#1d6a54]">Add</Button></div> : null; })()}
+      </div>
 
       {cart.length > 0 ? <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]"><Table><TableHeader><TableRow className="bg-[#f7f8f5]"><TableHead>Goods</TableHead><TableHead>Qty</TableHead><TableHead>Unit price</TableHead><TableHead>Minimum</TableHead><TableHead>Total</TableHead><TableHead /></TableRow></TableHeader><TableBody>{cart.map((c) => { const belowFloor = c.unit_price < c.minimum_selling_price; return <TableRow key={c.inventory_id}><TableCell className="min-w-[190px] font-medium">{c.item_name}{belowFloor && <p className="mt-1 text-[11px] font-semibold text-amber-700">Below minimum — authorisation required</p>}</TableCell><TableCell>{c.quantity}</TableCell><TableCell className="min-w-[130px]"><Input aria-label={`Price for ${c.item_name}`} type="number" min="0" step="0.01" value={c.unit_price} onChange={(e) => updateLine(c.inventory_id, { unit_price: Number(e.target.value) || 0, price_override: false })} className="h-9 w-28 rounded-lg" /></TableCell><TableCell className="whitespace-nowrap text-xs text-slate-500">{money(c.minimum_selling_price)}</TableCell><TableCell className="font-semibold">{money(c.quantity * c.unit_price)}</TableCell><TableCell><div className="flex items-center gap-2"><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setCart(cart.filter((x) => x.inventory_id !== c.inventory_id))}>Remove</Button></div></TableCell></TableRow>; })}</TableBody></Table>{cart.some((c) => c.unit_price < c.minimum_selling_price) && <div className="border-t border-amber-100 bg-amber-50 px-4 py-3"><p className="text-xs font-semibold text-amber-900">Boss approval required</p><p className="mt-1 text-[11px] text-amber-800">This price is below the stored minimum. Tapping the button will send an approval request; no sale or stock movement is recorded until the Boss approves it.</p></div>}</div> : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><ShoppingCartIcon /><p className="mt-2 text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Choose the item above. The sale is kept this simple for walk-in customers.</p></div>}
 
