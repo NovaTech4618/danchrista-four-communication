@@ -25,7 +25,8 @@ type StockFilter = "all" | "ok" | "low" | "out";
 
 function isPhonePart(item: InventoryItem) {
   const brand = item.brand;
-  return item.category === "Phone Parts" && Boolean(brand && PHONE_PARTS[brand]) && PHONE_PARTS[brand].includes(item.subcategory || "");
+  const partTypes = brand ? PHONE_PARTS[brand] : undefined;
+  return item.category === "Phone Parts" && Boolean(partTypes) && partTypes.includes(item.subcategory || "");
 }
 function stockState(item: InventoryItem): "ok" | "low" | "out" {
   if (Number(item.quantity) === 0) return "out";
@@ -93,7 +94,6 @@ export default function InventoryPage() {
           <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop stock</p><h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Phone Parts</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Browse parts by phone brand, then part type and exact model.</p></div>
           <div className="flex flex-wrap gap-2"><Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>{isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>}{isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>}</div>
         </header>
-
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard title="All parts" value={parts.length} detail="Phone repair parts" active={!family} onClick={resetNavigation} />
           <SummaryCard title="iPhone" value={parts.filter(i => i.brand === "iPhone").length} detail="Charging · earpiece · back glass" onClick={() => { setFamily("iPhone"); setBrand(null); setPartType(null); }} />
@@ -101,10 +101,8 @@ export default function InventoryPage() {
           <SummaryCard title="Android" value={parts.filter(i => ANDROID_BRANDS.includes(i.brand || "")).length} detail="itel · Infinix · Tecno · Redmi and more" onClick={() => { setFamily("Android"); setBrand(null); setPartType(null); }} />
           {isOwner && <div className="rounded-2xl border border-[#dfe6df] bg-[#1d6a54] p-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#d7a95a]">Stock at cost</p><p className="mt-2 font-heading text-xl font-bold">{money(stockValue)}</p><p className="mt-1 text-[11px] text-[#c7d8d2]">Current phone-parts value</p></div>}
         </section>
-
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Browse</p><h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">{family || "Phone Parts"}{brand && family === "Android" ? ` · ${brand}` : ""}{partType ? ` · ${partType}` : ""}</h2></div>{(family || brand || partType || stockFilter !== "all") && <button type="button" onClick={resetNavigation} className="inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]"><ArrowLeft className="size-3.5" /> Start over</button>}</div>
-
           {!family ? <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <CategoryCard label="iPhone" count={parts.filter(i => i.brand === "iPhone").length} description="Charging flex, earpiece flex and back glass" icon={Smartphone} onClick={() => setFamily("iPhone")} />
             <CategoryCard label="Samsung" count={parts.filter(i => i.brand === "Samsung").length} description="Down board and power flex" icon={Smartphone} onClick={() => { setFamily("Samsung"); setBrand("Samsung"); }} />
@@ -116,16 +114,13 @@ export default function InventoryPage() {
             {partType && <div className="mb-2 flex items-center gap-2 text-xs text-[#74837e]"><span>{brand || family}</span><ChevronRight className="size-3" /><span>{partType}</span></div>}
           </div>}
         </section>
-
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px]"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" /><input aria-label="Search phone parts" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search model, part, brand or SKU..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" /></div><select aria-label="Stock status" value={stockFilter} onChange={e => setStockFilter(e.target.value as StockFilter)} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm"><option value="all">All stock</option><option value="ok">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option></select><button type="button" onClick={() => setStockFilter("out")} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Show empty stock ({out.length})</button></div>
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#74837e]"><span><strong className="text-[#182a28]">{visibleItems.length}</strong> items shown</span>{family && <span>Family: <strong className="text-[#285c4d]">{family}</strong></span>}{brand && <span>Brand: <strong className="text-[#285c4d]">{brand}</strong></span>}{partType && <span>Part: <strong className="text-[#285c4d]">{partType}</strong></span>}{low.length > 0 && <span>Low stock: <strong className="text-[#285c4d]">{low.length}</strong></span>}</div>
         </section>
-
         {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
         {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
         <EngineerPartIssuePanel items={items} onSaved={refresh} />
-
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe6df] px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Phone parts</h2></div>{(brand || partType) && <span className="rounded-full bg-[#eef4f1] px-3 py-1 text-xs font-semibold text-[#1d6a54]">{brand || family}{partType ? ` · ${partType}` : ""}</span>}</div>
           <InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={visibleItems} embedded showActions={isOwner} />
@@ -134,7 +129,6 @@ export default function InventoryPage() {
     </AppLayout>
   );
 }
-
 function SummaryCard({ title, value, detail, active, onClick }: { title:string; value:number; detail:string; active?:boolean; onClick:()=>void }) {
   return <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${active ? "border-[#1d6a54] bg-[#eef4f1]" : "border-[#dfe6df] bg-white"}`}><span className="inline-flex rounded-lg bg-[#eef4f1] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#1d6a54]">{title}</span><p className="mt-3 font-heading text-2xl font-bold text-[#182a28]">{value}</p><p className="mt-1 text-[11px] text-[#74837e]">{detail}</p></button>;
 }
