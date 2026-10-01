@@ -25,8 +25,10 @@ type StockFilter = "all" | "ok" | "low" | "out";
 
 function isPhonePart(item: InventoryItem) {
   const brand = item.brand;
-  const partTypes = brand ? PHONE_PARTS[brand] : undefined;
-  return item.category === "Phone Parts" && Boolean(partTypes) && partTypes.includes(item.subcategory || "");
+  if (item.category !== "Phone Parts" || !brand) return false;
+  const partTypes = PHONE_PARTS[brand];
+  if (!partTypes) return false;
+  return partTypes.includes(item.subcategory || "");
 }
 function stockState(item: InventoryItem): "ok" | "low" | "out" {
   if (Number(item.quantity) === 0) return "out";
