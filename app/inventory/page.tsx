@@ -24,7 +24,8 @@ const PHONE_PARTS: Record<string, string[]> = {
 type StockFilter = "all" | "ok" | "low" | "out";
 
 function isPhonePart(item: InventoryItem) {
-  return item.category === "Phone Parts" && Boolean(item.brand && PHONE_PARTS[item.brand]) && PHONE_PARTS[item.brand].includes(item.subcategory || "");
+  const brand = item.brand;
+  return item.category === "Phone Parts" && Boolean(brand && PHONE_PARTS[brand]) && PHONE_PARTS[brand].includes(item.subcategory || "");
 }
 function stockState(item: InventoryItem): "ok" | "low" | "out" {
   if (Number(item.quantity) === 0) return "out";
@@ -84,7 +85,6 @@ export default function InventoryPage() {
   }
   function refresh() { setRefreshKey(v => v + 1); }
   const selectedBrandParts = brand ? (PHONE_PARTS[brand] || []) : [];
-  const androidSelected = family === "Android";
 
   return (
     <AppLayout>
