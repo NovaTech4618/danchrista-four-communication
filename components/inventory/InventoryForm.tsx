@@ -38,8 +38,6 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
 
   useEffect(() => {
     if (!editingItem) { resetForm(); return; }
-    const normalizedType = "part";
-    const normalizedCategory = "Phone Parts";
     const floor = Number((editingItem as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? editingItem.selling_price);
     setItemName(editingItem.item_name); setCategory("Phone Parts");
     setSubcategory(editingItem.subcategory && PART_SUBCATEGORIES.includes(editingItem.subcategory) ? editingItem.subcategory : "Charging Flex");
