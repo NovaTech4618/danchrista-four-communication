@@ -260,7 +260,7 @@ function ModelCard({ model, items, isOwner, onEdit }: { model:string; items:Inve
 function InventoryCard({ item, isOwner, onEdit }: { item:InventoryItem; isOwner:boolean; onEdit:(item:InventoryItem)=>void }) {
   const state = stockState(item);
   return <article className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_5px_18px_rgba(18,59,52,0.05)]">
-    <div className="flex h-40 items-center justify-center bg-[#f7f8f5]"><InventoryImage src={item.image_url} alt={item.item_name} size="lg" /></div>
+    <div className="flex h-40 items-center justify-center bg-[#f7f8f5]"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /></div>
     <div className="p-4">
       <p className="text-sm font-bold text-[#182a28]">{item.item_name}</p>
       <p className="mt-1 text-xs text-[#74837e]">{item.brand || "Accessory"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p>
