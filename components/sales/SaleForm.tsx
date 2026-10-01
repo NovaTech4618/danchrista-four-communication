@@ -29,7 +29,6 @@ const PHONE_PARTS: Record<string, string[]> = {
 };
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 const selectClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10";
-
 type PriceControlledInventory = InventoryItem & { minimum_selling_price?: number };
 
 export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
@@ -40,7 +39,8 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [discount, setDiscount] = useState("0");
   const [selectedItemId, setSelectedItemId] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("iPhone");\n  const [selectedPartType, setSelectedPartType] = useState("Charging Flex");
+  const [selectedBrand, setSelectedBrand] = useState("iPhone");
+  const [selectedPartType, setSelectedPartType] = useState("Charging Flex");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedQty, setSelectedQty] = useState("1");
@@ -77,11 +77,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     setCart(existing ? cart.map((c) => c.inventory_id === item.id ? { ...c, quantity: c.quantity + qty } : c) : [...cart, { inventory_id: item.id, item_name: item.item_name, quantity: qty, unit_price: Number(item.selling_price), available: item.quantity, cost: Number(item.cost_price ?? 0), selling_price: Number(item.selling_price), minimum_selling_price: floor, price_override: false }]);
     setSelectedItemId(""); setSelectedQty("1");
   }
-
-  function updateLine(id: string, patch: Partial<CartLine>) {
-    setCart((lines) => lines.map((line) => line.inventory_id === id ? { ...line, ...patch } : line));
-  }
-
+  function updateLine(id: string, patch: Partial<CartLine>) { setCart((lines) => lines.map((line) => line.inventory_id === id ? { ...line, ...patch } : line)); }
   const subtotal = useMemo(() => cart.reduce((s, c) => s + c.quantity * c.unit_price, 0), [cart]);
   const discountAmount = Math.max(0, Number(discount) || 0);
   const total = subtotal - Math.min(discountAmount, subtotal);
@@ -95,77 +91,20 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     const needsApproval = belowLineFloor || total < minimumSubtotal;
     if (needsApproval) {
       setLoading(true);
-      const { error } = await saleService.requestPriceOverride({
-        customerId: customerId || null,
-        paymentMethod,
-        discount: discountAmount,
-        staffName: null,
-        notes: null,
-        items: cart.map((c) => ({
-          inventory_id: c.inventory_id,
-          quantity: c.quantity,
-          unit_price: c.unit_price,
-          price_override: true,
-        })),
-        reason: "Sale price is below the stored minimum selling price.",
-      });
+      const { error } = await saleService.requestPriceOverride({ customerId: customerId || null, paymentMethod, discount: discountAmount, staffName: null, notes: null, items: cart.map((c) => ({ inventory_id: c.inventory_id, quantity: c.quantity, unit_price: c.unit_price, price_override: true })), reason: "Sale price is below the stored minimum selling price." });
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Boss approval requested. The sale has not been recorded yet.");
-      setCart([]);
-      setCustomerId("");
-      setDiscount("0");
-      setShowCustomer(false);
-      setSaleAttemptKey(null);
-      setSaleAttemptSignature(null);
-      void loadOptions();
-      onSaleCompleted();
-      return;
+      setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted(); return;
     }
-    const attemptSignature = JSON.stringify({
-      customerId: customerId || null,
-      paymentMethod,
-      discount: discountAmount,
-      items: cart.map((c) => ({
-        inventory_id: c.inventory_id,
-        quantity: c.quantity,
-        unit_price: c.unit_price,
-        price_override: c.price_override,
-      })),
-    });
-    const idempotencyKey =
-      saleAttemptKey && saleAttemptSignature === attemptSignature
-        ? saleAttemptKey
-        : crypto.randomUUID();
-
-    setSaleAttemptKey(idempotencyKey);
-    setSaleAttemptSignature(attemptSignature);
-    setLoading(true);
-    const { error } = await saleService.createSale({
-      customerId: customerId || null,
-      paymentMethod,
-      discount: discountAmount,
-      staffName: null,
-      notes: null,
-      items: cart.map((c) => ({
-        inventory_id: c.inventory_id,
-        quantity: c.quantity,
-        unit_price: c.unit_price,
-        price_override: c.price_override,
-      })),
-      idempotencyKey,
-    });
+    const attemptSignature = JSON.stringify({ customerId: customerId || null, paymentMethod, discount: discountAmount, items: cart.map((c) => ({ inventory_id: c.inventory_id, quantity: c.quantity, unit_price: c.unit_price, price_override: c.price_override })) });
+    const idempotencyKey = saleAttemptKey && saleAttemptSignature === attemptSignature ? saleAttemptKey : crypto.randomUUID();
+    setSaleAttemptKey(idempotencyKey); setSaleAttemptSignature(attemptSignature); setLoading(true);
+    const { error } = await saleService.createSale({ customerId: customerId || null, paymentMethod, discount: discountAmount, staffName: null, notes: null, items: cart.map((c) => ({ inventory_id: c.inventory_id, quantity: c.quantity, unit_price: c.unit_price, price_override: c.price_override })), idempotencyKey });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Sale recorded. Stock reduced automatically.");
-    setCart([]);
-    setCustomerId("");
-    setDiscount("0");
-    setShowCustomer(false);
-    setSaleAttemptKey(null);
-    setSaleAttemptSignature(null);
-    void loadOptions();
-    onSaleCompleted();
+    setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted();
   }
 
   return <section className="rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
@@ -173,30 +112,19 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     <div className="space-y-5 p-5 sm:p-6">
       <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {Object.keys(PHONE_PARTS).map((brand) => <button key={brand} type="button" onClick={() => chooseBrand(brand)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedBrand === brand ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{brand}</button>)}
-        </div>
+        <div className="mb-4 flex flex-wrap gap-2">{Object.keys(PHONE_PARTS).map((brand) => <button key={brand} type="button" onClick={() => chooseBrand(brand)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedBrand === brand ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{brand}</button>)}</div>
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Part type</p>
-        <div className="mb-5 flex flex-wrap gap-2">
-          {partTypes.map((type) => <button key={type} type="button" onClick={() => choosePartType(type)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedPartType === type ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{type}</button>)}
-        </div>
+        <div className="mb-5 flex flex-wrap gap-2">{partTypes.map((type) => <button key={type} type="button" onClick={() => choosePartType(type)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedPartType === type ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{type}</button>)}</div>
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Choose model</p>
-        {models.length ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">
-          {models.map((model) => { const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); const inStock = items.some((i) => i.quantity > 0); return <button key={model} type="button" disabled={!inStock} onClick={() => chooseModel(model)} className={`rounded-xl border p-3 text-sm font-bold ${selectedModel === model ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:cursor-not-allowed disabled:opacity-35`}>{model}<span className="mt-1 block text-[10px] font-medium text-slate-400">{inStock ? "In stock" : "Out of stock"}</span></button>; })}
-        </div> : <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center text-sm text-slate-500">No {selectedBrand} {selectedPartType} models have been added yet. Add the exact model in Inventory first.</div>}
+        {models.length ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">{models.map((model) => { const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); const inStock = items.some((i) => i.quantity > 0); return <button key={model} type="button" disabled={!inStock} onClick={() => chooseModel(model)} className={`rounded-xl border p-3 text-sm font-bold ${selectedModel === model ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:cursor-not-allowed disabled:opacity-35`}>{model}<span className="mt-1 block text-[10px] font-medium text-slate-400">{inStock ? "In stock" : "Out of stock"}</span></button>; })}</div> : <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center text-sm text-slate-500">No {selectedBrand} {selectedPartType} models have been added yet. Add the exact model in Inventory first.</div>}
         {selectedPartType === "Back Glass" && selectedModel && variants.length > 0 && <><p className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Choose colour</p><div className="flex flex-wrap gap-2">{variants.map((variant) => { const item = modelItems.find((i) => i.item_name.endsWith(" - " + variant)); return <button key={variant} type="button" disabled={!item || item.quantity <= 0} onClick={() => chooseVariant(variant)} className={`rounded-xl border px-3 py-2 text-sm font-semibold ${selectedVariant === variant ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:opacity-35`}>{variant}</button>; })}</div></>}
         {selectedItemId && (() => { const item = inventory.find((i) => i.id === selectedItemId); return item ? <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dfe6df] bg-white p-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.item_name}</p><p className="text-xs text-slate-500">₦{Number(item.selling_price).toLocaleString()} · {item.quantity} in stock</p></div><Input aria-label="Quantity" type="number" min="1" step="1" value={selectedQty} onChange={(e) => setSelectedQty(e.target.value)} className="h-11 w-24 rounded-xl"/><Button type="button" onClick={addToCart} className="h-11 rounded-xl bg-[#123b34] px-5 hover:bg-[#1d6a54]">Add</Button></div> : null; })()}
       </div>
-
-      {cart.length > 0 ? <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]"><Table><TableHeader><TableRow className="bg-[#f7f8f5]"><TableHead>Goods</TableHead><TableHead>Qty</TableHead><TableHead>Unit price</TableHead><TableHead>Minimum</TableHead><TableHead>Total</TableHead><TableHead /></TableRow></TableHeader><TableBody>{cart.map((c) => { const belowFloor = c.unit_price < c.minimum_selling_price; return <TableRow key={c.inventory_id}><TableCell className="min-w-[190px] font-medium">{c.item_name}{belowFloor && <p className="mt-1 text-[11px] font-semibold text-amber-700">Below minimum — authorisation required</p>}</TableCell><TableCell>{c.quantity}</TableCell><TableCell className="min-w-[130px]"><Input aria-label={`Price for ${c.item_name}`} type="number" min="0" step="0.01" value={c.unit_price} onChange={(e) => updateLine(c.inventory_id, { unit_price: Number(e.target.value) || 0, price_override: false })} className="h-9 w-28 rounded-lg" /></TableCell><TableCell className="whitespace-nowrap text-xs text-slate-500">{money(c.minimum_selling_price)}</TableCell><TableCell className="font-semibold">{money(c.quantity * c.unit_price)}</TableCell><TableCell><div className="flex items-center gap-2"><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setCart(cart.filter((x) => x.inventory_id !== c.inventory_id))}>Remove</Button></div></TableCell></TableRow>; })}</TableBody></Table>{cart.some((c) => c.unit_price < c.minimum_selling_price) && <div className="border-t border-amber-100 bg-amber-50 px-4 py-3"><p className="text-xs font-semibold text-amber-900">Boss approval required</p><p className="mt-1 text-[11px] text-amber-800">This price is below the stored minimum. Tapping the button will send an approval request; no sale or stock movement is recorded until the Boss approves it.</p></div>}</div> : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><ShoppingCartIcon /><p className="mt-2 text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Choose the item above. The sale is kept this simple for walk-in customers.</p></div>}
-
+      {cart.length > 0 ? <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]"><Table><TableHeader><TableRow className="bg-[#f7f8f5]"><TableHead>Goods</TableHead><TableHead>Qty</TableHead><TableHead>Unit price</TableHead><TableHead>Minimum</TableHead><TableHead>Total</TableHead><TableHead /></TableRow></TableHeader><TableBody>{cart.map((c) => { const belowFloor = c.unit_price < c.minimum_selling_price; return <TableRow key={c.inventory_id}><TableCell className="min-w-[190px] font-medium">{c.item_name}{belowFloor && <p className="mt-1 text-[11px] font-semibold text-amber-700">Below minimum — authorisation required</p>}</TableCell><TableCell>{c.quantity}</TableCell><TableCell className="min-w-[130px]"><Input aria-label={`Price for ${c.item_name}`} type="number" min="0" step="0.01" value={c.unit_price} onChange={(e) => updateLine(c.inventory_id, { unit_price: Number(e.target.value) || 0, price_override: false })} className="h-9 w-28 rounded-lg" /></TableCell><TableCell className="whitespace-nowrap text-xs text-slate-500">{money(c.minimum_selling_price)}</TableCell><TableCell className="font-semibold">{money(c.quantity * c.unit_price)}</TableCell><TableCell><Button size="sm" variant="ghost" className="text-red-600" onClick={() => setCart(cart.filter((x) => x.inventory_id !== c.inventory_id))}>Remove</Button></TableCell></TableRow>; })}</TableBody></Table>{cart.some((c) => c.unit_price < c.minimum_selling_price) && <div className="border-t border-amber-100 bg-amber-50 px-4 py-3"><p className="text-xs font-semibold text-amber-900">Boss approval required</p><p className="mt-1 text-[11px] text-amber-800">This price is below the stored minimum. Tapping the button will send an approval request; no sale or stock movement is recorded until the Boss approves it.</p></div>}</div> : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><ShoppingCartIcon /><p className="mt-2 text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Choose the item above. The sale is kept this simple for walk-in customers.</p></div>}
       <div className="grid gap-3 md:grid-cols-[1fr_180px]"><label className="text-xs font-semibold text-[#687974]">Payment<select className={`${selectClass} mt-1`} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>{PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}</select></label><label className="text-xs font-semibold text-[#687974]">Discount<select className={`${selectClass} mt-1`} value={discount} onChange={(e) => setDiscount(e.target.value)}><option value="0">No discount</option><option value="500">₦500</option><option value="1000">₦1,000</option><option value="2000">₦2,000</option></select></label></div>
-
       <div className="border-t border-[#edf0ed] pt-4"><button type="button" onClick={() => setShowCustomer((v) => !v)} className="text-xs font-bold text-[#1d6a54]">{showCustomer ? "− Hide customer details" : "+ Add customer details (optional)"}</button>{showCustomer && <div className="mt-3"><select className={selectClass} value={customerId} onChange={(e) => setCustomerId(e.target.value)}><option value="">Select saved customer</option>{customers.map((c) => <option key={c.id} value={c.id}>{c.full_name}{c.phone ? ` · ${c.phone}` : ""}</option>)}</select><p className="mt-1 text-[11px] text-[#87958f]">Only use this when the customer needs a record. Walk-in sales can stay anonymous.</p></div>}</div>
-
       <div className="flex flex-col gap-4 rounded-2xl bg-[#123b34] p-4 text-white sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><p className="text-xs text-[#c7d8d2]">{cart.length} item{cart.length === 1 ? "" : "s"} · Subtotal {money(subtotal)}</p><p className="mt-1 font-heading text-2xl font-bold">{money(total)}</p></div><Button onClick={complete} disabled={loading || !cart.length} className="h-12 rounded-xl bg-[#d7a95a] px-7 font-bold text-[#123b34] hover:bg-[#e5bc75]">{loading ? "Processing…" : cart.some((c) => c.unit_price < c.minimum_selling_price) || total < cart.reduce((s, c) => s + c.quantity * c.minimum_selling_price, 0) ? "Request Boss approval" : "Complete sale"}</Button></div>
     </div>
   </section>;
 }
-
 function ShoppingCartIcon() { return <div className="mx-auto grid size-10 place-items-center rounded-full bg-[#eef4f1] text-[#1d6a54]"><span className="text-lg">+</span></div>; }
