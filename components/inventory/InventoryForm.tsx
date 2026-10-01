@@ -96,7 +96,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
 
     setLoading(true);
     const payload = {
-      item_name: itemName.trim(), category: "Phone Parts", subcategory, item_type: "part",
+      item_name: itemName.trim(), category: "Phone Parts", subcategory, item_type: "part" as const,
       brand, compatible_models: compatibleModels.trim(), sku: sku.trim() || null,
       selling_price: sp, minimum_selling_price: floor, cost_price: cp, quantity: q, minimum_stock: m,
       supplier: supplier.trim() || null, shelf_location: shelfLocation.trim() || null, notes: notes.trim() || null, image_url: null,
