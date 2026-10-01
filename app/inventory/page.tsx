@@ -77,8 +77,6 @@ export default function InventoryPage() {
   function refresh() { setRefreshKey(v => v + 1); }
 
   const currentPart = PARTS.find(p => p.name === category);
-  const accessoryCategory = null;
-
   return (
     <AppLayout>
       <main className="mx-auto w-full max-w-[1500px] space-y-6">
@@ -132,12 +130,7 @@ export default function InventoryPage() {
                 <CategoryCard key={name} label={name} count={parts.filter(i => i.subcategory === name).length} description={description} icon={Icon} onClick={() => { setCategory(name); setBrand(null); }} />
               ))}
             </div>
-          ) : shelf === "accessories" && !category ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ACCESSORIES.map(name => (
-                <CategoryCard key={name} label={name} count={accessories.filter(i => i.subcategory === name || i.category === name).length} description="Browse this stock shelf" icon={Package} onClick={() => setCategory(name)} />
-              ))}
-            </div>
+
           ) : category && (currentPart || accessoryCategory) ? (
             <div className="mt-5">
               <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-[#74837e]">
