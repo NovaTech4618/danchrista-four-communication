@@ -46,7 +46,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const phoneParts = useMemo(() => inventory.filter((i) => i.category === "Phone Parts" && ["Charging Flex", "Earpiece Flex", "Back Glass / Housing"].includes(i.subcategory || "")), [inventory]);
   const models = useMemo(() => Array.from(new Set(phoneParts.filter((i) => i.subcategory === selectedPartType).map((i) => i.compatible_models).filter((model): model is string => Boolean(model)))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), [phoneParts, selectedPartType]);
   const modelItems = useMemo(() => phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === selectedModel), [phoneParts, selectedPartType, selectedModel]);
-  const variants = useMemo(() => Array.from(new Set(modelItems.map((i) => i.item_name.match(/ - (.+)$/)?.[1]).filter(Boolean))), [modelItems]);
+  const variants = useMemo(() => Array.from(new Set(modelItems.map((i) => i.item_name.match(/ - (.+)$/)?.[1]).filter((variant): variant is string => Boolean(variant)))), [modelItems]);
   function choosePartType(type: "Charging Flex" | "Earpiece Flex" | "Back Glass / Housing") { setSelectedPartType(type); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
   function chooseModel(model: string) { setSelectedModel(model); setSelectedVariant(""); const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); setSelectedItemId(selectedPartType === "Back Glass / Housing" ? "" : items[0]?.id || ""); }
   function chooseVariant(variant: string) { setSelectedVariant(variant); setSelectedItemId(modelItems.find((i) => i.item_name.endsWith(" - " + variant))?.id || ""); }
