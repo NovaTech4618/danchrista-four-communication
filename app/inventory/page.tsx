@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Package, Smartphone, Cable, Headphones, Search, ArrowLeft } from "lucide-react";
+import { ChevronRight, Package, Smartphone, Search, ArrowLeft } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import InventoryForm from "@/components/inventory/InventoryForm";
 import InventoryTable from "@/components/inventory/InventoryTable";
@@ -14,25 +14,32 @@ import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
 import type { InventoryItem } from "@/types/inventory";
 
-type Shelf = "all" | "parts";
-type PartCategory = "Charging Flex" | "Earpiece Flex" | "Back Glass / Housing";
+const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
+const PHONE_PARTS: Record<string, string[]> = {
+  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass"],
+  Samsung: ["Down Board", "Power Flex"],
+  ...Object.fromEntries(ANDROID_BRANDS.map(brand => [brand, ["Down Board", "Power Flex"]])),
+};
 
-const PARTS: { name: PartCategory; icon: typeof Package; description: string; brands?: string[] }[] = [
-  { name: "Charging Flex", icon: Cable, description: "iPhone charging port flex cables", brands: ["iPhone"] },
-  { name: "Earpiece Flex", icon: Headphones, description: "iPhone earpiece and sensor flexes", brands: ["iPhone"] },
-  { name: "Back Glass / Housing", icon: Smartphone, description: "iPhone back glass by model and colour", brands: ["iPhone"] },
-];
+type StockFilter = "all" | "ok" | "low" | "out";
 
-function groupFor(item: InventoryItem): Shelf {
-  return "parts";
+function isPhonePart(item: InventoryItem) {
+  return item.category === "Phone Parts" && Boolean(item.brand && PHONE_PARTS[item.brand]) && PHONE_PARTS[item.brand].includes(item.subcategory || "");
 }
-function stockState(item: InventoryItem) {
+function stockState(item: InventoryItem): "ok" | "low" | "out" {
   if (Number(item.quantity) === 0) return "out";
   if (Number(item.quantity) <= Number(item.minimum_stock)) return "low";
   return "ok";
 }
 function money(n: number) {
   return `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+}
+function familyFor(brand: string | null) {
+  if (!brand) return null;
+  if (brand === "iPhone") return "iPhone";
+  if (brand === "Samsung") return "Samsung";
+  if (ANDROID_BRANDS.includes(brand)) return "Android";
+  return null;
 }
 
 export default function InventoryPage() {
@@ -41,11 +48,11 @@ export default function InventoryPage() {
   const isOwner = myRole === "owner";
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [shelf, setShelf] = useState<Shelf>("all");
-  const [category, setCategory] = useState<string | null>(null);
+  const [family, setFamily] = useState<string | null>(null);
   const [brand, setBrand] = useState<string | null>(null);
+  const [partType, setPartType] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [stockFilter, setStockFilter] = useState<"all"|"ok"|"low"|"out">("all");
+  const [stockFilter, setStockFilter] = useState<StockFilter>("all");
 
   useEffect(() => {
     void staffService.getMyRole().then(({ data }) => setMyRole(data));
@@ -54,134 +61,73 @@ export default function InventoryPage() {
     });
   }, [refreshKey]);
 
-  const parts = items.filter(i => groupFor(i) === "parts");
-  const low = items.filter(i => stockState(i) === "low");
-  const out = items.filter(i => stockState(i) === "out");
-  const stockValue = items.reduce((sum, i) => sum + Number(i.quantity || 0) * Number(i.cost_price || 0), 0);
+  const parts = items.filter(isPhonePart);
+  const low = parts.filter(i => stockState(i) === "low");
+  const out = parts.filter(i => stockState(i) === "out");
+  const stockValue = parts.reduce((sum, i) => sum + Number(i.quantity || 0) * Number(i.cost_price || 0), 0);
 
   const visibleItems = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return items.filter(item => {
-      const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${item.subcategory || ""} ${item.category || ""}`.toLowerCase();
+    return parts.filter(item => {
+      const text = `${item.item_name} ${item.brand || ""} ${item.compatible_models || ""} ${item.sku || ""} ${item.subcategory || ""}`.toLowerCase();
+      const itemFamily = familyFor(item.brand);
       return (!needle || text.includes(needle))
-        && (shelf === "all" || groupFor(item) === shelf)
-        && (!category || item.subcategory === category || item.category === category)
-        && (!brand || (brand === "__other" ? !item.brand?.trim() : (item.brand || "").toLowerCase() === brand.toLowerCase()))
+        && (!family || itemFamily === family)
+        && (!brand || item.brand === brand)
+        && (!partType || item.subcategory === partType)
         && (stockFilter === "all" || stockState(item) === stockFilter);
     });
-  }, [items, shelf, category, brand, query, stockFilter]);
+  }, [parts, family, brand, partType, query, stockFilter]);
 
   function resetNavigation() {
-    setShelf("all"); setCategory(null); setBrand(null); setStockFilter("all"); setQuery("");
+    setFamily(null); setBrand(null); setPartType(null); setStockFilter("all"); setQuery("");
   }
   function refresh() { setRefreshKey(v => v + 1); }
+  const selectedBrandParts = brand ? (PHONE_PARTS[brand] || []) : [];
+  const androidSelected = family === "Android";
 
-  const currentPart = PARTS.find(p => p.name === category);
   return (
     <AppLayout>
       <main className="mx-auto w-full max-w-[1500px] space-y-6">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop stock</p>
-            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Inventory</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Find stock quickly, check quantity and issue parts without digging through menus.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>
-            {isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>}
-            {isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>}
-          </div>
+          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop stock</p><h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Phone Parts</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Browse parts by phone brand, then part type and exact model.</p></div>
+          <div className="flex flex-wrap gap-2"><Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>{isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import items</Link>}{isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>}</div>
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard title="All parts" value={items.length} detail="Phone repair parts" active={shelf === "all" && !category} onClick={resetNavigation} />
-          <SummaryCard title="Charging flex" value={items.filter(i => i.subcategory === "Charging Flex").length} detail="iPhone charging flex" onClick={() => { setShelf("parts"); setCategory("Charging Flex"); setBrand("iPhone"); }} />
-          <SummaryCard title="Back glass" value={items.filter(i => i.subcategory === "Back Glass / Housing").length} detail="iPhone back glass" onClick={() => { setShelf("parts"); setCategory("Back Glass / Housing"); setBrand("iPhone"); }} />
-          <SummaryCard title="Low stock" value={low.length} detail="At reorder level" tone="amber" onClick={() => { setStockFilter("low"); setCategory(null); setBrand(null); }} />
-          {isOwner && <div className="rounded-2xl border border-[#dfe6df] bg-[#1d6a54] p-4 text-white">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#d7a95a]">Stock at cost</p>
-            <p className="mt-2 font-heading text-xl font-bold">{money(stockValue)}</p>
-            <p className="mt-1 text-[11px] text-[#c7d8d2]">Current stock value</p>
-          </div>}
+          <SummaryCard title="All parts" value={parts.length} detail="Phone repair parts" active={!family} onClick={resetNavigation} />
+          <SummaryCard title="iPhone" value={parts.filter(i => i.brand === "iPhone").length} detail="Charging · earpiece · back glass" onClick={() => { setFamily("iPhone"); setBrand(null); setPartType(null); }} />
+          <SummaryCard title="Samsung" value={parts.filter(i => i.brand === "Samsung").length} detail="Down board · power flex" onClick={() => { setFamily("Samsung"); setBrand("Samsung"); setPartType(null); }} />
+          <SummaryCard title="Android" value={parts.filter(i => ANDROID_BRANDS.includes(i.brand || "")).length} detail="itel · Infinix · Tecno · Redmi and more" onClick={() => { setFamily("Android"); setBrand(null); setPartType(null); }} />
+          {isOwner && <div className="rounded-2xl border border-[#dfe6df] bg-[#1d6a54] p-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#d7a95a]">Stock at cost</p><p className="mt-2 font-heading text-xl font-bold">{money(stockValue)}</p><p className="mt-1 text-[11px] text-[#c7d8d2]">Current phone-parts value</p></div>}
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Browse stock</p>
-              <h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">
-                {category ? category : "Phone Parts"}
-              </h2>
-            </div>
-            {(shelf !== "all" || category || brand || stockFilter !== "all") && (
-              <button type="button" onClick={resetNavigation} className="inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]"><ArrowLeft className="size-3.5" /> Start over</button>
-            )}
-          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Browse</p><h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">{family || "Phone Parts"}{brand && family === "Android" ? ` · ${brand}` : ""}{partType ? ` · ${partType}` : ""}</h2></div>{(family || brand || partType || stockFilter !== "all") && <button type="button" onClick={resetNavigation} className="inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]"><ArrowLeft className="size-3.5" /> Start over</button>}</div>
 
-          {shelf === "all" && !category ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PARTS.map(({ name, icon: Icon, description }) => (
-                <CategoryCard key={name} label={name} count={parts.filter(i => i.subcategory === name).length} description={description} icon={Icon} onClick={() => { setShelf("parts"); setCategory(name); setBrand("iPhone"); }} />
-              ))}
-            </div>
-          ) : shelf === "parts" && !category ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PARTS.map(({ name, icon: Icon, description }) => (
-                <CategoryCard key={name} label={name} count={parts.filter(i => i.subcategory === name).length} description={description} icon={Icon} onClick={() => { setCategory(name); setBrand(null); }} />
-              ))}
-            </div>
-
-          ) : category && currentPart ? (
-            <div className="mt-5">
-              <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-[#74837e]">
-                <button type="button" onClick={() => { setCategory(null); setBrand(null); }} className="font-bold text-[#1d6a54]">Phone Parts</button>
-                <ChevronRight className="size-3" /> <span>{category}</span>
-              </div>
-              {currentPart?.brands && (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-                  {currentPart.brands.map(b => (
-                    <CategoryCard key={b} label={b} count={parts.filter(i => i.subcategory === category && (i.brand || "").toLowerCase() === b.toLowerCase()).length} description="View brand stock" icon={Smartphone} onClick={() => setBrand(b === "Other" ? "__other" : b)} active={brand === b || (b === "Other" && brand === "__other")} />
-                  ))}
-                </div>
-              )}
-
-            </div>
-          ) : null}
+          {!family ? <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <CategoryCard label="iPhone" count={parts.filter(i => i.brand === "iPhone").length} description="Charging flex, earpiece flex and back glass" icon={Smartphone} onClick={() => setFamily("iPhone")} />
+            <CategoryCard label="Samsung" count={parts.filter(i => i.brand === "Samsung").length} description="Down board and power flex" icon={Smartphone} onClick={() => { setFamily("Samsung"); setBrand("Samsung"); }} />
+            <CategoryCard label="Android" count={parts.filter(i => ANDROID_BRANDS.includes(i.brand || "")).length} description="itel, Infinix, Tecno, Redmi, Huawei, Oppo, Vivo, Gionee, Nokia" icon={Package} onClick={() => setFamily("Android")} />
+          </div> : family === "Android" && !brand ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">{ANDROID_BRANDS.map(b => <CategoryCard key={b} label={b} count={parts.filter(i => i.brand === b).length} description="Down board · Power flex" icon={Smartphone} onClick={() => setBrand(b)} />)}</div> : <div className="mt-5">
+            {family === "iPhone" && !partType && <div className="grid gap-3 sm:grid-cols-3">{PHONE_PARTS.iPhone.map(type => <CategoryCard key={type} label={type} count={parts.filter(i => i.brand === "iPhone" && i.subcategory === type).length} description="View exact models" icon={Package} onClick={() => { setBrand("iPhone"); setPartType(type); }} />)}</div>}
+            {family === "Samsung" && !partType && <div className="grid gap-3 sm:grid-cols-2">{PHONE_PARTS.Samsung.map(type => <CategoryCard key={type} label={type} count={parts.filter(i => i.brand === "Samsung" && i.subcategory === type).length} description="View exact models" icon={Package} onClick={() => setPartType(type)} />)}</div>}
+            {family === "Android" && brand && !partType && <div className="grid gap-3 sm:grid-cols-2">{selectedBrandParts.map(type => <CategoryCard key={type} label={type} count={parts.filter(i => i.brand === brand && i.subcategory === type).length} description="View exact models" icon={Package} onClick={() => setPartType(type)} />)}</div>}
+            {partType && <div className="mb-2 flex items-center gap-2 text-xs text-[#74837e]"><span>{brand || family}</span><ChevronRight className="size-3" /><span>{partType}</span></div>}
+          </div>}
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
-          <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px]">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" />
-              <input aria-label="Search inventory" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search product, model, brand or SKU..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" />
-            </div>
-            <select aria-label="Stock status" value={stockFilter} onChange={e => setStockFilter(e.target.value as typeof stockFilter)} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm">
-              <option value="all">All stock</option><option value="ok">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option>
-            </select>
-            <button type="button" onClick={() => setStockFilter("out")} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Show empty stock ({out.length})</button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#74837e]">
-            <span><strong className="text-[#182a28]">{visibleItems.length}</strong> items shown</span>
-            {category && <span>Category: <strong className="text-[#285c4d]">{category}</strong></span>}
-            {brand && <span>Brand: <strong className="text-[#285c4d]">{brand === "__other" ? "Other / unbranded" : brand}</strong></span>}
-            {(query || category || brand || stockFilter !== "all") && <button type="button" onClick={() => { setQuery(""); setCategory(null); setBrand(null); setStockFilter("all"); }} className="font-bold text-[#1d6a54]">Clear filters</button>}
-          </div>
+          <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px]"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#5b6d68]" /><input aria-label="Search phone parts" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search model, part, brand or SKU..." className="h-11 w-full rounded-xl border border-[#dfe6df] pl-10 pr-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10" /></div><select aria-label="Stock status" value={stockFilter} onChange={e => setStockFilter(e.target.value as StockFilter)} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm"><option value="all">All stock</option><option value="ok">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option></select><button type="button" onClick={() => setStockFilter("out")} className="h-11 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d]">Show empty stock ({out.length})</button></div>
+          <div className="mt-3 flex flex-wrap gap-3 text-xs text-[#74837e]"><span><strong className="text-[#182a28]">{visibleItems.length}</strong> items shown</span>{family && <span>Family: <strong className="text-[#285c4d]">{family}</strong></span>}{brand && <span>Brand: <strong className="text-[#285c4d]">{brand}</strong></span>}{partType && <span>Part: <strong className="text-[#285c4d]">{partType}</strong></span>}{low.length > 0 && <span>Low stock: <strong className="text-[#285c4d]">{low.length}</strong></span>}</div>
         </section>
 
         {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
-
-        {isOwner && <section className="grid gap-6 xl:grid-cols-2">
-          <InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} />
-          <PurchaseStockPanel items={items} onSaved={refresh} />
-        </section>}
-
+        {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
         <EngineerPartIssuePanel items={items} onSaved={refresh} />
 
         <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.08)]">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe6df] px-5 py-4">
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Products</h2></div>
-            {category && <span className="rounded-full bg-[#eef4f1] px-3 py-1 text-xs font-semibold text-[#1d6a54]">{category}{brand ? ` · ${brand === "__other" ? "Other / unbranded" : brand}` : ""}</span>}
-          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe6df] px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Stock records</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Phone parts</h2></div>{(brand || partType) && <span className="rounded-full bg-[#eef4f1] px-3 py-1 text-xs font-semibold text-[#1d6a54]">{brand || family}{partType ? ` · ${partType}` : ""}</span>}</div>
           <InventoryTable refreshKey={refreshKey} onEdit={setEditingItem} itemsOverride={visibleItems} embedded showActions={isOwner} />
         </section>
       </main>
@@ -189,21 +135,9 @@ export default function InventoryPage() {
   );
 }
 
-function SummaryCard({ title, value, detail, active, tone, onClick }: { title:string; value:number; detail:string; active?:boolean; tone?: "amber"; onClick:()=>void }) {
-  return <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${active ? "border-[#1d6a54] bg-[#eef4f1]" : "border-[#dfe6df] bg-white"}`}>
-    <span className={`inline-flex rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${tone === "amber" ? "bg-[#f6f1e9] text-[#1d6a54]" : "bg-[#eef4f1] text-[#1d6a54]"}`}>{title}</span>
-    <p className="mt-3 font-heading text-2xl font-bold text-[#182a28]">{value}</p><p className="mt-1 text-[11px] text-[#74837e]">{detail}</p>
-  </button>;
+function SummaryCard({ title, value, detail, active, onClick }: { title:string; value:number; detail:string; active?:boolean; onClick:()=>void }) {
+  return <button type="button" onClick={onClick} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm ${active ? "border-[#1d6a54] bg-[#eef4f1]" : "border-[#dfe6df] bg-white"}`}><span className="inline-flex rounded-lg bg-[#eef4f1] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#1d6a54]">{title}</span><p className="mt-3 font-heading text-2xl font-bold text-[#182a28]">{value}</p><p className="mt-1 text-[11px] text-[#74837e]">{detail}</p></button>;
 }
-function ShelfCard({ title, count, description, icon: Icon, onClick }: { title:string; count:number; description:string; icon:typeof Package; onClick:()=>void }) {
-  return <button type="button" onClick={onClick} className="group rounded-2xl border border-[#dfe6df] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-[#1d6a54] hover:shadow-md">
-    <div className="flex items-start justify-between"><span className="grid size-11 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54]"><Icon className="size-5" /></span><ChevronRight className="size-5 text-[#5b6d68] transition group-hover:translate-x-1 group-hover:text-[#1d6a54]" /></div>
-    <h3 className="mt-5 text-lg font-bold text-[#182a28]">{title}</h3><p className="mt-1 text-sm leading-6 text-[#74837e]">{description}</p><p className="mt-4 text-xs font-bold text-[#1d6a54]">{count} items · Open shelf</p>
-  </button>;
-}
-function CategoryCard({ label, count, description, icon: Icon, onClick, active }: { label:string; count:number; description:string; icon:typeof Package; onClick:()=>void; active?:boolean }) {
-  return <button type="button" onClick={onClick} className={`group rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-[#1d6a54] hover:shadow-sm ${active ? "border-[#1d6a54] bg-[#eef4f1] ring-2 ring-[#1d6a54]/10" : "border-[#dfe6df] bg-white"}`}>
-    <div className="flex items-center justify-between"><span className="grid size-9 place-items-center rounded-lg bg-white text-[#1d6a54] ring-1 ring-[#dfe6df]"><Icon className="size-4" /></span><ChevronRight className="size-4 text-[#9aa9a4] group-hover:text-[#1d6a54]" /></div>
-    <p className="mt-3 text-sm font-bold text-[#182a28]">{label}</p><p className="mt-1 text-xs text-[#74837e]">{description}</p><p className="mt-2 text-[11px] font-semibold text-[#1d6a54]">{count} {count === 1 ? "item" : "items"}</p>
-  </button>;
+function CategoryCard({ label, count, description, icon: Icon, onClick }: { label:string; count:number; description:string; icon:typeof Package; onClick:()=>void }) {
+  return <button type="button" onClick={onClick} className="group rounded-2xl border border-[#dfe6df] bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-[#1d6a54] hover:shadow-sm"><div className="flex items-center justify-between"><span className="grid size-9 place-items-center rounded-lg bg-[#eef4f1] text-[#1d6a54]"><Icon className="size-4" /></span><ChevronRight className="size-4 text-[#9aa9a4] group-hover:text-[#1d6a54]" /></div><p className="mt-3 text-sm font-bold text-[#182a28]">{label}</p><p className="mt-1 text-xs leading-5 text-[#74837e]">{description}</p><p className="mt-2 text-[11px] font-semibold text-[#1d6a54]">{count} {count === 1 ? "item" : "items"}</p></button>;
 }
