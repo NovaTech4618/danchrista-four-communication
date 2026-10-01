@@ -14,6 +14,19 @@ import InventoryImage from "@/components/inventory/InventoryImage";
 
 type CartLine = { inventory_id: string; item_name: string; quantity: number; unit_price: number; available: number; cost: number; selling_price: number; minimum_selling_price: number; price_override: boolean };
 type SaleFormProps = { onSaleCompleted: () => void };
+const PHONE_PARTS: Record<string, string[]> = {
+  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass"],
+  Samsung: ["Down Board", "Power Flex"],
+  itel: ["Down Board", "Power Flex"],
+  Infinix: ["Down Board", "Power Flex"],
+  Tecno: ["Down Board", "Power Flex"],
+  Redmi: ["Down Board", "Power Flex"],
+  Huawei: ["Down Board", "Power Flex"],
+  Oppo: ["Down Board", "Power Flex"],
+  Vivo: ["Down Board", "Power Flex"],
+  Gionee: ["Down Board", "Power Flex"],
+  Nokia: ["Down Board", "Power Flex"],
+};
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 const selectClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10";
 
@@ -27,7 +40,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [discount, setDiscount] = useState("0");
   const [selectedItemId, setSelectedItemId] = useState("");
-  const [selectedPartType, setSelectedPartType] = useState<"Charging Flex" | "Earpiece Flex" | "Back Glass / Housing">("Charging Flex");
+  const [selectedBrand, setSelectedBrand] = useState("iPhone");\n  const [selectedPartType, setSelectedPartType] = useState("Charging Flex");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedQty, setSelectedQty] = useState("1");
@@ -43,12 +56,14 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     if (i.data) setInventory(i.data);
   }
 
-  const phoneParts = useMemo(() => inventory.filter((i) => i.category === "Phone Parts" && ["Charging Flex", "Earpiece Flex", "Back Glass / Housing"].includes(i.subcategory || "")), [inventory]);
+  const phoneParts = useMemo(() => inventory.filter((i) => i.category === "Phone Parts" && i.brand === selectedBrand && (PHONE_PARTS[selectedBrand] || []).includes(i.subcategory || "")), [inventory, selectedBrand]);
+  const partTypes = PHONE_PARTS[selectedBrand] || [];
   const models = useMemo(() => Array.from(new Set(phoneParts.filter((i) => i.subcategory === selectedPartType).map((i) => i.compatible_models).filter((model): model is string => Boolean(model)))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), [phoneParts, selectedPartType]);
   const modelItems = useMemo(() => phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === selectedModel), [phoneParts, selectedPartType, selectedModel]);
   const variants = useMemo(() => Array.from(new Set(modelItems.map((i) => i.item_name.match(/ - (.+)$/)?.[1]).filter((variant): variant is string => Boolean(variant)))), [modelItems]);
-  function choosePartType(type: "Charging Flex" | "Earpiece Flex" | "Back Glass / Housing") { setSelectedPartType(type); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
-  function chooseModel(model: string) { setSelectedModel(model); setSelectedVariant(""); const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); setSelectedItemId(selectedPartType === "Back Glass / Housing" ? "" : items[0]?.id || ""); }
+  function chooseBrand(brand: string) { setSelectedBrand(brand); setSelectedPartType(PHONE_PARTS[brand]?.[0] || ""); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
+  function choosePartType(type: string) { setSelectedPartType(type); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); }
+  function chooseModel(model: string) { setSelectedModel(model); setSelectedVariant(""); const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); setSelectedItemId(selectedPartType === "Back Glass" ? "" : items[0]?.id || ""); }
   function chooseVariant(variant: string) { setSelectedVariant(variant); setSelectedItemId(modelItems.find((i) => i.item_name.endsWith(" - " + variant))?.id || ""); }
 
   function addToCart() {
@@ -157,14 +172,19 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     <header className="border-b border-[#edf0ed] px-5 py-5 sm:px-6"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Walk-in first</p><h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">New sale</h2><p className="mt-1 text-xs leading-5 text-[#74837e]">For normal sales, choose the goods, quantity and payment. No customer name is required.</p></div><div className="rounded-xl bg-[#f7f8f5] px-4 py-2.5 text-right"><p className="text-[10px] font-semibold uppercase tracking-wide text-[#74837e]">Estimated profit</p><p className="font-heading text-lg font-bold text-[#182a28]">{money(estimatedGrossProfit)}</p></div></div></header>
     <div className="space-y-5 p-5 sm:p-6">
       <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
         <div className="mb-4 flex flex-wrap gap-2">
-          {(["Charging Flex", "Earpiece Flex", "Back Glass / Housing"] as const).map((type) => <button key={type} type="button" onClick={() => choosePartType(type)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedPartType === type ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{type}</button>)}
+          {Object.keys(PHONE_PARTS).map((brand) => <button key={brand} type="button" onClick={() => chooseBrand(brand)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedBrand === brand ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{brand}</button>)}
+        </div>
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Part type</p>
+        <div className="mb-5 flex flex-wrap gap-2">
+          {partTypes.map((type) => <button key={type} type="button" onClick={() => choosePartType(type)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedPartType === type ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{type}</button>)}
         </div>
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Choose model</p>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">
+        {models.length ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-7">
           {models.map((model) => { const items = phoneParts.filter((i) => i.subcategory === selectedPartType && i.compatible_models === model); const inStock = items.some((i) => i.quantity > 0); return <button key={model} type="button" disabled={!inStock} onClick={() => chooseModel(model)} className={`rounded-xl border p-3 text-sm font-bold ${selectedModel === model ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:cursor-not-allowed disabled:opacity-35`}>{model}<span className="mt-1 block text-[10px] font-medium text-slate-400">{inStock ? "In stock" : "Out of stock"}</span></button>; })}
-        </div>
-        {selectedPartType === "Back Glass / Housing" && selectedModel && <><p className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Choose colour</p><div className="flex flex-wrap gap-2">{variants.map((variant) => { const item = modelItems.find((i) => i.item_name.endsWith(" - " + variant)); return <button key={variant} type="button" disabled={!item || item.quantity <= 0} onClick={() => chooseVariant(variant)} className={`rounded-xl border px-3 py-2 text-sm font-semibold ${selectedVariant === variant ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:opacity-35`}>{variant}</button>; })}</div></>}
+        </div> : <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center text-sm text-slate-500">No {selectedBrand} {selectedPartType} models have been added yet. Add the exact model in Inventory first.</div>}
+        {selectedPartType === "Back Glass" && selectedModel && variants.length > 0 && <><p className="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-slate-500">Choose colour</p><div className="flex flex-wrap gap-2">{variants.map((variant) => { const item = modelItems.find((i) => i.item_name.endsWith(" - " + variant)); return <button key={variant} type="button" disabled={!item || item.quantity <= 0} onClick={() => chooseVariant(variant)} className={`rounded-xl border px-3 py-2 text-sm font-semibold ${selectedVariant === variant ? "border-[#123b34] bg-[#eef4f1] text-[#123b34]" : "border-slate-200 bg-white text-slate-700"} disabled:opacity-35`}>{variant}</button>; })}</div></>}
         {selectedItemId && (() => { const item = inventory.find((i) => i.id === selectedItemId); return item ? <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dfe6df] bg-white p-3"><InventoryImage src={item.image_url} alt={item.item_name} /><div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.item_name}</p><p className="text-xs text-slate-500">₦{Number(item.selling_price).toLocaleString()} · {item.quantity} in stock</p></div><Input aria-label="Quantity" type="number" min="1" step="1" value={selectedQty} onChange={(e) => setSelectedQty(e.target.value)} className="h-11 w-24 rounded-xl"/><Button type="button" onClick={addToCart} className="h-11 rounded-xl bg-[#123b34] px-5 hover:bg-[#1d6a54]">Add</Button></div> : null; })()}
       </div>
 
