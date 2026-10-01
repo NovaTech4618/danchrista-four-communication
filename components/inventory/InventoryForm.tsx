@@ -11,25 +11,12 @@ import InventoryImage from "@/components/inventory/InventoryImage";
 
 type Props = { editingItem: InventoryItem | null; onSaved: () => void; onCancelEdit: () => void };
 
-const PART_SUBCATEGORIES = [
-  "Display",
-  "Battery",
-  "Down Board",
-  "Charging Flex",
-  "Screen Guard",
-  "Back Glass / Housing",
-  "Power Flex",
-  "Camera",
-  "Audio",
-  "Earpiece Flex",
-  "Other Phone Parts",
-];
-const GOODS_SUBCATEGORIES = ["Chargers", "Cables", "Earphones", "Headsets", "Power Banks", "Speakers", "Screen Protectors", "Phone Accessories", "Other Gadgets & Accessories"];
+const PART_SUBCATEGORIES = ["Charging Flex", "Earpiece Flex", "Back Glass / Housing"];
 
 export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Props) {
   const [itemName, setItemName] = useState("");
   const [category, setCategory] = useState("Phone Parts");
-  const [subcategory, setSubcategory] = useState("Other Phone Parts");
+  const [subcategory, setSubcategory] = useState("Charging Flex");
   const [itemType, setItemType] = useState<"part" | "accessory" | "gadget">("part");
   const [brand, setBrand] = useState("");
   const [compatibleModels, setCompatibleModels] = useState("");
@@ -47,28 +34,28 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
   const [removeImage, setRemoveImage] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const subcategories = useMemo(() => category === "Phone Parts" ? PART_SUBCATEGORIES : GOODS_SUBCATEGORIES, [category]);
+  const subcategories = PART_SUBCATEGORIES;
 
   useEffect(() => {
     if (!editingItem) { resetForm(); return; }
-    const normalizedType = editingItem.item_type === "gadget" || editingItem.item_type === "accessory" ? editingItem.item_type : "part";
-    const normalizedCategory = editingItem.category === "Phone Parts" || editingItem.category === "Gadgets & Accessories" ? editingItem.category : normalizedType === "part" ? "Phone Parts" : "Gadgets & Accessories";
+    const normalizedType = "part";
+    const normalizedCategory = "Phone Parts";
     const floor = Number((editingItem as InventoryItem & { minimum_selling_price?: number }).minimum_selling_price ?? editingItem.selling_price);
-    setItemName(editingItem.item_name); setCategory(normalizedCategory);
-    setSubcategory(editingItem.subcategory || (normalizedCategory === "Phone Parts" ? "Other Phone Parts" : "Other Gadgets & Accessories"));
-    setItemType(normalizedType); setBrand(editingItem.brand || ""); setCompatibleModels(editingItem.compatible_models || ""); setSku(editingItem.sku || "");
+    setItemName(editingItem.item_name); setCategory("Phone Parts");
+    setSubcategory(editingItem.subcategory && PART_SUBCATEGORIES.includes(editingItem.subcategory) ? editingItem.subcategory : "Charging Flex");
+    setItemType("part"); setBrand(editingItem.brand || ""); setCompatibleModels(editingItem.compatible_models || ""); setSku(editingItem.sku || "");
     setSellingPrice(String(editingItem.selling_price)); setMinimumSellingPrice(String(floor)); setCostPrice(editingItem.cost_price != null ? String(editingItem.cost_price) : ""); setQuantity(String(editingItem.quantity)); setMinimumStock(String(editingItem.minimum_stock));
     setSupplier(editingItem.supplier || ""); setShelfLocation(editingItem.shelf_location || ""); setNotes(editingItem.notes || ""); setImageUrl(editingItem.image_url || null); setImageFile(null); setRemoveImage(false);
   }, [editingItem]);
 
   function resetForm() {
-    setItemName(""); setCategory("Phone Parts"); setSubcategory("Other Phone Parts"); setItemType("part"); setBrand(""); setCompatibleModels(""); setSku(""); setSellingPrice(""); setMinimumSellingPrice(""); setCostPrice(""); setQuantity("0"); setMinimumStock("5"); setSupplier(""); setShelfLocation(""); setNotes(""); setImageUrl(null); setImageFile(null); setRemoveImage(false);
+    setItemName(""); setCategory("Phone Parts"); setSubcategory("Charging Flex"); setItemType("part"); setBrand(""); setCompatibleModels(""); setSku(""); setSellingPrice(""); setMinimumSellingPrice(""); setCostPrice(""); setQuantity("0"); setMinimumStock("5"); setSupplier(""); setShelfLocation(""); setNotes(""); setImageUrl(null); setImageFile(null); setRemoveImage(false);
   }
 
   function handleCategoryChange(value: string) {
-    const nextIsParts = value === "Phone Parts";
-    setCategory(value); setSubcategory(nextIsParts ? "Other Phone Parts" : "Other Gadgets & Accessories");
-    if (nextIsParts) setItemType("part"); else if (itemType === "part") setItemType("accessory");
+    setCategory("Phone Parts");
+    setSubcategory(value);
+    setItemType("part");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,8 +98,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
       <CardHeader className="pb-3"><CardTitle className="text-lg">{editingItem ? "Edit item" : "Add inventory item"}</CardTitle><p className="text-sm text-slate-500">Keep the name, model and shelf easy to recognize during a busy day.</p></CardHeader>
       <CardContent><form onSubmit={handleSubmit} className="space-y-4">
         <Input placeholder="Item name — e.g. Tecno Spark 10 Charging Board" value={itemName} onChange={e => setItemName(e.target.value)} />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Main group</span><select value={category} onChange={e => handleCategoryChange(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option>Phone Parts</option><option>Gadgets & Accessories</option></select></label><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Subcategory</span><select value={subcategory} onChange={e => setSubcategory(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">{subcategories.map(value => <option key={value}>{value}</option>)}</select></label></div>
-        {category === "Gadgets & Accessories" && <label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Item kind</span><select value={itemType} onChange={e => setItemType(e.target.value as "accessory" | "gadget")} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="accessory">Accessory</option><option value="gadget">Gadget / Device</option></select></label>}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Category</span><div className="flex h-10 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700">Phone Parts</div></label><label className="space-y-1"><span className="text-xs font-semibold text-slate-600">Part type</span><select value={subcategory} onChange={e => handleCategoryChange(e.target.value)} className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm">{subcategories.map(value => <option key={value}>{value}</option>)}</select></label></div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="space-y-1"><span className="text-xs font-semibold text-slate-600">{category === "Phone Parts" ? "Phone brand" : "Brand"}</span><Input list={category === "Phone Parts" ? "phone-brands" : undefined} placeholder={category === "Phone Parts" ? "e.g. iPhone, Samsung, Tecno, Infinix" : "Brand"} value={brand} onChange={e => setBrand(e.target.value)} /><span className="text-[11px] text-slate-500">{category === "Phone Parts" ? "Use the phone brand/family this part belongs to." : "Product brand, if applicable."}</span></label>
           <Input placeholder="SKU / code (optional)" value={sku} onChange={e => setSku(e.target.value)} />
