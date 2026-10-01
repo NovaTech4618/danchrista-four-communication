@@ -131,7 +131,7 @@ export default function InventoryPage() {
               ))}
             </div>
 
-          ) : category && (currentPart || accessoryCategory) ? (
+          ) : category && currentPart ? (
             <div className="mt-5">
               <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-[#74837e]">
                 <button type="button" onClick={() => { setCategory(null); setBrand(null); }} className="font-bold text-[#1d6a54]">Phone Parts</button>
