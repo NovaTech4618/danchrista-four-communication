@@ -33,7 +33,6 @@ export default function NewRepairPage() {
   const [deposit, setDeposit] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [priority, setPriority] = useState("Normal");
-  const [expectedDate, setExpectedDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { void (async () => { const { data } = await supabase.from("inventory").select("brand, compatible_models").not("compatible_models", "is", null).limit(2000); const list: { brand: string; model: string }[] = []; for (const row of (data || []) as { brand: string | null; compatible_models: string | null }[]) { const b = (row.brand || "").trim(); for (const raw of (row.compatible_models || "").split(/[,;|]/)) { const m = raw.trim(); if (b && m && !list.some((x) => x.brand.toLowerCase() === b.toLowerCase() && x.model.toLowerCase() === m.toLowerCase())) list.push({ brand: b, model: m }); } } setModels(list.sort((a,b) => a.brand.localeCompare(b.brand) || a.model.localeCompare(b.model))); })(); }, []);
