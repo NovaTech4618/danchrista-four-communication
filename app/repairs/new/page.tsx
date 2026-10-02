@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronDown, Phone, Search, UserRound, Smartphone } from "lucide-react";
+import { ArrowLeft, Phone, UserRound, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import AppLayout from "@/components/layout/AppLayout";
@@ -19,9 +19,6 @@ export default function NewRepairPage() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [serviceType, setServiceType] = useState("Standard Repair");
-  const [models, setModels] = useState<{ brand: string; model: string }[]>([]);
-  const [modelSearch, setModelSearch] = useState("");
-  const [showModels, setShowModels] = useState(false);
   const [deviceType, setDeviceType] = useState("Phone");
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
@@ -35,14 +32,12 @@ export default function NewRepairPage() {
   const [priority, setPriority] = useState("Normal");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { void (async () => { const { data } = await supabase.from("inventory").select("brand, compatible_models").not("compatible_models", "is", null).limit(2000); const list: { brand: string; model: string }[] = []; for (const row of (data || []) as { brand: string | null; compatible_models: string | null }[]) { const b = (row.brand || "").trim(); for (const raw of (row.compatible_models || "").split(/[,;|]/)) { const m = raw.trim(); if (b && m && !list.some((x) => x.brand.toLowerCase() === b.toLowerCase() && x.model.toLowerCase() === m.toLowerCase())) list.push({ brand: b, model: m }); } } setModels(list.sort((a,b) => a.brand.localeCompare(b.brand) || a.model.localeCompare(b.model))); })(); }, []);
-  const brands = useMemo(() => [...new Set(models.map((x) => x.brand))], [models]);
-  const filteredModels = useMemo(() => { const q = modelSearch.trim().toLowerCase(); return models.filter((x) => (!brand || x.brand === brand) && (!q || (x.brand + " " + x.model).toLowerCase().includes(q))).slice(0, 80); }, [models, brand, modelSearch]);
+  const brands = useMemo(() => ["Apple", "Samsung", "Tecno", "Infinix", "itel", "Redmi", "Xiaomi", "Nokia", "Huawei", "Oppo", "Vivo", "Realme", "Google", "OnePlus", "Other"], []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!phone.trim()) return void toast.error("Enter the customer phone number.");
-    if (!brand.trim() || !model.trim()) return void toast.error("Select the device brand and model.");
+    if (!brand.trim() || !model.trim()) return void toast.error("Enter the device brand and model.");
     if (!issue.trim()) return void toast.error("Tell us what is wrong with the device.");
 
     const estimatedCost = estimated ? Number(estimated) : null;
@@ -106,7 +101,7 @@ export default function NewRepairPage() {
             <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label><select className={select} value={deviceType} onChange={(e) => setDeviceType(e.target.value)}><option>Phone</option><option>Tablet</option><option>Laptop</option><option>Watch</option><option>Other</option></select></div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Brand</label><select className={select} value={brand} onChange={(e) => { setBrand(e.target.value); setModel(""); setModelSearch(""); }}><option value="">Select brand</option>{brands.map((item) => <option key={item}>{item}</option>)}</select></div>
-              <div className="relative"><label className="mb-1.5 block text-sm font-medium text-slate-700">Model</label><button type="button" onClick={() => setShowModels((v) => !v)} className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 text-left text-sm"><span className={model ? "font-semibold text-slate-900" : "text-slate-400"}>{model || "Select phone model"}</span><ChevronDown className="size-4 text-slate-400" /></button>{showModels && <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"><div className="border-b border-slate-100 p-2"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><input autoFocus value={modelSearch} onChange={(e) => setModelSearch(e.target.value)} placeholder="Search model..." className="h-10 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none" /></div></div><div className="max-h-64 overflow-y-auto p-1">{filteredModels.map((item) => <button type="button" key={item.brand+"-"+item.model} onClick={() => { setBrand(item.brand); setModel(item.model); setModelSearch(""); setShowModels(false); }} className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-teal-50"><span><b>{item.model}</b><span className="ml-2 text-xs text-slate-400">{item.brand}</span></span>{model === item.model && brand === item.brand && <Check className="size-4 text-teal-700" />}</button>)}</div></div>}</div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Model</label><Input className={input} value={model} onChange={(e) => setModel(e.target.value)} placeholder="Enter phone model (e.g. iPhone 13 Pro Max)" required /></div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">IMEI / Serial</label><Input className={input} value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="Optional" /></div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Color</label><Input className={input} value={color} onChange={(e) => setColor(e.target.value)} placeholder="Optional" /></div>
             </CardContent>
