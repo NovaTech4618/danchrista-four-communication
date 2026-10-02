@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, UserRound, Smartphone } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Phone, Search, UserRound, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import AppLayout from "@/components/layout/AppLayout";
@@ -18,6 +18,10 @@ const select = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 tex
 export default function NewRepairPage() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [serviceType, setServiceType] = useState("Standard Repair");
+  const [models, setModels] = useState<{ brand: string; model: string }[]>([]);
+  const [modelSearch, setModelSearch] = useState("");
+  const [showModels, setShowModels] = useState(false);
   const [deviceType, setDeviceType] = useState("Phone");
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
@@ -32,10 +36,14 @@ export default function NewRepairPage() {
   const [expectedDate, setExpectedDate] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => { void (async () => { const { data } = await supabase.from("inventory").select("brand, compatible_models").not("compatible_models", "is", null).limit(2000); const list: { brand: string; model: string }[] = []; for (const row of (data || []) as { brand: string | null; compatible_models: string | null }[]) { const b = (row.brand || "").trim(); for (const raw of (row.compatible_models || "").split(/[,;|]/)) { const m = raw.trim(); if (b && m && !list.some((x) => x.brand.toLowerCase() === b.toLowerCase() && x.model.toLowerCase() === m.toLowerCase())) list.push({ brand: b, model: m }); } } setModels(list.sort((a,b) => a.brand.localeCompare(b.brand) || a.model.localeCompare(b.model))); })(); }, []);
+  const brands = useMemo(() => [...new Set(models.map((x) => x.brand))], [models]);
+  const filteredModels = useMemo(() => { const q = modelSearch.trim().toLowerCase(); return models.filter((x) => (!brand || x.brand === brand) && (!q || (x.brand + " " + x.model).toLowerCase().includes(q))).slice(0, 80); }, [models, brand, modelSearch]);
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!customerName.trim() || !phone.trim()) return void toast.error("Customer name and phone are required.");
-    if (!brand.trim() || !model.trim()) return void toast.error("Device brand and model are required.");
+    if (!phone.trim()) return void toast.error("Enter the customer phone number.");
+    if (!brand.trim() || !model.trim()) return void toast.error("Select the device brand and model.");
     if (!issue.trim()) return void toast.error("Tell us what is wrong with the device.");
 
     const estimatedCost = estimated ? Number(estimated) : null;
@@ -60,7 +68,8 @@ export default function NewRepairPage() {
         p_deposit: paid,
         p_payment_method: paymentMethod,
         p_priority: priority,
-        p_expected_completion_date: expectedDate || null,
+        p_expected_completion_date: null,
+        p_service_type: serviceType,
       });
 
       if (error) throw new Error(error.message);
@@ -88,8 +97,8 @@ export default function NewRepairPage() {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><UserRound className="size-4 text-teal-700" /> Customer</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Full name</label><Input className={input} value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Customer name" autoComplete="name" required /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone number</label><Input className={input} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" required /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Full name</label><Input className={input} value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Walk-in Customer" autoComplete="name" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone number</label><div className="relative"><Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input className={`${input} pl-10`} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" required /></div>
             </CardContent>
           </Card>
 
@@ -97,8 +106,8 @@ export default function NewRepairPage() {
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Smartphone className="size-4 text-teal-700" /> Device</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label><select className={select} value={deviceType} onChange={(e) => setDeviceType(e.target.value)}><option>Phone</option><option>Tablet</option><option>Laptop</option><option>Watch</option><option>Other</option></select></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Brand</label><Input className={input} value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Tecno, iPhone, Samsung..." required /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Model</label><Input className={input} value={model} onChange={(e) => setModel(e.target.value)} placeholder="Camon 20, iPhone 13..." required /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Brand</label><select className={select} value={brand} onChange={(e) => { setBrand(e.target.value); setModel(""); setModelSearch(""); }}><option value="">Select brand</option>{brands.map((item) => <option key={item}>{item}</option>)}</select></div>
+              <div className="relative"><label className="mb-1.5 block text-sm font-medium text-slate-700">Model</label><button type="button" onClick={() => setShowModels((v) => !v)} className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 text-left text-sm"><span className={model ? "font-semibold text-slate-900" : "text-slate-400"}>{model || "Select phone model"}</span><ChevronDown className="size-4 text-slate-400" /></button>{showModels && <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"><div className="border-b border-slate-100 p-2"><div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><input autoFocus value={modelSearch} onChange={(e) => setModelSearch(e.target.value)} placeholder="Search model..." className="h-10 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none" /></div></div><div className="max-h-64 overflow-y-auto p-1">{filteredModels.map((item) => <button type="button" key={item.brand+"-"+item.model} onClick={() => { setBrand(item.brand); setModel(item.model); setModelSearch(""); setShowModels(false); }} className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-teal-50"><span><b>{item.model}</b><span className="ml-2 text-xs text-slate-400">{item.brand}</span></span>{model === item.model && brand === item.brand && <Check className="size-4 text-teal-700" />}</button>)}</div></div>}</div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">IMEI / Serial</label><Input className={input} value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="Optional" /></div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Color</label><Input className={input} value={color} onChange={(e) => setColor(e.target.value)} placeholder="Optional" /></div>
             </CardContent>
@@ -108,7 +117,7 @@ export default function NewRepairPage() {
             <CardHeader><CardTitle className="text-base">Repair job</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Customer complaint / problem</label><textarea className="min-h-28 w-full rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100" value={issue} onChange={(e) => setIssue(e.target.value)} placeholder="Describe the fault exactly as reported by the customer..." required /></div>
-              <div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Technician</label><Input className={input} value={technician} onChange={(e) => setTechnician(e.target.value)} placeholder="Optional" /></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Expected completion</label><Input className={input} type="date" value={expectedDate} onChange={(e) => setExpectedDate(e.target.value)} /></div></div>
+              <div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Service</label><select className={select} value={serviceType} onChange={(e) => setServiceType(e.target.value)}><option>Standard Repair</option><option>Network Unlock</option></select></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Technician</label><Input className={input} value={technician} onChange={(e) => setTechnician(e.target.value)} placeholder="Optional" /></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Collection rule</label><div className="flex h-11 items-center rounded-xl border border-teal-100 bg-teal-50 px-3 text-sm font-semibold text-teal-800">{serviceType === "Network Unlock" ? "No 3-day limit" : "Maximum 3 days"}</div></div></div>
               <div className="grid gap-4 sm:grid-cols-3"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Estimated cost</label><Input className={input} type="number" min="0" value={estimated} onChange={(e) => setEstimated(e.target.value)} placeholder="0" /></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Deposit paid</label><Input className={input} type="number" min="0" value={deposit} onChange={(e) => setDeposit(e.target.value)} placeholder="0" /></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Payment method</label><select className={select} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="pos">POS</option><option value="other">Other</option></select></div></div>
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Priority</label><select className={select} value={priority} onChange={(e) => setPriority(e.target.value)}>{REPAIR_PRIORITIES.map((item) => <option key={item}>{item}</option>)}</select></div>
             </CardContent>
