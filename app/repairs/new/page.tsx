@@ -97,7 +97,7 @@ export default function NewRepairPage() {
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><UserRound className="size-4 text-teal-700" /> Customer</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Full name</label><Input className={input} value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Walk-in Customer" autoComplete="name" /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone number</label><div className="relative"><Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input className={`${input} pl-10`} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" required /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone number</label><div className="relative"><Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input className={`${input} pl-10`} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" required /></div></div>
             </CardContent>
           </Card>
 
