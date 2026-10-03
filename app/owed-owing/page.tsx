@@ -69,7 +69,7 @@ export default function OwedOwingPage() {
     }
     if (kind === "supplier") {
       const result = await businessOperationsService.getSupplierPayablePayments(id);
-      if (result.error) return toast.error(result.error.message);
+      if (result.error) { toast.error(result.error.message); return; }
       setHistory({ title: name, lines: (result.data ?? []).map((p: any) => `${new Date(p.paid_at).toLocaleDateString("en-NG")} · Paid ${money(Number(p.amount))} · ${p.payment_method}`) });
       return;
     }
