@@ -55,7 +55,7 @@ export default function OwedOwingPage() {
 
     if (c.error) toast.error(c.error.message); else setCustomers(c.data ?? []);
     if (e.error) toast.error(e.error.message); else setEngineers(e.data ?? []);
-    if (eb.error) toast.error(eb.error.message); else setEngineerBalances(eb.data ?? []);
+    if (eb.error) toast.error(eb.error.message); else setEngineerBalances(Array.isArray(eb.data) ? eb.data : []);
     if (s.error) toast.error(s.error.message); else setSuppliers(s.data ?? []);
     if (f.error) toast.error(f.error.message); else setFollowups((f.data ?? []) as Followup[]);
     if (ft.error) toast.error(ft.error.message); else setMoneyRows((ft.data ?? []) as MoneyRow[]);
