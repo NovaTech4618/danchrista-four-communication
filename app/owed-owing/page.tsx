@@ -74,7 +74,7 @@ export default function OwedOwingPage() {
       return;
     }
     const result = await businessOperationsService.getInvoices();
-    if (result.error) return toast.error(result.error.message);
+    if (result.error) { toast.error(result.error.message); return; }
     const rows = (result.data ?? []).filter((i: any) => i.customer_id === id);
     setHistory({ title: name, lines: rows.map((i: any) => `${new Date(i.issued_at).toLocaleDateString("en-NG")} · ${i.invoice_number} · ${i.payment_status} · Owed ${money(Number(i.total))} · Paid ${money(Number(i.paid_amount))} · Balance ${money(Number(i.outstanding))}`) });
   }
