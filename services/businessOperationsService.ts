@@ -3,6 +3,23 @@ import { supabase } from "@/lib/supabase";
 export const businessOperationsService = {
   async getCustomerBalances() { return await supabase.rpc("get_customer_balances"); },
   async getInvoices() { return await supabase.from("invoice_balance_view").select("*").order("issued_at", { ascending: false }); },
+  async getCustomerOpenInvoices(customerId: string) { return await supabase.from("invoice_balance_view").select("*").eq("customer_id", customerId).neq("status", "void").gt("outstanding", 0).order("issued_at", { ascending: true }); },
+  async recordCustomerBalancePayment(customerId: string, amount: number, paymentMethod: "cash" | "transfer" | "pos" | "other") {
+    const { data: invoices, error } = await this.getCustomerOpenInvoices(customerId);
+    if (error) return { data: null, error };
+    const total = (invoices ?? []).reduce((sum, invoice) => sum + Number(invoice.outstanding || 0), 0);
+    if (amount <= 0 || amount > total + 0.01) return { data: null, error: new Error("Payment is greater than the customer's outstanding balance.") };
+    let remaining = amount;
+    for (const invoice of invoices ?? []) {
+      if (remaining <= 0.01) break;
+      const pay = Math.min(remaining, Number(invoice.outstanding || 0));
+      if (pay <= 0) continue;
+      const result = await this.recordInvoicePayment({ invoiceId: invoice.id, amount: pay, paymentMethod, notes: "Payment recorded from Owed & Owing" });
+      if (result.error) return { data: null, error: result.error };
+      remaining -= pay;
+    }
+    return { data: true, error: null };
+  },
   async getInvoice(invoiceId: string) { return await supabase.from("invoice_balance_view").select("*").eq("id", invoiceId).single(); },
   async getRepairInvoice(repairId: string) { return await supabase.from("invoice_balance_view").select("*").eq("repair_id", repairId).neq("status", "void").order("issued_at", { ascending: true }).maybeSingle(); },
   async getInvoicePayments(invoiceId: string) { return await supabase.from("invoice_payments").select("*").eq("invoice_id", invoiceId).order("payment_date", { ascending: false }); },
