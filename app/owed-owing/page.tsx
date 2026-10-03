@@ -92,6 +92,9 @@ export default function OwedOwingPage() {
   const supplierOut = supplierPayments.reduce((n, x) => n + Number(x.amount), 0);
   const paidOut = financialOut + supplierOut;
   const followupRows = [...rows].filter(r => r.enabled && r.threshold > 0 && r.balance >= r.threshold).sort((a, b) => b.balance - a.balance);
+  const customerOutstanding = customers.reduce((n, r) => n + Math.max(0, Number(r.balance)), 0);
+  const engineerOutstanding = engineerBalances.reduce((n, r) => n + Math.max(0, Number(r.balance)), 0);
+  const supplierOutstanding = suppliers.reduce((n, r) => n + Math.max(0, Number(r.balance)), 0);
 
   async function saveThreshold() {
     if (!thresholdTarget) return;
