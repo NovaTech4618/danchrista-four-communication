@@ -26,6 +26,7 @@ export default function OwedOwingPage() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer" | "pos" | "other">("cash");
   const [saving, setSaving] = useState(false);
+  const [history, setHistory] = useState<{ title: string; lines: string[] } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -55,6 +56,28 @@ export default function OwedOwingPage() {
   const customerTotal = customers.reduce((n, r) => n + Math.max(Number(r.balance), 0), 0);
   const engineerTotal = engineerRows.reduce((n, r) => n + Math.max(Number(r.balance), 0), 0);
   const supplierTotal = suppliers.reduce((n, r) => n + Math.max(Number(r.balance), 0), 0);
+
+  async function openHistory(kind: "customer" | "engineer" | "supplier", id: string, name: string) {
+    if (kind === "engineer") {
+      const result = await engineerService.getTransactions(id);
+      if (result.error) return toast.error(result.error.message);
+      setHistory({ title: name, lines: (result.data ?? []).map((t: any) => {
+        const amount = Number(t.debit || 0) > 0 ? `Owed ${money(Number(t.debit))}` : `Paid ${money(Number(t.credit || 0))}`;
+        return `${new Date(t.transaction_date).toLocaleDateString("en-NG")} · ${t.description || t.transaction_type} · ${amount}`;
+      }) });
+      return;
+    }
+    if (kind === "supplier") {
+      const result = await businessOperationsService.getSupplierPayablePayments(id);
+      if (result.error) return toast.error(result.error.message);
+      setHistory({ title: name, lines: (result.data ?? []).map((p: any) => `${new Date(p.paid_at).toLocaleDateString("en-NG")} · Paid ${money(Number(p.amount))} · ${p.payment_method}`) });
+      return;
+    }
+    const result = await businessOperationsService.getInvoices();
+    if (result.error) return toast.error(result.error.message);
+    const rows = (result.data ?? []).filter((i: any) => i.customer_id === id);
+    setHistory({ title: name, lines: rows.map((i: any) => `${new Date(i.issued_at).toLocaleDateString("en-NG")} · ${i.invoice_number} · ${i.payment_status} · Owed ${money(Number(i.total))} · Paid ${money(Number(i.paid_amount))} · Balance ${money(Number(i.outstanding))}`) });
+  }
 
   async function recordPayment() {
     if (!paymentTarget) return;
@@ -105,6 +128,17 @@ export default function OwedOwingPage() {
 
     {loading && <div className="rounded-xl border border-[#dfe6df] bg-white p-5 text-sm text-[#74837e]">Loading accounts…</div>}
 
+    {history && <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a641d]">History</p>
+        <h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">{history.title}</h2>
+        <div className="mt-4 max-h-80 overflow-y-auto rounded-xl border border-[#edf0ed]">
+          {history.lines.length ? history.lines.map((line, i) => <div key={i} className="border-b border-[#edf0ed] px-4 py-3 text-sm text-[#53635d] last:border-0">{line}</div>) : <div className="p-5 text-sm text-[#74837e]">No transaction history.</div>}
+        </div>
+        <button onClick={() => setHistory(null)} className="mt-4 h-11 w-full rounded-xl bg-[#123b34] text-sm font-bold text-white">Close</button>
+      </div>
+    </div>}
+
     {paymentTarget && <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a641d]">Record payment</p>
@@ -126,6 +160,6 @@ type Row = { id: string; name: string; phone: string | null; detail: string; owe
 function AccountGroup({ title, description, rows, onPay }: { title: string; description: string; rows: Row[]; onPay: (v: { kind: Row["kind"]; id: string; name: string; balance: number }) => void }) {
   return <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white">
     <div className="border-b border-[#edf0ed] p-5"><h2 className="font-heading text-lg font-bold text-[#182a28]">{title}</h2><p className="mt-1 text-xs text-[#74837e]">{description}</p></div>
-    {rows.length === 0 ? <div className="p-8 text-center text-sm text-[#74837e]">No outstanding balance.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-[#f7f8f5]"><tr><th className="px-5 py-3">Person</th><th className="px-5 py-3">What it is</th><th className="px-5 py-3">Amount owed</th><th className="px-5 py-3">Amount paid</th><th className="px-5 py-3">Balance</th><th className="px-5 py-3">History</th><th /></tr></thead><tbody>{rows.map(r => <tr key={r.id} className="border-t border-[#edf0ed]"><td className="px-5 py-4"><p className="font-bold text-[#183b34]">{r.name}</p><p className="text-[11px] text-[#8b918e]">{r.phone || "No phone"}</p></td><td className="px-5 py-4 text-[#53635d]">{r.detail}</td><td className="px-5 py-4">{money(r.owed)}</td><td className="px-5 py-4 text-emerald-700">{money(r.paid)}</td><td className="px-5 py-4 font-bold text-amber-700">{money(r.balance)}</td><td className="px-5 py-4 text-xs text-[#53635d]">Open account</td><td className="px-5 py-4"><button onClick={() => onPay({ kind: r.kind, id: r.id, name: r.name, balance: r.balance })} className="rounded-lg bg-[#123b34] px-3 py-2 text-xs font-bold text-white">Record payment</button></td></tr>)}</tbody></table></div>}
+    {rows.length === 0 ? <div className="p-8 text-center text-sm text-[#74837e]">No outstanding balance.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-[#f7f8f5]"><tr><th className="px-5 py-3">Person</th><th className="px-5 py-3">What it is</th><th className="px-5 py-3">Amount owed</th><th className="px-5 py-3">Amount paid</th><th className="px-5 py-3">Balance</th><th className="px-5 py-3">History</th><th /></tr></thead><tbody>{rows.map(r => <tr key={r.id} className="border-t border-[#edf0ed]"><td className="px-5 py-4"><p className="font-bold text-[#183b34]">{r.name}</p><p className="text-[11px] text-[#8b918e]">{r.phone || "No phone"}</p></td><td className="px-5 py-4 text-[#53635d]">{r.detail}</td><td className="px-5 py-4">{money(r.owed)}</td><td className="px-5 py-4 text-emerald-700">{money(r.paid)}</td><td className="px-5 py-4 font-bold text-amber-700">{money(r.balance)}</td><td className="px-5 py-4"><button onClick={() => void openHistory(r.kind, r.id, r.name)} className="text-xs font-bold text-[#1d6a54] hover:underline">View history</button></td><td className="px-5 py-4"><button onClick={() => onPay({ kind: r.kind, id: r.id, name: r.name, balance: r.balance })} className="rounded-lg bg-[#123b34] px-3 py-2 text-xs font-bold text-white">Record payment</button></td></tr>)}</tbody></table></div>}
   </section>;
 }
