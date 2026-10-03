@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";\nimport type { ReactNode } from "react";
 import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Bell, History, MessageCircle, RefreshCw, Settings2, Wallet } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import { supabase } from "@/lib/supabase";
@@ -183,6 +183,6 @@ export default function OwedOwingPage() {
   </main></AppLayout>;
 }
 
-function MoneyCard({ icon, label: title, value, note }: { icon: React.ReactNode; label: string; value: string; note: string }) {
+function MoneyCard({ icon, label: title, value, note }: { icon: ReactNode; label: string; value: string; note: string }) {
   return <div className="rounded-2xl border border-[#dfe6df] bg-white p-5"><div className="flex items-center justify-between"><div className="flex size-10 items-center justify-center rounded-xl bg-[#eef5f1] text-[#1d6a54]">{icon}</div><p className="text-xs font-semibold text-[#74837e]">{title}</p></div><p className="mt-4 font-heading text-2xl font-bold text-[#182a28]">{value}</p><p className="mt-1 text-xs text-[#8a9691]">{note}</p></div>;
 }
