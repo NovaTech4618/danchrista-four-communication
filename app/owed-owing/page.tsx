@@ -57,10 +57,10 @@ export default function OwedOwingPage() {
   const engineerTotal = engineerRows.reduce((n, r) => n + Math.max(Number(r.balance), 0), 0);
   const supplierTotal = suppliers.reduce((n, r) => n + Math.max(Number(r.balance), 0), 0);
 
-  async function openHistory(kind: "customer" | "engineer" | "supplier", id: string, name: string) {
+  async function openHistory(kind: "customer" | "engineer" | "supplier", id: string, name: string): Promise<void> {
     if (kind === "engineer") {
       const result = await engineerService.getTransactions(id);
-      if (result.error) return toast.error(result.error.message);
+      if (result.error) { toast.error(result.error.message); return; }
       setHistory({ title: name, lines: (result.data ?? []).map((t: any) => {
         const amount = Number(t.debit || 0) > 0 ? `Owed ${money(Number(t.debit))}` : `Paid ${money(Number(t.credit || 0))}`;
         return `${new Date(t.transaction_date).toLocaleDateString("en-NG")} · ${t.description || t.transaction_type} · ${amount}`;
