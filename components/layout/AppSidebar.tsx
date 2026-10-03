@@ -19,9 +19,8 @@ const groups: { label: string; items: NavItem[] }[] = [
     { title: "Repairs", url: "/repairs", icon: Wrench, permission: "repairs" },
     { title: "Inventory", url: "/inventory", icon: Package, permission: "inventory" },
   ] },
-  { label: "Owing & owed", items: [
-    { title: "Debit · people owe us", url: "/outstanding", icon: HandCoins, permission: "outstanding" },
-    { title: "Credit · we owe people", url: "/credit", icon: WalletCards, permission: "payments" },
+  { label: "Owed & owing", items: [
+    { title: "Owed & Owing", url: "/owed-owing", icon: HandCoins, permission: "outstanding" },
   ] },
   { label: "Owner control", items: [
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
