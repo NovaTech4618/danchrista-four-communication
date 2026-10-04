@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Package, Plus, ShoppingCart, TrendingUp, Wrench, UserRound } from "lucide-react";
+import { ArrowRight, HandCoins, Package, Plus, ShoppingCart, TrendingUp, WalletCards, Wrench, UserRound } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import DailyShopMetrics from "@/components/dashboard/DailyShopMetrics";
 import InventoryIntelligence from "@/components/dashboard/InventoryIntelligence";
