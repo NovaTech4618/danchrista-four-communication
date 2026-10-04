@@ -7,6 +7,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import InventoryTable from "@/components/inventory/InventoryTable";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
+import { ACCESSORY_GROUPS } from "@/lib/inventoryCategories";
 
 type Shelf = "all" | "parts" | "accessories";
 type StockFilter = "all" | "healthy" | "low" | "out";
@@ -82,7 +83,7 @@ export default function StockroomPage() {
     });
   }, [items, shelf, selectedGroup, query, filter]);
 
-  const title = category || (shelf === "parts" ? "Phone Parts" : shelf === "accessories" ? "Gadgets & Accessories" : "All Stock");
+  const title = category || (shelf === "parts" ? "Phone Parts" : shelf === "accessories" ? "Accessories" : "All Stock");
 
   function reset() {
     setShelf("all");
@@ -124,7 +125,7 @@ export default function StockroomPage() {
           {!category && shelf === "all" && (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Shelf title="Phone Parts" count={parts.length} description="Repair parts used by the workshop" icon={Wrench} onClick={() => setShelf("parts")} />
-              <Shelf title="Gadgets & Accessories" count={accessories.length} description="Shop goods sold from the counter" icon={Package} onClick={() => setShelf("accessories")} />
+              <Shelf title="Accessories" count={accessories.length} description="Phone accessories sold from the counter" icon={Package} onClick={() => setShelf("accessories")} />
             </div>
           )}
 
