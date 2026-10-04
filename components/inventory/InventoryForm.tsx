@@ -40,6 +40,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const partTypes = useMemo(() => PHONE_PARTS[brand] || [], [brand]);
 
@@ -231,7 +232,21 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
             </div>
           </div>
           <Input placeholder="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
-          <div className="flex gap-2"><Button type="submit" disabled={loading} className="min-h-11 flex-1">{loading ? "Saving..." : editingItem ? "Save changes" : "Add item"}</Button>{editingItem && <Button type="button" variant="outline" className="min-h-11" onClick={onCancelEdit}>Cancel</Button>}</div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" disabled={loading || removing} className="min-h-11 flex-1">{loading ? "Saving..." : editingItem ? "Save changes" : "Add item"}</Button>
+            {editingItem && <Button type="button" variant="outline" className="min-h-11" onClick={onCancelEdit}>Cancel</Button>}
+            {editingItem && <Button type="button" variant="outline" disabled={loading || removing} className="min-h-11 border-red-200 text-red-700 hover:bg-red-50" onClick={async () => {
+              if (!window.confirm("Remove this item from active inventory? Its past sales/records will be kept.")) return;
+              setRemoving(true);
+              const result = await inventoryService.deactivateInventoryItem(editingItem.id);
+              setRemoving(false);
+              if (result.error) return toast.error(result.error.message);
+              toast.success("Item removed from active inventory.");
+              resetForm();
+              onSaved();
+              onCancelEdit();
+            }}>{removing ? "Removing..." : "Remove from inventory"}</Button>}
+          </div>
         </form>
       </CardContent>
     </Card>
