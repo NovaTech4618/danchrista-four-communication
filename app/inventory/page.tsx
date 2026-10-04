@@ -6,7 +6,6 @@ import { ArrowLeft, Cable, ChevronRight, Headphones, Package, Pencil, Smartphone
 import AppLayout from "@/components/layout/AppLayout";
 import InventoryForm from "@/components/inventory/InventoryForm";
 import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
-import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
 import OpeningStockPanel from "@/components/inventory/OpeningStockPanel";
 import InventoryImage from "@/components/inventory/InventoryImage";
 import { inventoryService } from "@/services/inventoryService";
@@ -225,7 +224,10 @@ export default function InventoryPage() {
 
         {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
         {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
-        <EngineerPartIssuePanel items={items} onSaved={refresh} />
+        <section className="rounded-2xl border border-[#dfe6df] bg-[#f7f8f5] p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1d6a54]">How Inventory works</p>
+          <p className="mt-1 text-sm leading-6 text-[#53635d]">Inventory is the shop's stock record. Add a new part or accessory, update its details, purchase stock when new stock arrives, and remove an item from active stock when the shop no longer carries it. Sales and engineer part issues change quantities automatically.</p>
+        </section>
       </main>
     </AppLayout>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, HandCoins, Package, Plus, ShoppingCart, TrendingUp, WalletCards, Wrench } from "lucide-react";
+import { ArrowRight, HandCoins, Package, Plus, ShoppingCart, TrendingUp, WalletCards, Wrench, UserRound } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import DailyShopMetrics from "@/components/dashboard/DailyShopMetrics";
 import InventoryIntelligence from "@/components/dashboard/InventoryIntelligence";
@@ -8,10 +8,9 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import LowStock from "@/components/dashboard/LowStock";
 
 const actions = [
-  { title: "Record a sale", description: "Sell goods in a few taps. Customer details are optional.", href: "/sales", icon: ShoppingCart, primary: true },
-  { title: "Take in a repair", description: "Record the phone, problem, price and status.", href: "/repairs/new", icon: Wrench },
-  { title: "Check stock", description: "Browse accessories and phone parts like a shop catalogue.", href: "/inventory", icon: Package },
-  { title: "Record debit", description: "Name, item collected, price and paid/unpaid status.", href: "/outstanding", icon: HandCoins },
+  { title: "Record a sale", description: "Customer buys a phone part or accessory.", href: "/sales", icon: ShoppingCart, primary: true },
+  { title: "Take in a repair", description: "Record the phone, problem, price and repair status.", href: "/repairs/new", icon: Wrench },
+  { title: "Give part to engineer", description: "Issue an available part and link it to the engineer's account.", href: "/engineers", icon: UserRound },
 ];
 
 export default function DashboardPage() {
@@ -20,7 +19,7 @@ export default function DashboardPage() {
 
     <DailyShopMetrics />
 
-    <section className="space-y-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Daily book shortcuts</p><h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">Record what is happening now.</h2></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{actions.map(({ title, description, href, icon: Icon, primary }) => <Link key={title} href={href} className={`group relative rounded-2xl border p-5 transition hover:-translate-y-1 ${primary ? "border-[#123b34] bg-[#123b34] text-white shadow-[0_16px_34px_rgba(18,59,52,0.14)]" : "border-[#dfe6df] bg-white text-[#182a28] shadow-[0_10px_28px_rgba(18,59,52,0.06)] hover:border-[#1d6a54]/30"}`}><span className={`flex size-10 items-center justify-center rounded-xl ${primary ? "bg-[#d7a95a] text-[#123b34]" : "bg-[#eef4f1] text-[#1d6a54]"}`}><Icon className="size-4" /></span><p className="mt-5 text-sm font-bold">{title}</p><p className={`mt-1.5 text-xs leading-5 ${primary ? "text-[#c7d8d2]" : "text-[#687974]"}`}>{description}</p><ArrowRight className={`absolute right-5 top-5 size-4 transition-transform group-hover:translate-x-1 ${primary ? "text-[#d7a95a]" : "text-[#9aa9a4]"}`} /></Link>)}</div></section>
+    <section className="space-y-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Daily book shortcuts</p><h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">Record what is happening now.</h2></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{actions.map(({ title, description, href, icon: Icon, primary }) => <Link key={title} href={href} className={`group relative rounded-2xl border p-5 transition hover:-translate-y-1 ${primary ? "border-[#123b34] bg-[#123b34] text-white shadow-[0_16px_34px_rgba(18,59,52,0.14)]" : "border-[#dfe6df] bg-white text-[#182a28] shadow-[0_10px_28px_rgba(18,59,52,0.06)] hover:border-[#1d6a54]/30"}`}><span className={`flex size-10 items-center justify-center rounded-xl ${primary ? "bg-[#d7a95a] text-[#123b34]" : "bg-[#eef4f1] text-[#1d6a54]"}`}><Icon className="size-4" /></span><p className="mt-5 text-sm font-bold">{title}</p><p className={`mt-1.5 text-xs leading-5 ${primary ? "text-[#c7d8d2]" : "text-[#687974]"}`}>{description}</p><ArrowRight className={`absolute right-5 top-5 size-4 transition-transform group-hover:translate-x-1 ${primary ? "text-[#d7a95a]" : "text-[#9aa9a4]"}`} /></Link>)}</div></section>
 
     <InventoryIntelligence />
 
