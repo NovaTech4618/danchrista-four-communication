@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, ClipboardList, Home, LogOut, Package, Search, ShoppingCart, UserRound, Wrench } from "lucide-react";
-import { FloatingAssistant } from "@/components/assistant/FloatingAssistant";
+import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
 import { DEFAULT_ROLE_PATH, hasPermission, permissionForPath } from "@/lib/permissions";
 import { staffService } from "@/services/staffService";
