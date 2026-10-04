@@ -19,7 +19,6 @@ const PART_GROUPS = [
   { name: "Other Phone Parts", description: "Other phone parts currently recorded in the shop", matches: ["Home Button", "Other Phone Parts"], icon: Package },
 ] as const;
 
-const ACCESSORY_GROUPS = ACCESSORY_GROUPS_SHARED;
 
 
 function groupFor(item: InventoryItem): Shelf {
@@ -135,7 +134,7 @@ export default function StockroomPage() {
 
           {!category && shelf === "accessories" && (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ACCESSORY_GROUPS_SHARED.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={accessories.filter(item => matchesGroup(item, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
+              {ACCESSORY_GROUPS_SHARED.map(({ name, description, matches }) => <Category key={name} name={name} count={accessories.filter(item => matchesGroup(item, matches)).length} description={description} icon={Package} onClick={() => setCategory(name)} />)}
             </div>
           )}
 
