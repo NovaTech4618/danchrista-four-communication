@@ -36,11 +36,11 @@ function isEngineerPart(item: InventoryItem) {
   const screenGuard = /screen\s*guard|tempered|protector/.test(text);
   if (screenGuard) return true;
 
-  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia/.test(text);
+  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia|oppo|vivo|gionee/.test(text);
   const samsung = /samsung/.test(text);
   const androidPart = /down\s*board|power\s*flex/.test(text);
   const iphone = /iphone|apple/.test(text);
-  const iphonePart = /charging\s*flex|back\s*glass|earpiece\s*flex/.test(text);
+  const iphonePart = /charging\s*flex|back\s*glass|earpiece\s*flex|home\s*button/.test(text);
 
   return (androidBrands && androidPart) || (samsung && androidPart) || (iphone && iphonePart);
 }
@@ -95,6 +95,9 @@ export default function EngineersPage() {
   const [workDescription, setWorkDescription] = useState("");
   const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
   const [faultyReturnId, setFaultyReturnId] = useState("");
+  const [partBrand, setPartBrand] = useState("");
+  const [partType, setPartType] = useState("");
+  const [partModel, setPartModel] = useState("");
   const [partLedger, setPartLedger] = useState<any>({ out: [], returned: [], used: [], paid: [] });
   const [dailySummary, setDailySummary] = useState<any[]>([]);
 
@@ -114,6 +117,11 @@ export default function EngineersPage() {
     });
   }, [engineers, balanceMap, engineerSearch, accountFilter]);
   const selectedBalance = selectedId ? balanceMap.get(selectedId) : undefined;
+  const engineerParts = useMemo(() => inventory.filter(isEngineerPart), [inventory]);
+  const partBrands = useMemo(() => Array.from(new Set(engineerParts.map((item) => item.brand?.trim() || "Other"))).sort(), [engineerParts]);
+  const partTypes = useMemo(() => Array.from(new Set(engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand).map((item) => item.subcategory?.trim() || "Other"))).sort(), [engineerParts, partBrand]);
+  const partModels = useMemo(() => Array.from(new Set(engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand && (item.subcategory?.trim() || "Other") === partType).map((item) => item.compatible_models?.trim()).filter(Boolean))).sort(), [engineerParts, partBrand, partType]);
+  const selectedPartItems = useMemo(() => engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand && (item.subcategory?.trim() || "Other") === partType && (item.compatible_models?.trim() || "") === partModel), [engineerParts, partBrand, partType, partModel]);
 
   const filteredTransactions = useMemo(() => {
     const start = periodStart(period);
@@ -182,6 +190,9 @@ export default function EngineersPage() {
     setWorkDescription("");
     setReturnCondition("normal");
     setFaultyReturnId("");
+    setPartBrand("");
+    setPartType("");
+    setPartModel("");
   }
 
   function openCreate() {
@@ -543,13 +554,23 @@ export default function EngineersPage() {
 
                     {(action === "parts" || action === "return" || action === "replacement" || action === "used" || action === "part-paid") ? (
                       <div className="grid gap-4 md:grid-cols-3">
-                        <label className="text-sm font-medium text-slate-700 md:col-span-2">Part
-                          <select value={inventoryId} onChange={(e) => { setInventoryId(e.target.value); const item = inventory.find((x) => x.id === e.target.value); setUnitPrice(item ? String(item.selling_price) : ""); }} className={inputClass}>
-                            <option value="">Select allowed engineer part</option>
-                            {inventory.filter(isEngineerPart).map((item) => <option key={item.id} value={item.id}>{item.item_name} — {money(item.selling_price)} (stock: {item.quantity})</option>)}
-                          </select>
-                        </label>
-                        <label className="text-sm font-medium text-slate-700">Quantity<input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className={inputClass} /></label>
+                        {action === "parts" ? (
+  <div className="md:col-span-3 rounded-2xl border border-slate-200 bg-white p-4">
+    <p className="text-sm font-bold text-slate-900">Choose phone part</p>
+    <p className="mt-1 text-xs text-slate-500">Brand → part type → model → exact item.</p>
+    <div className="mt-4 flex flex-wrap gap-2">{partBrands.map((brand) => <button key={brand} type="button" onClick={() => { setPartBrand(brand); setPartType(""); setPartModel(""); setInventoryId(""); }} className={"rounded-xl border px-3 py-2 text-sm font-semibold " + (partBrand === brand ? "border-teal-700 bg-teal-700 text-white" : "border-slate-200 bg-white text-slate-700")}>{brand}</button>)}</div>
+    {partBrand && <><p className="mt-4 text-xs font-bold uppercase tracking-wide text-slate-500">Part type</p><div className="mt-2 flex flex-wrap gap-2">{partTypes.map((type) => <button key={type} type="button" onClick={() => { setPartType(type); setPartModel(""); setInventoryId(""); }} className={"rounded-xl border px-3 py-2 text-sm font-semibold " + (partType === type ? "border-teal-700 bg-teal-700 text-white" : "border-slate-200 bg-white text-slate-700")}>{type}</button>)}</div></>}
+    {partType && partModels.length > 0 && <><p className="mt-4 text-xs font-bold uppercase tracking-wide text-slate-500">Model</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">{partModels.map((model) => <button key={model} type="button" onClick={() => { setPartModel(model); setInventoryId(""); }} className={"rounded-xl border p-3 text-left " + (partModel === model ? "border-teal-500 bg-teal-50" : "border-slate-200 bg-white")}><p className="text-sm font-semibold text-slate-900">{model}</p></button>)}</div></>}
+    {partModel && <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{selectedPartItems.map((item) => <button key={item.id} type="button" disabled={item.quantity <= 0} onClick={() => { setInventoryId(item.id); setUnitPrice(String(item.selling_price)); }} className={"rounded-xl border p-3 text-left " + (inventoryId === item.id ? "border-teal-500 bg-teal-50" : "border-slate-200 bg-white") + " disabled:opacity-40"}><p className="text-sm font-semibold text-slate-900">{item.item_name}</p><p className="mt-1 text-xs text-slate-500">{money(item.selling_price)} · {item.quantity} in stock</p></button>)}</div>}
+  </div>
+) : (
+  <label className="text-sm font-medium text-slate-700 md:col-span-2">Part
+    <select value={inventoryId} onChange={(e) => setInventoryId(e.target.value)} className={inputClass}>
+      <option value="">Select allowed engineer part</option>
+      {inventory.filter(isEngineerPart).map((item) => <option key={item.id} value={item.id}>{item.item_name} — {money(item.selling_price)} (stock: {item.quantity})</option>)}
+    </select>
+  </label>
+)}
                         {action === "return" && <label className="text-sm font-medium text-slate-700">Condition<select value={returnCondition} onChange={(e) => setReturnCondition(e.target.value as "normal" | "faulty")} className={inputClass}><option value="normal">Normal — back to stock</option><option value="faulty">Faulty — keep separate</option></select></label>}
                         {(action === "parts") && <label className="text-sm font-medium text-slate-700">Unit price<input type="number" min="0" step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputClass} /></label>}
                         {action === "replacement" && <label className="text-sm font-medium text-slate-700 md:col-span-2">Faulty return<select required value={faultyReturnId} onChange={(e) => setFaultyReturnId(e.target.value)} className={inputClass}><option value="">Select the faulty return</option>{transactions.filter((t) => t.transaction_type === "faulty_return").map((t) => <option key={t.reference_id ?? t.id} value={t.reference_id ?? ""}>{t.description} · {new Date(t.transaction_date).toLocaleDateString()}</option>)}</select></label>}

@@ -14,7 +14,7 @@ type InventorySection = "Phone Parts" | "Accessories";
 
 const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
 const PHONE_PARTS: Record<string, string[]> = {
-  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass"],
+  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass", "Home Button"],
   Samsung: ["Down Board", "Power Flex"],
   ...Object.fromEntries(ANDROID_BRANDS.map((brand) => [brand, ["Down Board", "Power Flex"]])),
 };
