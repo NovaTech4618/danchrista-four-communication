@@ -7,28 +7,18 @@ import AppLayout from "@/components/layout/AppLayout";
 import InventoryTable from "@/components/inventory/InventoryTable";
 import { inventoryService } from "@/services/inventoryService";
 import type { InventoryItem } from "@/types/inventory";
+import { ACCESSORY_GROUPS as ACCESSORY_GROUPS_SHARED } from "@/lib/inventoryCategories";
 
 type Shelf = "all" | "parts" | "accessories";
 type StockFilter = "all" | "healthy" | "low" | "out";
 
 const PART_GROUPS = [
-  { name: "Displays", description: "LCD, OLED and replacement screens", matches: ["Displays"], icon: Smartphone },
-  { name: "Charging & Power", description: "Downboards, charging flexes and power flexes", matches: ["Downboards", "Charging Flex", "Power Flex", "Charging", "Power"], icon: Cable },
-  { name: "Audio", description: "Earpiece, speaker and audio flex parts", matches: ["Earpiece Flex", "Audio"], icon: Headphones },
-  { name: "Housing & Glass", description: "Back glass, housings and covers", matches: ["Back Glass", "Housing", "Back Glass/Housing"], icon: Smartphone },
-  { name: "Camera", description: "Camera modules and camera flex parts", matches: ["Camera"], icon: Smartphone },
-  { name: "Batteries", description: "Replacement phone batteries", matches: ["Batteries", "Battery"], icon: BatteryCharging },
-  { name: "Other Phone Parts", description: "Any workshop part outside the main shelves", matches: ["Other Phone Parts", "Other"], icon: Package },
+  { name: "iPhone", description: "Charging flex, earpiece flex and back glass", matches: ["Charging Flex", "Earpiece Flex", "Back Glass"], icon: Smartphone },
+  { name: "Samsung", description: "Down boards and power flex", matches: ["Down Board", "Power Flex"], icon: Smartphone },
+  { name: "Android", description: "Down boards and power flex for supported Android brands", matches: ["Down Board", "Power Flex"], icon: Smartphone },
+  { name: "Other Phone Parts", description: "Other phone parts currently recorded in the shop", matches: ["Home Button", "Other Phone Parts"], icon: Package },
 ] as const;
 
-const ACCESSORY_GROUPS = [
-  { name: "Charging", description: "Chargers, cables and charging accessories", matches: ["Chargers", "Cables"], icon: Cable },
-  { name: "Audio", description: "Earphones, headsets and speakers", matches: ["Earphones", "Headsets", "Speakers"], icon: Headphones },
-  { name: "Power", description: "Power banks and portable power", matches: ["Power Banks"], icon: BatteryCharging },
-  { name: "Protection", description: "Screen protectors and phone protection", matches: ["Screen Protectors"], icon: Smartphone },
-  { name: "Wearables", description: "Smartwatches and wearable gadgets", matches: ["Smartwatches"], icon: Package },
-  { name: "Other Accessories", description: "Other counter goods", matches: ["Other Accessories", "Other"], icon: Package },
-] as const;
 
 
 function groupFor(item: InventoryItem): Shelf {
@@ -44,6 +34,12 @@ function stateFor(item: InventoryItem): Exclude<StockFilter, "all"> {
 function matchesGroup(item: InventoryItem, matches: readonly string[]) {
   const value = (item.subcategory || item.category || "").toLowerCase();
   return matches.some(match => value === match.toLowerCase());
+}
+function matchesPartGroup(item: InventoryItem, groupName: string, matches: readonly string[]) {
+  if (groupName === "iPhone") return item.brand === "iPhone" && matchesGroup(item, matches);
+  if (groupName === "Samsung") return item.brand === "Samsung" && matchesGroup(item, matches);
+  if (groupName === "Android") return item.brand !== "iPhone" && item.brand !== "Samsung" && matchesGroup(item, matches);
+  return matchesGroup(item, matches);
 }
 
 function money(value: number) {
@@ -71,18 +67,20 @@ export default function StockroomPage() {
   const out = items.filter(item => stateFor(item) === "out");
   const stockValue = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.cost_price || 0), 0);
 
-  const selectedGroup = [...PART_GROUPS, ...ACCESSORY_GROUPS].find(group => group.name === category);
+  const selectedPartGroup = PART_GROUPS.find(group => group.name === category);
+  const selectedAccessoryGroup = ACCESSORY_GROUPS_SHARED.find(group => group.name === category);
+  const selectedGroup = selectedPartGroup || selectedAccessoryGroup;
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return items.filter(item => {
       const searchable = [item.item_name, item.brand, item.compatible_models, item.sku, item.subcategory, item.category].filter(Boolean).join(" ").toLowerCase();
-      const categoryMatch = !selectedGroup || matchesGroup(item, selectedGroup.matches);
+      const categoryMatch = !selectedGroup || (selectedPartGroup ? matchesPartGroup(item, selectedPartGroup.name, selectedPartGroup.matches) : matchesGroup(item, selectedAccessoryGroup!.matches));
       const filterMatch = filter === "all" || stateFor(item) === filter;
       return (!needle || searchable.includes(needle)) && (shelf === "all" || groupFor(item) === shelf) && categoryMatch && filterMatch;
     });
   }, [items, shelf, selectedGroup, query, filter]);
 
-  const title = category || (shelf === "parts" ? "Phone Parts" : shelf === "accessories" ? "Gadgets & Accessories" : "All Stock");
+  const title = category || (shelf === "parts" ? "Phone Parts" : shelf === "accessories" ? "Accessories" : "All Stock");
 
   function reset() {
     setShelf("all");
@@ -124,19 +122,19 @@ export default function StockroomPage() {
           {!category && shelf === "all" && (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Shelf title="Phone Parts" count={parts.length} description="Repair parts used by the workshop" icon={Wrench} onClick={() => setShelf("parts")} />
-              <Shelf title="Gadgets & Accessories" count={accessories.length} description="Shop goods sold from the counter" icon={Package} onClick={() => setShelf("accessories")} />
+              <Shelf title="Accessories" count={accessories.length} description="Phone accessories sold from the counter" icon={Package} onClick={() => setShelf("accessories")} />
             </div>
           )}
 
           {!category && shelf === "parts" && (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PART_GROUPS.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={parts.filter(item => matchesGroup(item, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
+              {PART_GROUPS.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={parts.filter(item => matchesPartGroup(item, name, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
             </div>
           )}
 
           {!category && shelf === "accessories" && (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ACCESSORY_GROUPS.map(({ name, description, icon: Icon, matches }) => <Category key={name} name={name} count={accessories.filter(item => matchesGroup(item, matches)).length} description={description} icon={Icon} onClick={() => setCategory(name)} />)}
+              {ACCESSORY_GROUPS_SHARED.map(({ name, description, matches }) => <Category key={name} name={name} count={accessories.filter(item => matchesGroup(item, matches)).length} description={description} icon={Package} onClick={() => setCategory(name)} />)}
             </div>
           )}
 

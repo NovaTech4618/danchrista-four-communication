@@ -24,8 +24,8 @@ const groups: { label: string; items: NavItem[] }[] = [
   ] },
   { label: "Owner control", items: [
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
-    { title: "Daily closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
-    { title: "Alerts", url: "/alerts", icon: Boxes, permission: "inventory" },
+    { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
+    { title: "Alert", url: "/alerts", icon: Boxes, permission: "inventory" },
   ] },
   { label: "People & tools", items: [
     { title: "Engineers", url: "/engineers", icon: UserRound, permission: "engineers" },
