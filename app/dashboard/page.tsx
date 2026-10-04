@@ -1,72 +1,36 @@
 import Link from "next/link";
-import { ArrowRight, Banknote, ClipboardList, Package, Plus, ShoppingCart, UserRound, Wrench } from "lucide-react";
+import { ArrowRight, HandCoins, Package, Plus, ShoppingCart, TrendingUp, WalletCards, Wrench, UserRound } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import DailyShopMetrics from "@/components/dashboard/DailyShopMetrics";
+import InventoryIntelligence from "@/components/dashboard/InventoryIntelligence";
+import ManagementInsights from "@/components/dashboard/ManagementInsights";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import LowStock from "@/components/dashboard/LowStock";
 
 const actions = [
-  { title: "Sale", text: "Record something sold", href: "/sales", icon: ShoppingCart },
-  { title: "Repair", text: "Receive a customer's phone", href: "/repairs/new", icon: Wrench },
-  { title: "Part out", text: "Give a part to an engineer", href: "/engineers", icon: UserRound },
-  { title: "Expense", text: "Record money spent", href: "/expenses", icon: Banknote },
+  { title: "Record a sale", description: "Customer buys a phone part or accessory.", href: "/sales", icon: ShoppingCart, primary: true },
+  { title: "Take in a repair", description: "Record the phone, problem, price and repair status.", href: "/repairs/new", icon: Wrench },
+  { title: "Give part to engineer", description: "Issue an available part and link it to the engineer's account.", href: "/engineers", icon: UserRound },
 ];
 
 export default function DashboardPage() {
-  return (
-    <main className="space-y-5">
-      <section className="rounded-2xl border border-[#dfe6df] bg-white px-5 py-5 shadow-sm sm:px-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold text-[#74837e]">Today · Amezing Limited</p>
-            <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">Today's shop book</h1>
-            <p className="mt-1 text-sm text-[#74837e]">Record what happens. Amezing keeps the totals and stock.</p>
-          </div>
-          <Link href="/reports/daily-closing" className="hidden rounded-xl border border-[#dfe6df] px-4 py-2 text-xs font-bold text-[#285c4d] sm:inline-flex sm:items-center sm:gap-2">
-            <ClipboardList className="size-4" /> Close day
-          </Link>
-        </div>
-      </section>
+  return <AppLayout><main className="space-y-7">
+    <section className="relative overflow-hidden rounded-[28px] bg-[#123b34] px-5 py-7 text-white shadow-[0_24px_60px_rgba(18,59,52,0.18)] sm:px-8 sm:py-8"><div className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full border-[46px] border-[#d7a95a]/10" /><div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div className="max-w-2xl"><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#d7a95a]">Amezing Limited</p><h1 className="mt-3 font-heading text-3xl font-bold tracking-[-0.035em] sm:text-4xl">Run the shop. Let the system keep the record.</h1><p className="mt-3 max-w-xl text-sm leading-6 text-[#c7d8d2]">The system follows the shop's real books: sales, phone parts, repairs, people who owe us, and people we owe.</p></div><Link href="/sales" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#d7a95a] px-6 py-3 text-sm font-bold text-[#123b34] shadow-lg transition hover:-translate-y-0.5 hover:bg-[#e5bc75]"><Plus className="size-4" /> Record sale</Link></div></section>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {actions.map(({ title, text, href, icon: Icon }) => (
-          <Link key={title} href={href} className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#1d6a54]/30">
-            <span className="grid size-11 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54]"><Icon className="size-5" /></span>
-            <p className="mt-4 text-sm font-bold text-[#182a28]">{title}</p>
-            <p className="mt-1 text-[11px] leading-4 text-[#74837e]">{text}</p>
-          </Link>
-        ))}
-      </section>
+    <DailyShopMetrics />
 
-      <section>
-        <div className="mb-3 flex items-end justify-between">
-          <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Quick view</p><h2 className="mt-1 text-lg font-bold text-[#182a28]">What is happening today?</h2></div>
-          <Link href="/activity" className="text-xs font-bold text-[#1d6a54]">History <ArrowRight className="ml-1 inline size-3" /></Link>
-        </div>
-        <DailyShopMetrics />
-      </section>
+    <section className="space-y-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Daily book shortcuts</p><h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">Record what is happening now.</h2></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{actions.map(({ title, description, href, icon: Icon, primary }) => <Link key={title} href={href} className={`group relative rounded-2xl border p-5 transition hover:-translate-y-1 ${primary ? "border-[#123b34] bg-[#123b34] text-white shadow-[0_16px_34px_rgba(18,59,52,0.14)]" : "border-[#dfe6df] bg-white text-[#182a28] shadow-[0_10px_28px_rgba(18,59,52,0.06)] hover:border-[#1d6a54]/30"}`}><span className={`flex size-10 items-center justify-center rounded-xl ${primary ? "bg-[#d7a95a] text-[#123b34]" : "bg-[#eef4f1] text-[#1d6a54]"}`}><Icon className="size-4" /></span><p className="mt-5 text-sm font-bold">{title}</p><p className={`mt-1.5 text-xs leading-5 ${primary ? "text-[#c7d8d2]" : "text-[#687974]"}`}>{description}</p><ArrowRight className={`absolute right-5 top-5 size-4 transition-transform group-hover:translate-x-1 ${primary ? "text-[#d7a95a]" : "text-[#9aa9a4]"}`} /></Link>)}</div></section>
 
-      <section className="grid gap-4 lg:grid-cols-[1.35fr_.65fr]">
-        <div className="rounded-2xl border border-[#dfe6df] bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4">
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Repair book</p><h2 className="mt-1 text-base font-bold text-[#182a28]">Recent repairs</h2></div>
-            <Link href="/repairs" className="text-xs font-bold text-[#1d6a54]">All repairs</Link>
-          </div>
-          <div className="p-4"><RecentActivity /></div>
-        </div>
-        <div className="rounded-2xl border border-[#e8e4da] bg-[#fbfaf7] shadow-sm">
-          <div className="flex items-center gap-2 border-b border-[#e8e4da] px-5 py-4"><Package className="size-4 text-[#8a641d]" /><h2 className="text-base font-bold text-[#182a28]">Stock attention</h2></div>
-          <div className="p-4"><LowStock /></div>
-          <Link href="/inventory" className="block border-t border-[#e8e4da] px-5 py-3 text-xs font-bold text-[#8a641d]">Open inventory →</Link>
-        </div>
-      </section>
+    <InventoryIntelligence />
 
-      <section className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Owner control</p><h2 className="mt-1 text-base font-bold text-[#182a28]">Need the full book?</h2><p className="mt-1 text-xs text-[#74837e]">Reports, closing, money owed and stock history stay available without filling the home screen.</p></div>
-          <div className="flex gap-2"><Link href="/owed-owing" className="rounded-xl border border-[#dfe6df] px-4 py-2.5 text-xs font-bold text-[#285c4d]">Owed & owing</Link><Link href="/reports" className="rounded-xl bg-[#123b34] px-4 py-2.5 text-xs font-bold text-white">Reports</Link></div>
-        </div>
-      </section>
-    </main>
-  );
+    <section className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]"><div className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]"><div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4 sm:px-6"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Owner view</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Today's shop</h2><p className="mt-0.5 text-xs text-[#74837e]">The detailed numbers stay in reports.</p></div><Link href="/reports" className="text-xs font-bold text-[#1d6a54]">Reports</Link></div><div className="p-4 sm:p-6"><ManagementInsights /></div></div><div className="overflow-hidden rounded-2xl border border-[#e8e4da] bg-[#fbfaf7] shadow-[0_10px_28px_rgba(18,59,52,0.06)]"><div className="flex items-center gap-3 border-b border-[#e8e4da] px-5 py-4"><Package className="size-4 text-[#8a641d]" /><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8a641d]">Stockroom</p><h2 className="mt-1 font-heading text-base font-bold text-[#182a28]">Low stock</h2></div></div><div className="p-4 sm:p-5"><LowStock /></div><Link href="/inventory" className="block border-t border-[#e8e4da] px-5 py-3 text-xs font-bold text-[#8a641d]">Open full inventory →</Link></div></section>
+
+    <section className="grid gap-5 lg:grid-cols-2"><OwnerCard title="Debit · people who owe us" description="The daily debit book: who collected what, price, paid status and balance." href="/outstanding" icon={HandCoins}><div className="rounded-xl bg-[#fff8e9] p-4 text-sm leading-6 text-[#6e551d]">Phone numbers, statements and WhatsApp reminders stay with the person's account.</div></OwnerCard><OwnerCard title="Credit · people we owe" description="Goods collected from people that Amezing still needs to pay for." href="/credit" icon={WalletCards}><div className="rounded-xl bg-[#eef4f1] p-4 text-sm leading-6 text-[#285c4d]">Track the person, goods, amount owed, due date and payments separately from customer debit.</div></OwnerCard></section>
+
+    <section className="overflow-hidden rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.06)]"><div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Repair book</p><h2 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Recent repairs</h2></div><Link href="/repairs" className="text-xs font-bold text-[#1d6a54]">Open repairs</Link></div><div className="p-4 sm:p-6"><RecentActivity /></div></section>
+
+    <section className="rounded-2xl border border-[#dfe6df] bg-[#f7f8f5] p-5 sm:p-6"><div className="flex items-start gap-3"><TrendingUp className="mt-0.5 size-5 text-[#1d6a54]" /><div><h2 className="font-heading text-base font-bold text-[#182a28]">Owner's five questions</h2><p className="mt-1 text-sm leading-6 text-[#687974]">What sold? What is low? What moves fast? Who owes us? Who do we owe?</p></div></div></section>
+  </main></AppLayout>;
 }
+
+function OwnerCard({ title, description, href, icon: Icon, children }: { title: string; description: string; href: string; icon: typeof HandCoins; children: React.ReactNode }) { return <div className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_8px_24px_rgba(18,59,52,0.05)]"><div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Icon className="size-4 text-[#1d6a54]" /><h2 className="font-heading text-base font-bold text-[#182a28]">{title}</h2></div><p className="mt-1 text-xs text-[#74837e]">{description}</p></div><Link href={href} className="text-xs font-bold text-[#1d6a54]">Open</Link></div><div className="mt-4">{children}</div></div>; }
