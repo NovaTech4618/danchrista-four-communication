@@ -1,21 +1,23 @@
-// Single source of truth for inventory categories - previously the add/edit
-// form only offered 3 coarse types (Part/Accessory/Gadget) while the
-// browsing view expected a finer workshop taxonomy (Phone Parts, Chargers &
-// Power, Displays...), so newly added items never matched how the shop
-// actually organizes a stockroom. One list now, used everywhere.
+// Inventory category vocabulary used by the shop. Keep this aligned with the real stockroom: phone parts and retail accessories, not a generic gadget catalogue.
 
 export const WORKSHOP_CATEGORIES = [
   { value: "Phone Parts", hint: "Downboards, back glass, charging flex — by brand" },
-  { value: "Laptop Parts", hint: "Keyboards, screens, batteries, chargers" },
-  { value: "Chargers & Power", hint: "Wall chargers, car chargers, power banks" },
-  { value: "Displays", hint: "Phone and laptop screens" },
-  { value: "Batteries", hint: "Phone and laptop batteries" },
-  { value: "Tools", hint: "Soldering, testing, repair tools" },
 ] as const;
 
 export const RETAIL_CATEGORIES = [
-  { value: "Devices", hint: "Phones, tablets, laptops for sale" },
-  { value: "Accessories", hint: "Cases, screen guards, earphones, cables" },
+  { value: "Accessories", hint: "Chargers, cables, earphones, screen guards, cases and other phone accessories" },
+] as const;
+
+export const ACCESSORY_GROUPS = [
+  { name: "Chargers", description: "Wall, fast and car chargers", matches: ["Chargers", "Charger"] },
+  { name: "Cables", description: "USB, Type-C, Lightning and other charging cables", matches: ["Cables", "Cable"] },
+  { name: "Earphones & Headsets", description: "Earphones, earbuds and headsets", matches: ["Earphones", "Headsets", "Earphones & Headsets"] },
+  { name: "Speakers", description: "Portable speakers and small audio accessories", matches: ["Speakers", "Speaker"] },
+  { name: "Power Banks", description: "Portable power banks", matches: ["Power Banks", "Power Bank"] },
+  { name: "Screen Guards", description: "Screen protectors and guards", matches: ["Screen Guards", "Screen Protectors", "Screen Guard"] },
+  { name: "Cases & Covers", description: "Phone cases, covers and pouches", matches: ["Cases", "Covers", "Cases & Covers", "Phone Cases"] },
+  { name: "Adapters & OTG", description: "Adapters, OTG and small connectors", matches: ["Adapters", "OTG", "Adapters & OTG"] },
+  { name: "Other Accessories", description: "Other phone accessories sold at the counter", matches: ["Other Accessories", "Other"] },
 ] as const;
 
 export const ALL_CATEGORIES = [...WORKSHOP_CATEGORIES, ...RETAIL_CATEGORIES];
