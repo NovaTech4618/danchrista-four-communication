@@ -36,11 +36,11 @@ function isEngineerPart(item: InventoryItem) {
   const screenGuard = /screen\s*guard|tempered|protector/.test(text);
   if (screenGuard) return true;
 
-  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia/.test(text);
+  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia|oppo|vivo|gionee/.test(text);
   const samsung = /samsung/.test(text);
   const androidPart = /down\s*board|power\s*flex/.test(text);
   const iphone = /iphone|apple/.test(text);
-  const iphonePart = /charging\s*flex|back\s*glass|earpiece\s*flex/.test(text);
+  const iphonePart = /charging\s*flex|back\s*glass|earpiece\s*flex|home\s*button/.test(text);
 
   return (androidBrands && androidPart) || (samsung && androidPart) || (iphone && iphonePart);
 }
@@ -95,6 +95,9 @@ export default function EngineersPage() {
   const [workDescription, setWorkDescription] = useState("");
   const [returnCondition, setReturnCondition] = useState<"normal" | "faulty">("normal");
   const [faultyReturnId, setFaultyReturnId] = useState("");
+  const [partBrand, setPartBrand] = useState("");
+  const [partType, setPartType] = useState("");
+  const [partModel, setPartModel] = useState("");
   const [partLedger, setPartLedger] = useState<any>({ out: [], returned: [], used: [], paid: [] });
   const [dailySummary, setDailySummary] = useState<any[]>([]);
 
@@ -114,6 +117,11 @@ export default function EngineersPage() {
     });
   }, [engineers, balanceMap, engineerSearch, accountFilter]);
   const selectedBalance = selectedId ? balanceMap.get(selectedId) : undefined;
+  const engineerParts = useMemo(() => inventory.filter(isEngineerPart), [inventory]);
+  const partBrands = useMemo(() => Array.from(new Set(engineerParts.map((item) => item.brand?.trim() || "Other"))).sort(), [engineerParts]);
+  const partTypes = useMemo(() => Array.from(new Set(engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand).map((item) => item.subcategory?.trim() || "Other"))).sort(), [engineerParts, partBrand]);
+  const partModels = useMemo(() => Array.from(new Set(engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand && (item.subcategory?.trim() || "Other") === partType).map((item) => item.compatible_models?.trim()).filter(Boolean))).sort(), [engineerParts, partBrand, partType]);
+  const selectedPartItems = useMemo(() => engineerParts.filter((item) => (item.brand?.trim() || "Other") === partBrand && (item.subcategory?.trim() || "Other") === partType && (item.compatible_models?.trim() || "") === partModel), [engineerParts, partBrand, partType, partModel]);
 
   const filteredTransactions = useMemo(() => {
     const start = periodStart(period);
@@ -182,6 +190,9 @@ export default function EngineersPage() {
     setWorkDescription("");
     setReturnCondition("normal");
     setFaultyReturnId("");
+    setPartBrand("");
+    setPartType("");
+    setPartModel("");
   }
 
   function openCreate() {
