@@ -18,6 +18,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     { title: "Sales", url: "/sales", icon: ShoppingCart, permission: "sales" },
     { title: "Repairs", url: "/repairs", icon: Wrench, permission: "repairs" },
     { title: "Inventory", url: "/inventory", icon: Package, permission: "inventory" },
+    { title: "Daily Parts Collection", url: "/parts-collection", icon: ClipboardList, permission: "inventory" },
   ] },
   { label: "Owed & owing", items: [
     { title: "Owed & Owing", url: "/owed-owing", icon: HandCoins, permission: "outstanding" },
