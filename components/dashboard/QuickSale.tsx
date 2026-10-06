@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { inventoryService } from "@/services/inventoryService";
 import { saleService } from "@/services/saleService";
 import type { InventoryItem } from "@/types/inventory";
-import { PAYMENT_METHODS } from "@/types/sale";
+import { CASH_ACCOUNT, PAYMENT_METHODS, TRANSFER_ACCOUNTS } from "@/types/sale";
 import InventoryImage from "@/components/inventory/InventoryImage";
 
 export default function QuickSale() {
@@ -15,8 +15,8 @@ export default function QuickSale() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState("1");
-  const [paymentMethod,
-      paymentAccount: paymentMethod === "Cash" ? "Cash" : "OPay", setPaymentMethod] = useState<string>("Cash");
+  const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+  const [paymentAccount, setPaymentAccount] = useState<string>(CASH_ACCOUNT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -75,6 +75,7 @@ export default function QuickSale() {
     const { error } = await saleService.createSale({
       customerId: null,
       paymentMethod,
+      paymentAccount,
       discount: 0,
       staffName: null,
       notes: "Quick sale",
@@ -164,15 +165,13 @@ export default function QuickSale() {
           className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-500/10"
         />
 
-        <select
+        <div className="grid grid-cols-2 gap-2"><select
           value={paymentMethod}
-          onChange={(event) => setPaymentMethod(event.target.value)}
+          onChange={(event) => { const value = event.target.value; setPaymentMethod(value); setPaymentAccount(value === "Cash" ? CASH_ACCOUNT : TRANSFER_ACCOUNTS[0]); }}
           disabled={saving}
           aria-label="Payment method"
           className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-500/10"
-        >
-          {PAYMENT_METHODS.map((method) => <option key={method}>{method}</option>)}
-        </select>
+        >{PAYMENT_METHODS.map((method) => <option key={method}>{method}</option>)}</select><select value={paymentAccount} onChange={(event) => setPaymentAccount(event.target.value)} disabled={saving} aria-label="Payment account" className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-500/10">{paymentMethod === "Cash" ? <option>Cash</option> : TRANSFER_ACCOUNTS.map((account) => <option key={account}>{account}</option>)}</select></div>
 
         <button
           type="button"
