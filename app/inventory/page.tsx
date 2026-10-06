@@ -20,7 +20,7 @@ const PHONE_PARTS: Record<string, string[]> = {
   ...Object.fromEntries(ANDROID_BRANDS.map((brand) => [brand, ["Down Board", "Power Flex"]])),
 };
 
-type Section = "Phone Parts" | "Accessories";
+type Section = "Phone Parts";
 type StockFilter = "all" | "ok" | "low" | "out";
 
 function isPhonePart(item: InventoryItem) {
@@ -74,10 +74,6 @@ export default function InventoryPage() {
   }, [refreshKey]);
 
   const phoneParts = useMemo(() => items.filter(isPhonePart), [items]);
-  const accessories = useMemo(
-    () => items.filter((item) => item.category === "Accessories" || item.item_type === "accessory"),
-    [items],
-  );
 
   const low = items.filter((item) => stockState(item) === "low");
   const stockValue = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.cost_price || 0), 0);
@@ -140,8 +136,7 @@ export default function InventoryPage() {
         </header>
 
         <section className="grid gap-3 sm:grid-cols-2">
-          <SectionCard active={section === "Phone Parts"} icon={Smartphone} title="Phone Parts" count={phoneParts.length} description="iPhone, Samsung and Android repair parts" onClick={() => chooseSection("Phone Parts")} />
-          <SectionCard active={section === "Accessories"} icon={Package} title="Accessories" count={accessories.length} description="Your existing accessory stock — nothing invented" onClick={() => chooseSection("Accessories")} />
+          <SectionCard active icon={Smartphone} title="Phone Parts" count={phoneParts.length} description="iPhone, Samsung and Android repair parts" onClick={() => chooseSection("Phone Parts")} />
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.06)]">
@@ -227,7 +222,7 @@ export default function InventoryPage() {
         {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
         <section className="rounded-2xl border border-[#dfe6df] bg-[#f7f8f5] p-4">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1d6a54]">How Inventory works</p>
-          <p className="mt-1 text-sm leading-6 text-[#53635d]">Inventory is the shop's stock record. Add a new part or accessory, update its details, purchase stock when new stock arrives, and remove an item from active stock when the shop no longer carries it. Sales and engineer part issues change quantities automatically.</p>
+          <p className="mt-1 text-sm leading-6 text-[#53635d]">Phone Parts are the shop stock record here. Add a part, update its details, record incoming stock, and follow every movement out. Sales and engineer part issues change quantities automatically.</p>
         </section>
       </main>
     </AppLayout>
