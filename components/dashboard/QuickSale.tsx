@@ -15,7 +15,8 @@ export default function QuickSale() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState("1");
-  const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+  const [paymentMethod,
+      paymentAccount: paymentMethod === "Cash" ? "Cash" : "OPay", setPaymentMethod] = useState<string>("Cash");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
