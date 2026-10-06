@@ -58,7 +58,6 @@ export default function InventoryPage() {
   const [partType, setPartType] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
-  const [todayMovements, setTodayMovements] = useState<any[]>([]);
 
   const isOwner = myRole === "owner";
 
@@ -66,9 +65,6 @@ export default function InventoryPage() {
     void staffService.getMyRole().then(({ data }) => setMyRole(data));
     void inventoryService.getInventory().then(({ data, error }) => {
       if (!error) setItems((data || []) as InventoryItem[]);
-    });
-    void engineerService.getTodayPartMovement().then(({ data, error }) => {
-      if (!error) setTodayMovements(data || []);
     });
   }, [refreshKey]);
 
