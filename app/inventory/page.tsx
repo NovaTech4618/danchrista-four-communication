@@ -132,6 +132,7 @@ export default function InventoryPage() {
             <p className="mt-1 text-sm text-[#74837e]">Tap the section, then tap your way to the exact item.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            {isOwner && <Link href="/inventory/verify" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Physical verification</Link>}
             <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d]">Stockroom</Link>
             {isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white">Import</Link>}
             {isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d]">Stock history</Link>}
