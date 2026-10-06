@@ -72,6 +72,11 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   function resetSelection() {
     setSelectedModel(""); setSelectedVariant(""); setSelectedItemId("");
   }
+  function handlePaymentMethod(value: string) {
+    setPaymentMethod(value);
+    setPaymentAccount(value === "Cash" ? CASH_ACCOUNT : TRANSFER_ACCOUNTS[0]);
+  }
+
   function chooseBrand(brand: string) {
     setSelectedBrand(brand); setSelectedPartType(PHONE_PARTS[brand]?.[0] || ""); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId("");
   }
