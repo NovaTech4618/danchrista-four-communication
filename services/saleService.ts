@@ -18,10 +18,11 @@ export const saleService = {
       .single();
   },
 
-  async requestPriceOverride(params: { customerId: string | null; paymentMethod: string; discount: number; staffName: string | null; notes: string | null; items: SaleItemInput[]; reason?: string }) {
+  async requestPriceOverride(params: { customerId: string | null; paymentMethod: string; paymentAccount: string; discount: number; staffName: string | null; notes: string | null; items: SaleItemInput[]; reason?: string }) {
     return await supabase.rpc("request_sale_price_override", {
       p_customer_id: params.customerId,
       p_payment_method: params.paymentMethod,
+      p_payment_account: params.paymentAccount,
       p_discount: params.discount,
       p_staff_name: params.staffName,
       p_notes: params.notes,
