@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { customerService } from "@/services/customerService";
 import { inventoryService } from "@/services/inventoryService";
 import { saleService } from "@/services/saleService";
-import { PAYMENT_METHODS } from "@/types/sale";
+import { CASH_ACCOUNT, PAYMENT_METHODS, TRANSFER_ACCOUNTS } from "@/types/sale";
 import type { InventoryItem } from "@/types/inventory";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { ChevronRight, Package, Smartphone } from "lucide-react";
 
 type CartLine = { inventory_id: string; item_name: string; quantity: number; unit_price: number; available: number; cost: number; selling_price: number; minimum_selling_price: number; price_override: boolean };
 type SaleFormProps = { onSaleCompleted: () => void };
-type SaleSection = "Phone Parts" | "Accessories";
+type SaleSection = "Phone Parts";
 type PriceControlledInventory = InventoryItem & { minimum_selling_price?: number };
 
 const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
@@ -27,24 +27,19 @@ const PHONE_PARTS: Record<string, string[]> = {
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 const selectClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10";
 
-function accessoryGroup(item: InventoryItem) {
-  return item.subcategory?.trim() || "Other accessories";
-}
-
 export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [customers, setCustomers] = useState<{ id: string; full_name: string; phone?: string | null }[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [section, setSection] = useState<SaleSection>("Phone Parts");
   const [selectedBrand, setSelectedBrand] = useState("iPhone");
   const [selectedPartType, setSelectedPartType] = useState("Charging Flex");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedVariant, setSelectedVariant] = useState("");
-  const [accessoryGroupName, setAccessoryGroupName] = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
   const [selectedQty, setSelectedQty] = useState("1");
   const [customerId, setCustomerId] = useState("");
   const [showCustomer, setShowCustomer] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [paymentAccount, setPaymentAccount] = useState<string>(CASH_ACCOUNT);
   const [discount, setDiscount] = useState("0");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,7 +59,6 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     return item.category === "Phone Parts" && Boolean(item.brand && types?.includes(item.subcategory || ""));
   }), [inventory]);
 
-  const accessories = useMemo(() => inventory.filter((item) => item.category === "Accessories" || item.item_type === "accessory"), [inventory]);
   const partTypes = PHONE_PARTS[selectedBrand] || [];
 
   const models = useMemo(() => Array.from(new Set(phoneParts
@@ -75,17 +69,20 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const modelItems = useMemo(() => phoneParts.filter((item) => item.brand === selectedBrand && item.subcategory === selectedPartType && item.compatible_models === selectedModel), [phoneParts, selectedBrand, selectedPartType, selectedModel]);
 
   const variants = useMemo(() => Array.from(new Set(modelItems.map((item) => item.item_name.match(/ - (.+)$/)?.[1]).filter((variant): variant is string => Boolean(variant)))), [modelItems]);
-  const accessoryGroups = useMemo(() => Array.from(new Set(accessories.map(accessoryGroup))).sort((a, b) => a.localeCompare(b)), [accessories]);
-  const accessoryItems = useMemo(() => accessories.filter((item) => accessoryGroup(item) === accessoryGroupName), [accessories, accessoryGroupName]);
 
   function resetSelection() {
-    setSelectedModel(""); setSelectedVariant(""); setSelectedItemId(""); setAccessoryGroupName("");
+    setSelectedModel(""); setSelectedVariant(""); setSelectedItemId("");
   }
   function chooseSection(next: SaleSection) {
     setSection(next);
     resetSelection();
     if (next === "Phone Parts") { setSelectedBrand("iPhone"); setSelectedPartType("Charging Flex"); }
   }
+  function handlePaymentMethod(value: string) {
+    setPaymentMethod(value);
+    setPaymentAccount(value === "Cash" ? CASH_ACCOUNT : TRANSFER_ACCOUNTS[0]);
+  }
+
   function chooseBrand(brand: string) {
     setSelectedBrand(brand); setSelectedPartType(PHONE_PARTS[brand]?.[0] || ""); setSelectedModel(""); setSelectedVariant(""); setSelectedItemId("");
   }
@@ -136,7 +133,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     if (needsApproval) {
       setLoading(true);
       const { error } = await saleService.requestPriceOverride({
-        customerId: customerId || null, paymentMethod, discount: discountAmount, staffName: null, notes: null,
+        customerId: customerId || null, paymentMethod, paymentAccount, discount: discountAmount, staffName: null, notes: null,
         items: cart.map((line) => ({ inventory_id: line.inventory_id, quantity: line.quantity, unit_price: line.unit_price, price_override: true })),
         reason: "Sale price is below the stored minimum selling price.",
       });
@@ -146,12 +143,12 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
       setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted(); return;
     }
 
-    const attemptSignature = JSON.stringify({ customerId: customerId || null, paymentMethod, discount: discountAmount, items: cart.map((line) => ({ inventory_id: line.inventory_id, quantity: line.quantity, unit_price: line.unit_price, price_override: line.price_override })) });
+    const attemptSignature = JSON.stringify({ customerId: customerId || null, paymentMethod, paymentAccount, discount: discountAmount, items: cart.map((line) => ({ inventory_id: line.inventory_id, quantity: line.quantity, unit_price: line.unit_price, price_override: line.price_override })) });
     const idempotencyKey = saleAttemptKey && saleAttemptSignature === attemptSignature ? saleAttemptKey : crypto.randomUUID();
     setSaleAttemptKey(idempotencyKey); setSaleAttemptSignature(attemptSignature); setLoading(true);
 
     const { error } = await saleService.createSale({
-      customerId: customerId || null, paymentMethod, discount: discountAmount, staffName: null, notes: null,
+      customerId: customerId || null, paymentMethod, paymentAccount, discount: discountAmount, staffName: null, notes: null,
       items: cart.map((line) => ({ inventory_id: line.inventory_id, quantity: line.quantity, unit_price: line.unit_price, price_override: line.price_override })),
       idempotencyKey,
     });
@@ -173,11 +170,6 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
       </header>
 
       <div className="space-y-5 p-5 sm:p-6">
-        <div className="grid grid-cols-2 gap-3">
-          <TopCard active={section === "Phone Parts"} icon={Smartphone} title="Phone Parts" description="Repair parts" onClick={() => chooseSection("Phone Parts")} />
-          <TopCard active={section === "Accessories"} icon={Package} title="Accessories" description="Existing accessory stock" onClick={() => chooseSection("Accessories")} />
-        </div>
-
         {section === "Phone Parts" ? (
           <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
@@ -242,7 +234,8 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
         ) : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><p className="text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Tap a product above, choose quantity, then add it.</p></div>}
 
         <div className="grid gap-3 md:grid-cols-[1fr_180px]">
-          <label className="text-xs font-semibold text-[#687974]">Payment<select className={`${selectClass} mt-1`} value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>{PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}</select></label>
+          <label className="text-xs font-semibold text-[#687974]">Payment method<select className={`${selectClass} mt-1`} value={paymentMethod} onChange={(e) => handlePaymentMethod(e.target.value)}>{PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}</select></label>
+          <label className="text-xs font-semibold text-[#687974]">{paymentMethod === "Cash" ? "Money received" : "Transfer to"}<select className={`${selectClass} mt-1`} value={paymentAccount} onChange={(e) => setPaymentAccount(e.target.value)}>{paymentMethod === "Cash" ? <option value="Cash">Cash</option> : TRANSFER_ACCOUNTS.map((account) => <option key={account} value={account}>{account}</option>)}</select></label>
           <label className="text-xs font-semibold text-[#687974]">Discount<select className={`${selectClass} mt-1`} value={discount} onChange={(e) => setDiscount(e.target.value)}><option value="0">No discount</option><option value="500">₦500</option><option value="1000">₦1,000</option><option value="2000">₦2,000</option></select></label>
         </div>
 
