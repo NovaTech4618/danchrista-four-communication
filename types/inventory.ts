@@ -23,6 +23,9 @@ export type InventoryItem = {
   image_path?: string | null;
   created_at: string;
   updated_at: string;
+  physical_verified_at?: string | null;
+  physical_verified_by?: string | null;
+  physical_verification_note?: string | null;
 };
 
 export type InventoryItemInput = {
