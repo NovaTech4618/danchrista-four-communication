@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import InventoryImage from "@/components/inventory/InventoryImage";
 
 type Props = { editingItem: InventoryItem | null; onSaved: () => void; onCancelEdit: () => void };
-type InventorySection = "Phone Parts" | "Accessories";
+type InventorySection = "Phone Parts";
 
 const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
 const PHONE_PARTS: Record<string, string[]> = {
@@ -48,7 +48,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
     if (!editingItem) { resetForm(); return; }
     const isPart = editingItem.category === "Phone Parts" || editingItem.item_type === "part";
     const floor = Number(editingItem.minimum_selling_price ?? editingItem.selling_price);
-    setSection(isPart ? "Phone Parts" : "Accessories");
+    setSection("Phone Parts");
     setItemName(editingItem.item_name);
     setBrand(editingItem.brand || "");
     setPartType(editingItem.subcategory || "");
@@ -123,10 +123,10 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
     setLoading(true);
     const payload = {
       item_name: itemName.trim(),
-      category: section,
-      subcategory: section === "Phone Parts" ? partType : (subcategory.trim() || null),
-      item_type: section === "Phone Parts" ? "part" as const : "accessory" as const,
-      brand: section === "Phone Parts" ? brand : (brand.trim() || null),
+      category: "Phone Parts",
+      subcategory: partType,
+      item_type: "part" as const,
+      brand,
       compatible_models: model.trim() || null,
       sku: sku.trim() || null,
       selling_price: sp,
@@ -178,13 +178,7 @@ export default function InventoryForm({ editingItem, onSaved, onCancelEdit }: Pr
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            {(["Phone Parts", "Accessories"] as const).map((value) => (
-              <button key={value} type="button" onClick={() => { setSection(value); if (value === "Accessories") { setPartType(""); setBrand(""); setModel(""); setVariant(""); } }} className={`min-h-11 rounded-xl border px-3 text-sm font-bold ${section === value ? "border-[#1d6a54] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{value}</button>
-            ))}
-          </div>
-
-          {section === "Phone Parts" ? (
+     {section === "Phone Parts" ? (
             <>
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
