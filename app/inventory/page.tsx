@@ -6,7 +6,6 @@ import { ArrowLeft, Cable, ChevronRight, Headphones, Package, Pencil, Search, Sm
 import AppLayout from "@/components/layout/AppLayout";
 import InventoryForm from "@/components/inventory/InventoryForm";
 import PurchaseStockPanel from "@/components/inventory/PurchaseStockPanel";
-import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
 import OpeningStockPanel from "@/components/inventory/OpeningStockPanel";
 import InventoryImage from "@/components/inventory/InventoryImage";
 import { inventoryService } from "@/services/inventoryService";
@@ -157,7 +156,6 @@ export default function InventoryPage() {
           </div>
         </section>
 
-        <TodayPartControl movements={todayMovements} items={phoneParts} />
 
         <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -221,7 +219,6 @@ export default function InventoryPage() {
 
         {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
         {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
-        <EngineerPartIssuePanel items={items} onSaved={refresh} />
       </main>
     </AppLayout>
   );
