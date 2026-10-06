@@ -39,14 +39,14 @@ export default function PhysicalVerificationPage() {
   useEffect(() => { void load(); }, []);
 
   const stats = useMemo(() => {
-    const verified = items.filter(i => Boolean(i.physical_verified_at)).length;
+    const verified = items.filter(i => Boolean((i as InventoryItem & { physical_verified_at?: string | null }).physical_verified_at)).length;
     return { total: items.length, verified, remaining: items.length - verified };
   }, [items]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return items.filter(item => {
-      const verified = Boolean(item.physical_verified_at);
+      const verified = Boolean((item as InventoryItem & { physical_verified_at?: string | null }).physical_verified_at);
       const sectionMatch = section === "all"
         || (section === "Phone Parts" && item.category === "Phone Parts")
         || (section === "Accessories" && (item.category === "Accessories" || item.item_type === "accessory"));
