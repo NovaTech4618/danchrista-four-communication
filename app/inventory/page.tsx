@@ -16,8 +16,8 @@ import type { InventoryItem } from "@/types/inventory";
 
 const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
 const PHONE_PARTS: Record<string, string[]> = {
-  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass", "Home Button"],
-  Samsung: ["Down Board", "Power Flex"],
+  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass", "Home Button", "Screen Guard"],
+  Samsung: ["Down Board", "Power Flex", "Screen Guard"],
   ...Object.fromEntries(ANDROID_BRANDS.map((brand) => [brand, ["Down Board", "Power Flex"]])),
 };
 
@@ -135,8 +135,8 @@ export default function InventoryPage() {
 
           {section === "Phone Parts" && !family && !partType && (
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <BrowseCard label="iPhone" description="Charging Flex · Earpiece Flex · Back Glass · Home Button" icon={Smartphone} count={phoneParts.filter((i) => i.brand === "iPhone").length} onClick={() => { setFamily("iPhone"); setBrand("iPhone"); }} />
-              <BrowseCard label="Samsung" description="Down Board · Power Flex" icon={Smartphone} count={phoneParts.filter((i) => i.brand === "Samsung").length} onClick={() => { setFamily("Samsung"); setBrand("Samsung"); }} />
+              <BrowseCard label="iPhone" description="Charging Flex · Earpiece Flex · Back Glass · Home Button · Screen Guard" icon={Smartphone} count={phoneParts.filter((i) => i.brand === "iPhone").length} onClick={() => { setFamily("iPhone"); setBrand("iPhone"); }} />
+              <BrowseCard label="Samsung" description="Down Board · Power Flex · Screen Guard" icon={Smartphone} count={phoneParts.filter((i) => i.brand === "Samsung").length} onClick={() => { setFamily("Samsung"); setBrand("Samsung"); }} />
               <BrowseCard label="Android" description="itel · Infinix · Tecno · Redmi · Huawei · Oppo · Vivo · Gionee · Nokia" icon={Package} count={phoneParts.filter((i) => ANDROID_BRANDS.includes(i.brand || "")).length} onClick={() => { setFamily("Android"); setBrand(null); }} />
             </div>
           )}
