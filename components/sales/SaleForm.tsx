@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import InventoryImage from "@/components/inventory/InventoryImage";
-import { Smartphone } from "lucide-react";
+import { ChevronRight, Package, Smartphone } from "lucide-react";
 
 type CartLine = { inventory_id: string; item_name: string; quantity: number; unit_price: number; available: number; cost: number; selling_price: number; minimum_selling_price: number; price_override: boolean };
 type SaleFormProps = { onSaleCompleted: () => void };
