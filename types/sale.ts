@@ -1,4 +1,6 @@
-export const PAYMENT_METHODS = ["Cash", "Transfer", "POS", "Other"] as const;
+export const PAYMENT_METHODS = ["Cash", "Transfer"] as const;
+export const CASH_ACCOUNT = "Cash" as const;
+export const TRANSFER_ACCOUNTS = ["OPay", "Moniepoint", "GTBank"] as const;
 
 export type SaleItemInput = {
   inventory_id: string;
@@ -12,6 +14,7 @@ export type Sale = {
   customer_id: string | null;
   sale_date: string;
   payment_method: string | null;
+  payment_account: string | null;
   subtotal: number | null;
   discount: number;
   total: number | null;
