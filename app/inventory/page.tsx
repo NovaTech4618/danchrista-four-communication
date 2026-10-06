@@ -188,7 +188,7 @@ export default function InventoryPage() {
 
 
 
-        {((section === "Phone Parts" && partType) || (section === "Accessories" && accessoryGroup)) && !visibleItems.length && <EmptyState text="No matching stock. Try another item or add it below." />}
+        {section === "Phone Parts" && partType && !visibleItems.length && <EmptyState text="No matching stock. Try another item or add it below." />}
 
         {isOwner && <OpeningStockPanel items={items} onSaved={refresh} />}
         {isOwner && <section className="grid gap-6 xl:grid-cols-2"><InventoryForm editingItem={editingItem} onSaved={() => { setEditingItem(null); refresh(); }} onCancelEdit={() => setEditingItem(null)} /><PurchaseStockPanel items={items} onSaved={refresh} /></section>}
