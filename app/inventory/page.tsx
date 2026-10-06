@@ -121,7 +121,7 @@ function InventoryCard({ item, isOwner, onEdit }: { item:InventoryItem; isOwner:
     <div className="flex h-40 items-center justify-center bg-[#f7f8f5]"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /></div>
     <div className="p-4">
       <p className="text-sm font-bold text-[#182a28]">{item.item_name}</p>
-      <p className="mt-1 text-xs text-[#74837e]">{item.brand || "Accessory"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p>
+      <p className="mt-1 text-xs text-[#74837e]">{item.brand || "Phone part"}{item.compatible_models ? ` · ${item.compatible_models}` : ""}</p>
       <div className="mt-3 flex items-end justify-between gap-2"><div><p className="text-[11px] text-[#74837e]">Selling</p><p className="font-heading text-lg font-bold text-[#182a28]">{money(item.selling_price)}</p></div><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${state === "out" ? "bg-red-50 text-red-700" : state === "low" ? "bg-amber-50 text-amber-700" : "bg-[#eef4f1] text-[#1d6a54]"}`}>{item.quantity} in stock</span></div>
       {isOwner && <button type="button" onClick={() => onEdit(item)} className="mt-3 flex w-full items-center justify-center gap-1 rounded-xl border border-[#dfe6df] py-2 text-xs font-bold text-[#285c4d]"><Pencil className="size-3.5" /> Edit item</button>}
     </div>
