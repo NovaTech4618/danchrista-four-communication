@@ -11,11 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import InventoryImage from "@/components/inventory/InventoryImage";
-import { ChevronRight, Package, Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 
 type CartLine = { inventory_id: string; item_name: string; quantity: number; unit_price: number; available: number; cost: number; selling_price: number; minimum_selling_price: number; price_override: boolean };
 type SaleFormProps = { onSaleCompleted: () => void };
-type SaleSection = "Phone Parts";
 type PriceControlledInventory = InventoryItem & { minimum_selling_price?: number };
 
 const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
@@ -170,7 +169,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
       </header>
 
       <div className="space-y-5 p-5 sm:p-6">
-        {section === "Phone Parts" ? (
+        
           <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
             <div className="flex flex-wrap gap-2">{Object.keys(PHONE_PARTS).map((value) => <button key={value} type="button" onClick={() => chooseBrand(value)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedBrand === value ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{value}</button>)}</div>
@@ -203,27 +202,6 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
 
             {selectedItem && <SelectedItem item={selectedItem} quantity={selectedQty} onQuantityChange={setSelectedQty} onAdd={addToCart} />}
           </div>
-        ) : (
-          <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
-            {!accessoryGroupName ? (
-              <>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Accessory group</p>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {accessoryGroups.map((group) => <button key={group} type="button" onClick={() => setAccessoryGroupName(group)} className="group rounded-2xl border border-slate-200 bg-white p-4 text-left hover:border-[#1d6a54] hover:shadow-sm"><div className="flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54]"><Package className="size-5" /></span><ChevronRight className="size-4 text-slate-400" /></div><p className="mt-4 text-sm font-bold text-slate-800">{group}</p><p className="mt-1 text-[11px] text-slate-500">{accessories.filter((item) => accessoryGroup(item) === group).length} items</p></button>)}
-                  {!accessoryGroups.length && <div className="col-span-full rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">No accessories have been added to Inventory yet.</div>}
-                </div>
-              </>
-            ) : (
-              <>
-                <button type="button" onClick={() => { setAccessoryGroupName(""); setSelectedItemId(""); }} className="mb-4 inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]"><ChevronRight className="size-3 rotate-180" /> Accessories</button>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {accessoryItems.map((item) => <button key={item.id} type="button" disabled={item.quantity <= 0} onClick={() => setSelectedItemId(item.id)} className={`rounded-2xl border bg-white p-3 text-left ${selectedItemId === item.id ? "border-[#1d6a54] bg-[#eef4f1]" : "border-slate-200"} disabled:opacity-40`}><div className="flex h-32 items-center justify-center rounded-xl bg-[#f7f8f5]"><InventoryImage src={item.image_url} alt={item.item_name} size="md" /></div><p className="mt-3 text-sm font-bold text-slate-800">{item.item_name}</p><p className="mt-1 text-xs text-slate-500">{money(item.selling_price)} · {item.quantity} in stock</p></button>)}
-                </div>
-                {selectedItem && <SelectedItem item={selectedItem} quantity={selectedQty} onQuantityChange={setSelectedQty} onAdd={addToCart} />}
-              </>
-            )}
-          </div>
-        )}
 
         {cart.length > 0 ? (
           <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]">
