@@ -81,6 +81,36 @@ export const engineerService = {
     return await supabase.rpc("engineer_part_paid", { p_engineer_id: engineerId, p_inventory_id: inventoryId, p_quantity: quantity, p_payment_method: paymentMethod, p_notes: notes ?? null });
   },
 
+  async getTodayPartMovement(date?: string) {
+    const day = date ?? new Date().toISOString().slice(0, 10);
+    const start = `${day}T00:00:00.000Z`;
+    const end = `${day}T23:59:59.999Z`;
+    const [out, returned, used, paid] = await Promise.all([
+      supabase.from("engineer_parts_out").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_in").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,return_condition,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_used").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_paid").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,payment_method,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+    ]);
+    const rows = [
+      ...(out.data ?? []).map((r) => ({ ...r, movement: "collected" as const })),
+      ...(returned.data ?? []).map((r) => ({ ...r, movement: "returned" as const })),
+      ...(used.data ?? []).map((r) => ({ ...r, movement: "used" as const })),
+      ...(paid.data ?? []).map((r) => ({ ...r, movement: "paid" as const })),
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const engineerIds = [...new Set(rows.map((r) => r.engineer_id))];
+    const inventoryIds = [...new Set(rows.map((r) => r.inventory_id))];
+    const [engineersRes, inventoryRes] = await Promise.all([
+      engineerIds.length ? supabase.from("engineers").select("id,name").in("id", engineerIds) : Promise.resolve({ data: [], error: null }),
+      inventoryIds.length ? supabase.from("inventory").select("id,item_name,brand,compatible_models,subcategory").in("id", inventoryIds) : Promise.resolve({ data: [], error: null }),
+    ]);
+    const engineers = new Map((engineersRes.data ?? []).map((e) => [e.id, e.name]));
+    const inventory = new Map((inventoryRes.data ?? []).map((i) => [i.id, i]));
+    return {
+      data: rows.map((r) => ({ ...r, engineer_name: engineers.get(r.engineer_id) ?? "Unknown engineer", item: inventory.get(r.inventory_id) ?? null })),
+      error: out.error ?? returned.error ?? used.error ?? paid.error ?? engineersRes.error ?? inventoryRes.error ?? null,
+    };
+  },
+
   async getDailyCollectionSummary(date?: string) {
     return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? new Date().toISOString().slice(0, 10) });
   },
