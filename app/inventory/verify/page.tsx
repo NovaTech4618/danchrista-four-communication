@@ -12,7 +12,7 @@ import type { InventoryItem } from "@/types/inventory";
 
 type Filter = "all" | "unverified" | "verified";
 
-function money(value: string | number) {
+function money(value: string | number | null | undefined) {
   return `₦${Number(value || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
 }
 
