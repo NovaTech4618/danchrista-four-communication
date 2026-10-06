@@ -125,7 +125,7 @@ export default function InventoryPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Browse</p>
               <h2 className="mt-1 font-heading text-xl font-bold text-[#182a28]">
-                {section === "Phone Parts" ? (partType ? `${brand || family || ""} · ${partType}` : family || "Phone Parts")}
+                {section === "Phone Parts" ? (partType ? `${brand || family || ""} · ${partType}` : family || "Phone Parts") : "Phone Parts"}}
               </h2>
             </div>
             {(family || brand || partType || query || stockFilter !== "all") && (
