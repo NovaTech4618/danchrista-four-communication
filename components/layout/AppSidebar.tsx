@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Boxes, ClipboardList, HandCoins, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench, UserRound } from "lucide-react";
+import { BarChart3, Boxes, ClipboardList, HandCoins, LayoutDashboard, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, WalletCards, Wrench, UserRound, Landmark } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { staffService } from "@/services/staffService";
 import { companyService } from "@/services/companyService";
@@ -26,6 +26,7 @@ const groups: { label: string; items: NavItem[] }[] = [
   ] },
   { label: "Owner control", items: [
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
+    { title: "Accounts", url: "/accounts", icon: Landmark, permission: "profit" },
     { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
     { title: "Alert", url: "/alerts", icon: Boxes, permission: "inventory" },
   ] },
