@@ -6,6 +6,17 @@ import type {
   EngineerTransaction,
 } from "@/types/engineer";
 
+const SHOP_TIME_ZONE = "Africa/Lagos";
+
+function shopDateString(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: SHOP_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+function nextShopDateString(day: string) {
+  const [year, month, date] = day.split("-").map(Number);
+  return shopDateString(new Date(Date.UTC(year, month - 1, date + 1, 12)));
+}
+
 export const engineerService = {
   async getEngineers() {
     return await supabase.from("engineers").select("*").order("name", { ascending: true });
@@ -82,9 +93,10 @@ export const engineerService = {
   },
 
   async getTodayPartMovement(date?: string) {
-    const day = date ?? new Date().toISOString().slice(0, 10);
-    const start = `${day}T00:00:00.000Z`;
-    const end = `${day}T23:59:59.999Z`;
+    const day = date ?? shopDateString();
+    const nextDay = nextShopDateString(day);
+    const start = `${day}T00:00:00+01:00`;
+    const end = `${nextDay}T00:00:00+01:00`;
     const [out, returned, used, paid] = await Promise.all([
       supabase.from("engineer_parts_out").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
       supabase.from("engineer_parts_in").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,return_condition,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
@@ -112,7 +124,7 @@ export const engineerService = {
   },
 
   async getDailyCollectionSummary(date?: string) {
-    return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? new Date().toISOString().slice(0, 10) });
+    return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? shopDateString() });
   },
 
   async recordWork(engineerId: string, amount: number, description: string, notes?: string | null) {
