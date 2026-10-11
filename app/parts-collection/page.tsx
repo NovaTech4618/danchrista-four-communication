@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownToLine, ArrowLeft, CheckCircle2, ClipboardList, RotateCcw, Search, Undo2 } from "lucide-react";
+import { ArrowDownToLine, CheckCircle2, ClipboardList, RotateCcw, Search, Undo2 } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import EngineerPartIssuePanel from "@/components/inventory/EngineerPartIssuePanel";
 import { engineerService } from "@/services/engineerService";
@@ -177,6 +177,16 @@ export default function PartsCollectionPage() {
             </div>
             <span className="rounded-full bg-[#f6f1e9] px-3 py-1.5 text-xs font-bold text-[#285c4d]">{outstanding.length} engineer/part balances</span>
           </div>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#87958f]" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search engineer or part..." className="h-10 w-full rounded-xl border border-[#dfe6df] pl-9 pr-3 text-sm outline-none focus:border-[#1d6a54]" />
+            </div>
+            <select value={engineerFilter} onChange={(e) => setEngineerFilter(e.target.value)} className="h-10 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold outline-none focus:border-[#1d6a54]">
+              <option value="all">All engineers</option>
+              {engineers.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+            </select>
+          </div>
           {loadError && <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{loadError}</div>}
           <div className="mt-4 overflow-hidden rounded-2xl border border-[#e5ebe7]">
             <div className="overflow-x-auto">
@@ -212,16 +222,7 @@ export default function PartsCollectionPage() {
               <h2 className="mt-1 text-xl font-bold text-[#182a28]">Today's movement record</h2>
               <p className="mt-1 text-sm text-[#74837e]">A date-filtered audit trail of parts collected, used, returned, and payment records. Open quantities are tracked separately above.</p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#87958f]" />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search engineer or part..." className="h-10 rounded-xl border border-[#dfe6df] pl-9 pr-3 text-sm outline-none focus:border-[#1d6a54]" />
-              </div>
-              <select value={engineerFilter} onChange={(e) => setEngineerFilter(e.target.value)} className="h-10 rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold outline-none focus:border-[#1d6a54]">
-                <option value="all">All engineers</option>
-                {engineers.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-              </select>
-            </div>
+
           </div>
 
           {message && <div className="mt-4 rounded-xl border border-[#d7a95a] bg-[#f6f1e9] px-4 py-3 text-sm font-semibold text-[#285c4d]">{message}</div>}
