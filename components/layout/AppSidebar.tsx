@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Boxes, ChevronDown, ClipboardList, HandCoins, LayoutHome, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, Wrench, UserRound, Landmark } from "lucide-react";
+import { BarChart3, Boxes, ChevronDown, ClipboardList, HandCoins, Home, LogOut, MessageCircle, Package, Search, Settings, ShoppingCart, Users, Wrench, UserRound, Landmark } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { staffService } from "@/services/staffService";
 import { companyService } from "@/services/companyService";
@@ -12,7 +12,7 @@ import { hasPermission, type Permission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
-type Icon = typeof LayoutHome;
+type Icon = typeof Home;
 type NavItem = { title: string; url: string; icon: Icon; permission: Permission };
 const primaryItems: NavItem[] = [
   { title: "Daily Parts Collection", url: "/parts-collection", icon: ClipboardList, permission: "inventory" },
@@ -59,7 +59,7 @@ export default function AppSidebar() {
     return <SidebarMenuItem key={item.title}><SidebarMenuButton render={<Link href={item.url} />} isActive={active} className={menuButtonClass(active)} tooltip={item.title} onClick={() => navigate(item.url)} aria-current={active ? "page" : undefined}><item.icon className="size-4" /><span>{item.title}</span></SidebarMenuButton></SidebarMenuItem>;
   }
   return <Sidebar collapsible="icon" className="border-r border-[#d7a95a]/10 bg-[#123b34] text-white shadow-[12px_0_40px_rgba(18,59,52,0.14)]">
-    <SidebarHeader className="border-b border-white/10 bg-[#123b34] px-3 py-4"><Link href="/workspace" onClick={() => navigate("/dashboard")} aria-label="Amezing dashboard" className="block rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a95a]"><AmezingLogo dark /></Link></SidebarHeader>
+    <SidebarHeader className="border-b border-white/10 bg-[#123b34] px-3 py-4"><Link href="/workspace" onClick={() => navigate("/workspace")} aria-label="Amezing dashboard" className="block rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a95a]"><AmezingLogo dark /></Link></SidebarHeader>
     <SidebarContent className="bg-[#123b34] px-2 py-3">
       <SidebarGroup className="px-0">
         <SidebarGroupLabel className="px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-[#9eb8ad]">Main</SidebarGroupLabel>
