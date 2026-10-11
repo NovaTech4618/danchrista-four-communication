@@ -64,6 +64,7 @@ export default function PartsCollectionPage() {
   const [actionNotes, setActionNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [activeView, setActiveView] = useState<"issue" | "outstanding" | "history">("issue");
 
   async function load() {
     setLoading(true);
@@ -155,7 +156,22 @@ export default function PartsCollectionPage() {
           <Stat label="Movements" value={movements.length} icon={ClipboardList} />
         </section>
 
-        <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
+        <section aria-label="Parts workflow" className="rounded-2xl border border-[#dfe6df] bg-white p-2 shadow-sm">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <button type="button" onClick={() => setActiveView("issue")} aria-pressed={activeView === "issue"} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${activeView === "issue" ? "bg-[#123b34] text-white shadow-sm" : "text-[#536660] hover:bg-[#f2f6f3]"}`}>
+              <ArrowDownToLine className="size-4" /> Give out parts
+            </button>
+            <button type="button" onClick={() => setActiveView("outstanding")} aria-pressed={activeView === "outstanding"} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${activeView === "outstanding" ? "bg-[#123b34] text-white shadow-sm" : "text-[#536660] hover:bg-[#f2f6f3]"}`}>
+              <RotateCcw className="size-4" /> Outstanding ({stillOut})
+            </button>
+            <button type="button" onClick={() => setActiveView("history")} aria-pressed={activeView === "history"} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${activeView === "history" ? "bg-[#123b34] text-white shadow-sm" : "text-[#536660] hover:bg-[#f2f6f3]"}`}>
+              <ClipboardList className="size-4" /> Movement history
+            </button>
+          </div>
+          {activeView !== "issue" && <button type="button" onClick={() => setActiveView("issue")} className="mt-2 inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-[#1d6a54] hover:bg-[#eef4f1]"><span aria-hidden="true">←</span> Back to give out parts</button>}
+        </section>
+
+        {activeView === "issue" && <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Step 1</p>
@@ -168,7 +184,7 @@ export default function PartsCollectionPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
+        {activeView === "outstanding" && <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Open items</p>
@@ -215,10 +231,10 @@ export default function PartsCollectionPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
+        {activeView === "history" && <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Step 2</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Movement history</p>
               <h2 className="mt-1 text-xl font-bold text-[#182a28]">Today's movement record</h2>
               <p className="mt-1 text-sm text-[#74837e]">A date-filtered audit trail of parts collected, used, returned, and payment records. Open quantities are tracked separately above.</p>
             </div>
@@ -250,7 +266,7 @@ export default function PartsCollectionPage() {
               </table>
             </div>
           </div>
-        </section>
+        </section>}}
 
         {action && (
           <section className="rounded-3xl border border-[#d7a95a] bg-[#fffdf8] p-5 shadow-[0_12px_32px_rgba(18,59,52,0.08)]">
