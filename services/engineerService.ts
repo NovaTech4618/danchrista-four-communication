@@ -123,6 +123,45 @@ export const engineerService = {
     };
   },
 
+  async getOutstandingPartBalances() {
+    const [out, returned, used] = await Promise.all([
+      supabase.from("engineer_parts_out").select("engineer_id,inventory_id,quantity,unit_price,created_at"),
+      supabase.from("engineer_parts_in").select("engineer_id,inventory_id,quantity,created_at"),
+      supabase.from("engineer_parts_used").select("engineer_id,inventory_id,quantity,created_at"),
+    ]);
+    const error = out.error ?? returned.error ?? used.error ?? null;
+    if (error) return { data: [], error };
+    type Balance = { engineer_id: string; inventory_id: string; issued: number; returned: number; used: number };
+    const balances = new Map<string, Balance>();
+    const get = (engineer_id: string, inventory_id: string) => {
+      const key = engineer_id + ":" + inventory_id;
+      let row = balances.get(key);
+      if (!row) {
+        row = { engineer_id, inventory_id, issued: 0, returned: 0, used: 0 };
+        balances.set(key, row);
+      }
+      return row;
+    };
+    (out.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).issued += Number(row.quantity || 0); });
+    (returned.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).returned += Number(row.quantity || 0); });
+    (used.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).used += Number(row.quantity || 0); });
+    const open = [...balances.values()]
+      .map((row) => ({ ...row, quantity: Math.max(0, row.issued - row.returned - row.used) }))
+      .filter((row) => row.quantity > 0);
+    const engineerIds = [...new Set(open.map((row) => row.engineer_id))];
+    const inventoryIds = [...new Set(open.map((row) => row.inventory_id))];
+    const [engineersRes, inventoryRes] = await Promise.all([
+      engineerIds.length ? supabase.from("engineers").select("id,name").in("id", engineerIds) : Promise.resolve({ data: [], error: null }),
+      inventoryIds.length ? supabase.from("inventory").select("id,item_name,brand,compatible_models,subcategory").in("id", inventoryIds) : Promise.resolve({ data: [], error: null }),
+    ]);
+    const engineers = new Map((engineersRes.data ?? []).map((row) => [row.id, row.name]));
+    const inventory = new Map((inventoryRes.data ?? []).map((row) => [row.id, row]));
+    return {
+      data: open.map((row) => ({ ...row, engineer_name: engineers.get(row.engineer_id) ?? "Unknown engineer", item: inventory.get(row.inventory_id) ?? null })),
+      error: engineersRes.error ?? inventoryRes.error ?? null,
+    };
+  },
+
   async getDailyCollectionSummary(date?: string) {
     return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? shopDateString() });
   },
