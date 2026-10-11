@@ -182,7 +182,7 @@ export default function PartsCollectionPage() {
           <div className="mt-4">
             <EngineerPartIssuePanel items={items} onSaved={load} />
           </div>
-        </section>
+        </section>}
 
         {activeView === "outstanding" && <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -229,7 +229,7 @@ export default function PartsCollectionPage() {
               </table>
             </div>
           </div>
-        </section>
+        </section>}
 
         {activeView === "history" && <section className="rounded-3xl border border-[#dfe6df] bg-white p-4 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -266,7 +266,7 @@ export default function PartsCollectionPage() {
               </table>
             </div>
           </div>
-        </section>}}
+        </section>}
 
         {action && (
           <section className="rounded-3xl border border-[#d7a95a] bg-[#fffdf8] p-5 shadow-[0_12px_32px_rgba(18,59,52,0.08)]">
