@@ -86,8 +86,9 @@ export default function PartsCollectionPage() {
   const engineers = useMemo(() => {
     const map = new Map<string, string>();
     movements.forEach((m) => map.set(m.engineer_id, m.engineer_name));
+    outstanding.forEach((row) => map.set(row.engineer_id, row.engineer_name));
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
-  }, [movements]);
+  }, [movements, outstanding]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
