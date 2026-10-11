@@ -30,7 +30,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     { title: "Reports", url: "/reports", icon: BarChart3, permission: "profit" },
     { title: "Accounts", url: "/accounts", icon: Landmark, permission: "profit" },
     { title: "Daily Closing", url: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" },
-    { title: "Alerts", url: "/alerts", icon: Boxes, permission: "inventory" },
+    { title: "Alerts", url: "/alerts", icon: Boxes, permission: "profit" },
   ] },
   { label: "People & tools", items: [
     { title: "Staff", url: "/staff", icon: Users, permission: "staff" },
