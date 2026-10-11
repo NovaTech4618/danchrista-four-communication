@@ -44,6 +44,10 @@ function menuButtonClass(active: boolean) { return `h-10 rounded-xl border trans
 export default function AppSidebar() {
   const pathname = usePathname(); const router = useRouter(); const { isMobile, setOpenMobile } = useSidebar(); const [myRole, setMyRole] = useState<StaffRole | null>(null); const [profile, setProfile] = useState<{ fullName: string; companyName: string } | null>(null); const [moreOpen, setMoreOpen] = useState(false);
   useEffect(() => { let active = true; void staffService.getMyRole().then(({ data }) => { if (active && data) setMyRole(data); }); void companyService.getCompany().then(({ data }) => { if (active && data) setProfile({ fullName: data.full_name ?? "Staff member", companyName: data.companies?.[0]?.name ?? "Amezing Limited" }); }); return () => { active = false; }; }, []);
+  useEffect(() => {
+    const currentIsInMoreTools = groups.some((group) => group.items.some((item) => pathname === item.url || pathname.startsWith(`${item.url}/`)));
+    if (currentIsInMoreTools) setMoreOpen(true);
+  }, [pathname]);
   async function handleLogout() { await supabase.auth.signOut(); router.replace("/login"); }
   function navigate(url: string) {
     if (isMobile) setOpenMobile(false);
