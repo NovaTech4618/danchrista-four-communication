@@ -64,7 +64,7 @@ export default function AppSidebar() {
       <SidebarGroup className="px-0">
         <SidebarGroupLabel className="px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-[#9eb8ad]">Main</SidebarGroupLabel>
         <SidebarGroupContent><SidebarMenu>
-          <SidebarMenuItem><SidebarMenuButton render={<Link href="/workspace" />} isActive={pathname === "/dashboard"} className={menuButtonClass(pathname === "/dashboard")} tooltip="Home" onClick={() => navigate("/dashboard")} aria-current={pathname === "/dashboard" ? "page" : undefined}><LayoutHome className="size-4" /><span>Home</span></SidebarMenuButton></SidebarMenuItem>
+          <SidebarMenuItem><SidebarMenuButton render={<Link href="/workspace" />} isActive={pathname === "/workspace" || pathname === "/dashboard"} className={menuButtonClass(pathname === "/workspace" || pathname === "/dashboard")} tooltip="Home" onClick={() => navigate("/workspace")} aria-current={pathname === "/workspace" || pathname === "/dashboard" ? "page" : undefined}><Home className="size-4" /><span>Home</span></SidebarMenuButton></SidebarMenuItem>
           {primaryItems.filter((item) => hasPermission(myRole, item.permission)).map(renderItem)}
         </SidebarMenu></SidebarGroupContent>
       </SidebarGroup>
