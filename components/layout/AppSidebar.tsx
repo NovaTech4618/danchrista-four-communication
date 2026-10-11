@@ -66,7 +66,7 @@ export default function AppSidebar() {
       </SidebarGroup>
       <SidebarGroup className="px-0 pt-2">
         <SidebarGroupContent><SidebarMenu><SidebarMenuItem>
-          <SidebarMenuButton onClick={() => setMoreOpen((open) => !open)} className={menuButtonClass(groups.some((group) => group.items.some((item) => pathname === item.url || pathname.startsWith(item.url + "/")))} tooltip="More tools" aria-expanded={moreOpen}>
+          <SidebarMenuButton onClick={() => setMoreOpen((open) => !open)} className={menuButtonClass(groups.some((group) => group.items.some((item) => pathname === item.url || pathname.startsWith(item.url + "/"))))} tooltip="More tools" aria-expanded={moreOpen}>
             <Boxes className="size-4" /><span className="flex-1 text-left">More tools</span><ChevronDown className={`size-4 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
           </SidebarMenuButton>
         </SidebarMenuItem></SidebarMenu></SidebarGroupContent>
