@@ -19,7 +19,7 @@ const secondary = [
   { title: "Repairs", href: "/repairs", icon: Wrench, permission: "repairs" as const },
   { title: "Owed & Owing", href: "/owed-owing", icon: HandCoins, permission: "outstanding" as const },
   { title: "Daily Closing", href: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" as const },
-  { title: "Alerts", href: "/alerts", icon: Boxes, permission: "inventory" as const },
+  { title: "Alerts", href: "/alerts", icon: Boxes, permission: "profit" as const },
   { title: "Staff", href: "/staff", icon: Users, permission: "staff" as const },
   { title: "Search", href: "/search", icon: Search, permission: "search" as const },
 ];
