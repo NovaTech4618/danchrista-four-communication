@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import AppSidebar from "./AppSidebar";
 import Header from "./Header";
 import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
@@ -19,7 +17,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-
     const checkWorkspaceAccess = async () => {
       setCheckingAuth(true);
       setCheckingAccess(true);
@@ -61,15 +58,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="min-h-screen bg-[var(--background)]">
-        <Header />
-        <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">{children}</div>
-        </main>
-      </SidebarInset>
+    <div className="flex min-h-screen min-w-0 flex-col">
+      <Header />
+      <main id="main-content" className="w-full min-w-0 flex-1" tabIndex={-1}>
+        <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">{children}</div>
+      </main>
       <FloatingAssistant />
-    </SidebarProvider>
+    </div>
   );
 }
