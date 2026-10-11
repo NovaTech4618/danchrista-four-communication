@@ -98,10 +98,10 @@ export const engineerService = {
     const start = `${day}T00:00:00+01:00`;
     const end = `${nextDay}T00:00:00+01:00`;
     const [out, returned, used, paid] = await Promise.all([
-      supabase.from("engineer_parts_out").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
-      supabase.from("engineer_parts_in").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,return_condition,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
-      supabase.from("engineer_parts_used").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
-      supabase.from("engineer_parts_paid").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,payment_method,notes").gte("created_at", start).lte("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_out").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lt("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_in").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,return_condition,notes").gte("created_at", start).lt("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_used").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,notes").gte("created_at", start).lt("created_at", end).order("created_at", { ascending: false }),
+      supabase.from("engineer_parts_paid").select("id,engineer_id,inventory_id,quantity,unit_price,created_at,payment_method,notes").gte("created_at", start).lt("created_at", end).order("created_at", { ascending: false }),
     ]);
     const rows = [
       ...(out.data ?? []).map((r) => ({ ...r, movement: "collected" as const })),
