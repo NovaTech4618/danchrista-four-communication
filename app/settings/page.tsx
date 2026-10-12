@@ -17,6 +17,8 @@ export default function SettingsPage() {
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [ownerWhatsAppPhone, setOwnerWhatsAppPhone] = useState("");
+  const [savingWhatsApp, setSavingWhatsApp] = useState(false);
   const [companyLogo, setCompanyLogo] = useState<string | null>(null);
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ export default function SettingsPage() {
     if (error || !data) { console.error("Settings load error:", error); toast.error("Failed to load settings."); return; }
     setUserId(data.id); setCompanyId(data.company_id); setFullName(data.full_name || ""); setRole(data.role || "");
     const company = Array.isArray(data.companies) ? data.companies[0] : data.companies;
-    setCompanyName(company?.name || ""); setCompanyLogo(company?.logo_url || null);
+    setCompanyName(company?.name || ""); setCompanyLogo(company?.logo_url || null); setOwnerWhatsAppPhone(company?.owner_whatsapp_phone || "");
   }
 
   async function handleSaveProfile(e: React.FormEvent) {
@@ -48,6 +50,18 @@ export default function SettingsPage() {
     if (!companyId || !companyName.trim()) return toast.error("Business name is required.");
     setSavingCompany(true); const { error } = await settingsService.updateCompanyName(companyId, companyName.trim()); setSavingCompany(false);
     if (error) toast.error(error.message); else toast.success("Business name updated!");
+  }
+
+  async function handleSaveWhatsApp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!companyId) return toast.error("Business record is not available.");
+    const phone = ownerWhatsAppPhone.trim();
+    if (phone && phone.replace(/\D/g, "").length < 10) return toast.error("Enter a valid WhatsApp phone number, including the country code if needed.");
+    setSavingWhatsApp(true);
+    const { error } = await settingsService.updateOwnerWhatsAppPhone(companyId, phone || null);
+    setSavingWhatsApp(false);
+    if (error) toast.error(error.message || "Could not save the WhatsApp number.");
+    else toast.success(phone ? "Boss WhatsApp number saved." : "Boss WhatsApp number removed.");
   }
 
   async function handleLogoUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -97,6 +111,7 @@ export default function SettingsPage() {
         <div className="grid gap-6 xl:grid-cols-2">
           <Card><CardHeader><CardTitle>Your Profile</CardTitle></CardHeader><CardContent><form onSubmit={handleSaveProfile} className="space-y-4"><div><label className="mb-1 block text-xs text-muted-foreground">Full Name</label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" /></div><Button type="submit" disabled={savingProfile}>{savingProfile ? "Saving…" : "Save Profile"}</Button></form></CardContent></Card>
           <Card><CardHeader><CardTitle>Business Details</CardTitle></CardHeader><CardContent><form onSubmit={handleSaveCompany} className="space-y-4"><div><label className="mb-1 block text-xs text-muted-foreground">Business / Shop Name</label><Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Amezing Limited" /></div><Button type="submit" disabled={savingCompany}>{savingCompany ? "Saving…" : "Save Business Details"}</Button></form></CardContent></Card>
+          <Card><CardHeader><CardTitle>Boss WhatsApp Notifications</CardTitle></CardHeader><CardContent><form onSubmit={handleSaveWhatsApp} className="space-y-4"><div><label className="mb-1 block text-xs text-muted-foreground" htmlFor="owner-whatsapp-phone">Boss WhatsApp number</label><Input id="owner-whatsapp-phone" type="tel" inputMode="tel" autoComplete="tel" value={ownerWhatsAppPhone} onChange={(e) => setOwnerWhatsAppPhone(e.target.value)} placeholder="e.g. 08012345678 or +2348012345678" /><p className="mt-2 text-xs leading-5 text-muted-foreground">Used for configured sale and repair notifications. Save the number the Boss actually uses on WhatsApp. Provider credentials must also be configured for automatic notifications.</p></div><Button type="submit" disabled={savingWhatsApp}>{savingWhatsApp ? "Saving…" : "Save WhatsApp Number"}</Button></form></CardContent></Card>
           <TwoFactorAuthCard />
         </div>
 

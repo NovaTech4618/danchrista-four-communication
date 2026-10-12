@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Search as SearchIcon, Users, Smartphone, Wrench, Package, FileText, Truck, X } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
@@ -21,16 +21,39 @@ export default function SearchPage() {
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const requestId = useRef(0);
 
   useEffect(() => {
     const term = q.trim();
-    if (!term) { setResults([]); setLoading(false); setError(""); return; }
-    const timer = setTimeout(async () => {
-      setLoading(true); setError("");
-      const { data, error: searchError } = await supabase.rpc("global_search", { p_query: term, p_limit: 100 });
-      if (searchError) setError(searchError.message || "Search is unavailable right now.");
-      setResults((data ?? []) as Result[]);
+    const currentRequest = ++requestId.current;
+    if (!term) {
+      setResults([]);
       setLoading(false);
+      setError("");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResults([]);
+    const timer = setTimeout(async () => {
+      try {
+        const { data, error: searchError } = await supabase.rpc("global_search", { p_query: term, p_limit: 100 });
+        if (currentRequest !== requestId.current) return;
+        if (searchError) {
+          setResults([]);
+          setError(searchError.message || "Search is unavailable right now.");
+          return;
+        }
+        setResults((data ?? []) as Result[]);
+      } catch {
+        if (currentRequest === requestId.current) {
+          setResults([]);
+          setError("Search is unavailable right now. Check your connection and try again.");
+        }
+      } finally {
+        if (currentRequest === requestId.current) setLoading(false);
+      }
     }, 220);
     return () => clearTimeout(timer);
   }, [q]);

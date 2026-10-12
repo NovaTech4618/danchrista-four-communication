@@ -10,7 +10,7 @@ export const settingsService = {
 
     return await supabase
       .from("profiles")
-      .select("id, full_name, role, company_id, companies(id, name, logo_url, slug, showcase_name, showcase_enabled, showcase_description, showcase_phone, showcase_address, showcase_services)")
+      .select("id, full_name, role, company_id, companies(id, name, logo_url, owner_whatsapp_phone, slug, showcase_name, showcase_enabled, showcase_description, showcase_phone, showcase_address, showcase_services)")
       .eq("id", session.user.id)
       .single();
   },
@@ -26,6 +26,13 @@ export const settingsService = {
     return await supabase
       .from("companies")
       .update({ name })
+      .eq("id", companyId);
+  },
+
+  async updateOwnerWhatsAppPhone(companyId: string, phone: string | null) {
+    return await supabase
+      .from("companies")
+      .update({ owner_whatsapp_phone: phone })
       .eq("id", companyId);
   },
 
