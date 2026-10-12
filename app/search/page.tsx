@@ -32,6 +32,19 @@ type Result = { id: string; group: "engineers" | "parts" | "activity"; title: st
 
 const money = (value: number) => "₦" + Number(value || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 });
 
+const ANDROID_BRANDS = ["itel", "Infinix", "Tecno", "Redmi", "Huawei", "Oppo", "Vivo", "Gionee", "Nokia"];
+const PHONE_PARTS: Record<string, string[]> = {
+  iPhone: ["Charging Flex", "Earpiece Flex", "Back Glass", "Home Button", "Screen Guard"],
+  Samsung: ["Down Board", "Power Flex", "Screen Guard"],
+  ...Object.fromEntries(ANDROID_BRANDS.map((brand) => [brand, ["Down Board", "Power Flex"]])),
+};
+
+function isPhonePart(part: PhonePart) {
+  if (part.category !== "Phone Parts" || !part.brand) return false;
+  return Boolean(PHONE_PARTS[part.brand]?.includes(part.subcategory || ""));
+}
+
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [engineers, setEngineers] = useState<Engineer[]>([]);
@@ -90,17 +103,15 @@ export default function SearchPage() {
         title: engineer.name,
         subtitle: [engineer.phone, engineer.business_name, engineer.status].filter(Boolean).join(" · "),
         href: "/engineers?search=" + encodeURIComponent(engineer.name) + "&engineer_id=" + encodeURIComponent(engineer.id),
-        searchText: [engineer.name, engineer.phone, engineer.business_name].filter(Boolean).join(" "),
       }));
     const partResults: Result[] = parts
-      .filter((part) => [part.item_name, part.brand, part.subcategory, part.compatible_models, part.sku].filter(Boolean).join(" ").toLowerCase().includes(term))
+      .filter((part) => isPhonePart(part) && [part.item_name, part.brand, part.subcategory, part.compatible_models, part.sku].filter(Boolean).join(" ").toLowerCase().includes(term))
       .map((part) => ({
         id: part.id,
         group: "parts",
         title: part.item_name,
         subtitle: [part.brand, part.subcategory, part.compatible_models, "Available: " + Number(part.quantity || 0)].filter(Boolean).join(" · "),
         href: "/inventory?search=" + encodeURIComponent(part.sku || part.item_name),
-        searchText: [part.item_name, part.brand, part.subcategory, part.compatible_models, part.sku].filter(Boolean).join(" "),
       }));
     const activityResults: Result[] = activity
       .filter((item) => {
@@ -117,7 +128,6 @@ export default function SearchPage() {
           title: engineerName + " — " + item.description,
           subtitle: date + " · " + item.transaction_type.replace(/_/g, " ") + " · " + amount,
           href: "/engineers?search=" + encodeURIComponent(engineerName) + "&engineer_id=" + encodeURIComponent(item.engineer_id),
-          searchText: [engineerName, item.description, item.transaction_type, item.notes].filter(Boolean).join(" "),
         };
       });
     return [...engineerResults, ...partResults, ...activityResults].slice(0, 100);
