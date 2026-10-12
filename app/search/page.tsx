@@ -35,6 +35,7 @@ export default function SearchPage() {
 
     setLoading(true);
     setError("");
+    setResults([]);
     const timer = setTimeout(async () => {
       try {
         const { data, error: searchError } = await supabase.rpc("global_search", { p_query: term, p_limit: 100 });
