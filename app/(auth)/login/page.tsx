@@ -40,10 +40,10 @@ export default function LoginPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
     const { data: profile } = await supabase.from("profiles").select("company_id, is_active").eq("id", user.id).maybeSingle();
-    if (profile?.company_id && profile.is_active !== false) { setLoading(false); router.replace("/dashboard"); return; }
+    if (profile?.company_id && profile.is_active !== false) { setLoading(false); router.replace("/workspace"); return; }
     const { data: joinedCompanyId, error: inviteError } = await supabase.rpc("accept_staff_invitation");
     setLoading(false);
-    if (!inviteError && joinedCompanyId) { toast.success("Welcome to the Amezing Limited team!"); router.replace("/dashboard"); return; }
+    if (!inviteError && joinedCompanyId) { toast.success("Welcome to the Amezing Limited team!"); router.replace("/workspace"); return; }
     await supabase.auth.signOut();
     setAuthError("This email does not have a valid Amezing Limited staff invitation. Ask the Amezing Limited owner to add you first.");
   }
