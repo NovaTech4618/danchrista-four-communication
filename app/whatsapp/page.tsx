@@ -172,7 +172,7 @@ export default function WhatsAppCenterPage() {
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
     return [...rows]
-      .filter((engineer) => engineer.status === "active" || !term)
+      .filter((engineer) => engineer.status === "active" || Boolean(term))
       .filter((engineer) => !term || [engineer.name, engineer.phone, engineer.business_name, engineer.address].filter(Boolean).join(" ").toLowerCase().includes(term))
       .sort((a, b) => Number((b.balance ?? 0) > 0) - Number((a.balance ?? 0) > 0) || a.name.localeCompare(b.name));
   }, [rows, query]);
@@ -271,7 +271,7 @@ export default function WhatsAppCenterPage() {
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 p-5">
               <h2 className="font-semibold text-slate-950">Engineers</h2>
-              <p className="mt-1 text-xs text-slate-500">Active engineers are shown first. Engineers with a verified positive balance are prioritised.</p>
+              <p className="mt-1 text-xs text-slate-500">Active engineers are shown by default. Search can also find inactive engineers; verified positive balances are prioritised.</p>
               <div className="relative mt-4"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search engineer, phone or business" aria-label="Search engineers" className="h-10 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none focus:border-teal-500" /></div>
             </div>
             <div className="max-h-[560px] overflow-y-auto p-2">
