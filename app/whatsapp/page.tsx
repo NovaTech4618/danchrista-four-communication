@@ -233,6 +233,10 @@ export default function WhatsAppCenterPage() {
       toast.error("A payment reminder requires a verified positive engineer balance.");
       return;
     }
+    if (template === "statement" && (balanceUnavailable || selected.balance == null)) {
+      toast.error("An account statement requires a verified engineer balance.");
+      return;
+    }
     if ((template === "statement" || template === "parts") && (detailLoading || Boolean(detailError))) {
       toast.error("Refresh and verify the selected engineer's records before sharing.");
       return;
