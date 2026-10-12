@@ -28,7 +28,7 @@ type AccountActivity = {
   credit: number;
   notes: string | null;
 };
-type Result = { id: string; group: "engineers" | "parts" | "activity"; title: string; subtitle: string; href: string; searchText: string };
+type Result = { id: string; group: "engineers" | "parts" | "activity"; title: string; subtitle: string; href: string };
 
 const money = (value: number) => "₦" + Number(value || 0).toLocaleString("en-NG", { maximumFractionDigits: 2 });
 
