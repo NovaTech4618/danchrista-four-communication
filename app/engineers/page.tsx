@@ -402,8 +402,8 @@ export default function EngineersPage() {
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-950">Engineers</h1>
             <p className="mt-1 text-sm text-slate-500">Give out parts, record returns and track what each engineer owes.</p>
           </div>
-          <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm hover:border-teal-200 hover:text-teal-700">
-            <ArrowLeft className="size-4" /> Back to dashboard
+          <Link href="/workspace" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm hover:border-teal-200 hover:text-teal-700">
+            <ArrowLeft className="size-4" /> Back to Home
           </Link>
         </header>
 
