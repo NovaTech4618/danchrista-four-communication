@@ -56,7 +56,7 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!companyId) return toast.error("Business record is not available.");
     const phone = ownerWhatsAppPhone.trim();
-    if (phone && phone.replace(/\\D/g, "").length < 10) return toast.error("Enter a valid WhatsApp phone number, including the country code if needed.");
+    if (phone && phone.replace(/\D/g, "").length < 10) return toast.error("Enter a valid WhatsApp phone number, including the country code if needed.");
     setSavingWhatsApp(true);
     const { error } = await settingsService.updateOwnerWhatsAppPhone(companyId, phone || null);
     setSavingWhatsApp(false);
