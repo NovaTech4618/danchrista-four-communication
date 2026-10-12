@@ -81,6 +81,11 @@ export default function InventoryPage() {
       .finally(() => setLoading(false));
   }, [refreshKey]);
 
+  useEffect(() => {
+    const searchTerm = new URLSearchParams(window.location.search).get("search");
+    if (searchTerm) setQuery(searchTerm);
+  }, []);
+
   const phoneParts = useMemo(() => items.filter(isPhonePart), [items]);
   const openingStockNeeded = phoneParts.length > 0 && phoneParts.every((item) => Number(item.quantity) === 0);
   const low = items.filter((item) => stockState(item) === "low");
