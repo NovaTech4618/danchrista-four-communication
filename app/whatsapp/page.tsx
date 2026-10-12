@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, ClipboardList, MessageCircle, RefreshCw, Search, Send, UserRound, Wallet } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ClipboardList, MessageCircle, RefreshCw, Search, Send, UserRound } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import { engineerService } from "@/services/engineerService";
-import { customerGeneralMessage, openWhatsApp } from "@/lib/whatsapp";
+import { openWhatsApp } from "@/lib/whatsapp";
 import type { Engineer, EngineerBalance, EngineerTransaction } from "@/types/engineer";
 import { toast } from "sonner";
 
