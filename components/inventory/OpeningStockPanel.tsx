@@ -37,7 +37,7 @@ export default function OpeningStockPanel({ items, onSaved }: { items: Inventory
   }
 
   return (
-    <section className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
+    <section id="opening-stock-setup" className="rounded-2xl border border-[#dfe6df] bg-white p-5 shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
       <div className="flex flex-col gap-1">
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Inventory setup</p>
         <h2 className="font-heading text-lg font-bold text-[#182a28]">Opening stock</h2>

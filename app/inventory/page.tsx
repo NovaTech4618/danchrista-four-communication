@@ -82,6 +82,7 @@ export default function InventoryPage() {
   }, [refreshKey]);
 
   const phoneParts = useMemo(() => items.filter(isPhonePart), [items]);
+  const openingStockNeeded = phoneParts.length > 0 && phoneParts.every((item) => Number(item.quantity) === 0);
   const low = items.filter((item) => stockState(item) === "low");
   const stockValue = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.cost_price || 0), 0);
 
@@ -144,6 +145,7 @@ export default function InventoryPage() {
 
         {loadError && <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"><p className="font-bold">Phone parts could not be loaded</p><p className="mt-1 break-words">{loadError}</p><button type="button" onClick={refresh} className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800">Retry</button></section>}
         {loading && <p role="status" className="rounded-xl border border-[#dfe6df] bg-white px-4 py-3 text-sm text-[#74837e]">Loading phone parts…</p>}
+        {!loading && !loadError && openingStockNeeded && <section role="status" className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-950"><p className="font-bold">Opening stock has not been recorded</p><p className="mt-1 leading-6">The database currently shows 0 available for every phone part. This may mean the physical opening count has not been entered; it does not prove the shop has no parts. Do not issue parts or enter guessed quantities. Count the real stock first, then establish each item’s opening balance below.</p><a href="#opening-stock-setup" className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white hover:bg-amber-800">Go to opening stock setup</a></section>}
         <section className="rounded-3xl border border-[#dfe6df] bg-[#f8faf8] p-3 sm:p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
