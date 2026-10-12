@@ -18,7 +18,7 @@ const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { mini
 
 const templates: { id: Template; label: string; description: string }[] = [
   { id: "balance", label: "Payment reminder", description: "Remind a customer about an outstanding balance." },
-  { id: "ready", label: "Repair ready", description: "Let a customer know their device is ready for pickup." },
+  { id: "ready", label: "Repair ready", description: "Use only after confirming the repair is marked Completed." },
   { id: "payment", label: "Payment received", description: "Confirm that a payment has been received." },
   { id: "general", label: "General message", description: "Start a normal conversation with a customer." },
 ];
@@ -99,6 +99,8 @@ export default function WhatsAppCenterPage() {
   function send() {
     if (!selected) { toast.error("Select a customer first."); return; }
     if (!selected.phone) { toast.error("This customer has no phone number."); return; }
+    if (template === "balance" && balanceUnavailable) { toast.error("Customer balance is unavailable. Refresh and verify the balance before sending a payment reminder."); return; }
+    if (template === "balance" && Number(selected.balance) <= 0) { toast.error("This customer has no verified outstanding balance. Choose another message template."); return; }
     if (!message.trim()) { toast.error("Write a message first."); return; }
     if (openWhatsApp(selected.phone, message.trim())) toast.success(`WhatsApp opened for ${selected.full_name}.`);
     else toast.error("Unable to open WhatsApp.");
