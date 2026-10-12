@@ -179,6 +179,14 @@ export default function EngineersPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchTerm = params.get("search");
+    const engineerId = params.get("engineer_id");
+    if (searchTerm) setEngineerSearch(searchTerm);
+    if (engineerId) void selectEngineer(engineerId);
+  }, []);
+
   function resetAction() {
     setAction(null);
     setInventoryId("");
