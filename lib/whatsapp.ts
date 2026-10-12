@@ -51,9 +51,9 @@ export async function notifyOwnerOnWhatsApp(type: "sale" | "repair", id: string)
 
 export function customerBalanceMessage(name: string, balance: number) {
   const amount = `₦${Number(balance || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
-  return `Hello ${name}, this is a friendly reminder from our workshop. Your current outstanding balance is ${amount}. Please let us know when you plan to settle it. Thank you.`;
+  return `Hello ${name}, this is a friendly reminder from Amezing Limited. Your current outstanding balance is ${amount}. Please let us know when you plan to settle it. Thank you.`;
 }
 
 export function customerGeneralMessage(name: string) {
-  return `Hello ${name}, this is a message from our workshop. We wanted to get in touch regarding your account/service. Please let us know how we can assist you. Thank you.`;
+  return `Hello ${name}, this is a message from Amezing Limited. We wanted to get in touch regarding your account or service. Please let us know how we can assist you. Thank you.`;
 }
