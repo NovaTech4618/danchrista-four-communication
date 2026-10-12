@@ -115,7 +115,7 @@ export default function SettingsPage() {
           <TwoFactorAuthCard />
         </div>
 
-        <section><h2 className="font-heading text-lg font-bold text-slate-950">Shop tools</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><SettingsLink href="/whatsapp" icon={MessageCircle} title="WhatsApp" text="Open customer communication tools." /><SettingsLink href="/staff" icon={Building2} title="Staff" text="Manage your team and see exactly what each person can access." /><SettingsLink href="/help" icon={CircleHelp} title="Help & Support" text="Guides, quick links and system status." /></div></section>
+        <section><h2 className="font-heading text-lg font-bold text-slate-950">Shop tools</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><SettingsLink href="/whatsapp" icon={MessageCircle} title="WhatsApp" text="Message engineers and share account or parts statements." /><SettingsLink href="/staff" icon={Building2} title="Staff" text="Manage your team and see exactly what each person can access." /><SettingsLink href="/help" icon={CircleHelp} title="Help & Support" text="Guides, quick links and system status." /></div></section>
 
         <Link href="/audit" className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm hover:border-slate-300"><ShieldCheck className="size-5 text-slate-500" /><span><strong className="text-slate-900">Audit Log</strong><span className="ml-2 text-slate-500">Owner security history stays separate from ordinary business activity.</span></span></Link>
       </div>
