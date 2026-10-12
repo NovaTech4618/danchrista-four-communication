@@ -26,8 +26,8 @@ const templates: { id: Template; label: string; description: string }[] = [
 function messageFor(template: Template, customer: WhatsAppCustomer) {
   switch (template) {
     case "balance": return customerBalanceMessage(customer.full_name, customer.balance);
-    case "ready": return `Hello ${customer.full_name}, good news! Your device repair is ready for pickup at our workshop. Please let us know when you will be coming. Thank you.`;
-    case "payment": return `Hello ${customer.full_name}, we confirm that your payment has been received. Thank you for choosing our workshop.`;
+    case "ready": return `Hello ${customer.full_name}, good news from Amezing Limited! Your device repair is ready for pickup. Please contact us to confirm a convenient collection time. Thank you.`;
+    case "payment": return `Hello ${customer.full_name}, Amezing Limited confirms that your payment has been received. Thank you.`;
     default: return customerGeneralMessage(customer.full_name);
   }
 }
@@ -39,34 +39,45 @@ export default function WhatsAppCenterPage() {
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [balanceUnavailable, setBalanceUnavailable] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   async function load() {
     setLoading(true);
-    const [customersResult, balancesResult] = await Promise.all([
-      customerService.getCustomers(),
-      businessOperationsService.getCustomerBalances(),
-    ]);
+    setLoadError("");
+    try {
+      const [customersResult, balancesResult] = await Promise.all([
+        customerService.getCustomers(),
+        businessOperationsService.getCustomerBalances(),
+      ]);
 
-    if (customersResult.error) {
-      toast.error(customersResult.error.message || "Unable to load customers.");
+      if (customersResult.error) {
+        setRows([]);
+        setLoadError("Customer records could not be loaded. Check your connection and retry.");
+        toast.error(customersResult.error.message || "Unable to load customers.");
+        return;
+      }
+
+      setBalanceUnavailable(Boolean(balancesResult.error));
+      if (balancesResult.error) toast.error("Customer balances could not be verified. The outstanding total is hidden until it can be loaded.");
+
+      const balances = balancesResult.error ? {} : ((balancesResult.data ?? []) as Balance[]).reduce<Record<string, number>>((map, row) => {
+        map[row.customer_id] = Number(row.balance || 0);
+        return map;
+      }, {});
+
+      const customers = (customersResult.data ?? []) as Customer[];
+      setRows(customers.map((customer) => ({
+        ...customer,
+        balance: balances[customer.id] ?? 0,
+      })));
+    } catch {
+      setLoadError("Could not connect to customer records. Check your connection and retry.");
       setRows([]);
+      toast.error("Unable to load WhatsApp customer records.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (balancesResult.error) toast.error(balancesResult.error.message || "Unable to load customer balances.");
-
-    const balances = ((balancesResult.data ?? []) as Balance[]).reduce<Record<string, number>>((map, row) => {
-      map[row.customer_id] = Number(row.balance || 0);
-      return map;
-    }, {});
-
-    const customers = (customersResult.data ?? []) as Customer[];
-    setRows(customers.map((customer) => ({
-      ...customer,
-      balance: balances[customer.id] ?? 0,
-    })));
-    setLoading(false);
   }
 
   useEffect(() => { void load(); }, []);
@@ -99,7 +110,10 @@ export default function WhatsAppCenterPage() {
       <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"><RefreshCw className="size-4" />{loading ? "Refreshing…" : "Refresh"}</button>
     </header>
 
-    <div className="grid gap-4 sm:grid-cols-3"><Stat label="Total customers" value={String(rows.length)} /><Stat label="Outstanding" value={money(rows.reduce((sum, row) => sum + Math.max(0, Number(row.balance)), 0))} /><Stat label="Ready to message" value={String(rows.filter((row) => Boolean(row.phone)).length)} /></div>
+    <div className="grid gap-4 sm:grid-cols-3"><Stat label="Total customers" value={String(rows.length)} /><Stat label="Outstanding" value={balanceUnavailable ? "Unavailable" : money(rows.reduce((sum, row) => sum + Math.max(0, Number(row.balance)), 0))} /><Stat label="Ready to message" value={String(rows.filter((row) => Boolean(row.phone)).length)} /></div>
+
+    {loadError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p className="font-semibold">Customer list unavailable</p><p className="mt-1">{loadError}</p><button type="button" onClick={() => void load()} className="mt-3 rounded-lg border border-red-200 bg-white px-3 py-2 font-semibold hover:bg-red-100">Retry</button></div>}
+    {balanceUnavailable && !loadError && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Customer names are available, but balances could not be verified. Payment reminders may contain an incorrect balance until the balance service recovers. Refresh before using a payment reminder.</div>}
 
     <div className="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -115,7 +129,7 @@ export default function WhatsAppCenterPage() {
           <div><label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Message template</label><div className="grid gap-2 sm:grid-cols-2">{templates.map((item) => <button key={item.id} type="button" onClick={() => setTemplate(item.id)} className={`rounded-xl border p-3 text-left ${template === item.id ? "border-teal-300 bg-teal-50" : "border-slate-200 hover:bg-slate-50"}`}><p className="text-sm font-semibold text-slate-900">{item.label}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.description}</p></button>)}</div></div>
           <div><label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500" htmlFor="whatsapp-message">Message</label><textarea id="whatsapp-message" value={message} onChange={(e) => setMessage(e.target.value)} disabled={!selected} rows={8} placeholder="Your message will appear here…" className="w-full resize-none rounded-xl border border-slate-200 p-3 text-sm leading-6 outline-none focus:border-teal-500 disabled:bg-slate-50" /></div>
           {selected && <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-500"><span className="font-semibold text-slate-700">Phone:</span> {selected.phone || "No phone number"}{Number(selected.balance) > 0 && <><span className="mx-2">•</span><span className="font-semibold text-amber-700">Outstanding: {money(selected.balance)}</span></>}</div>}
-          <button type="button" onClick={send} disabled={!selected || !selected.phone} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"><Send className="size-4" />Open WhatsApp & Send</button>
+          <button type="button" onClick={send} disabled={!selected || !selected.phone} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"><Send className="size-4" />Review message in WhatsApp</button>
           <p className="flex items-start gap-2 text-[11px] leading-5 text-slate-400"><CheckCircle2 className="mt-0.5 size-3.5 shrink-0" />WhatsApp opens with the message pre-filled. You still review and send it from WhatsApp.</p>
         </div>
       </section>
