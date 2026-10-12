@@ -51,6 +51,8 @@ export default function InventoryPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [myRole, setMyRole] = useState<StaffRole | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loadError, setLoadError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [section, setSection] = useState<Section>("Phone Parts");
   const [family, setFamily] = useState<string | null>(null);
@@ -63,9 +65,20 @@ export default function InventoryPage() {
 
   useEffect(() => {
     void staffService.getMyRole().then(({ data }) => setMyRole(data));
-    void inventoryService.getInventory().then(({ data, error }) => {
-      if (!error) setItems((data || []) as InventoryItem[]);
-    });
+    setLoading(true);
+    setLoadError("");
+    void inventoryService.getInventory()
+      .then(({ data, error }) => {
+        if (error) {
+          setLoadError(error.message || "Phone parts could not be loaded. Refresh and try again.");
+          return;
+        }
+        setItems((data || []) as InventoryItem[]);
+      })
+      .catch((error: unknown) => {
+        setLoadError(error instanceof Error ? error.message : "Phone parts could not be loaded. Refresh and try again.");
+      })
+      .finally(() => setLoading(false));
   }, [refreshKey]);
 
   const phoneParts = useMemo(() => items.filter(isPhonePart), [items]);
@@ -129,6 +142,8 @@ export default function InventoryPage() {
           </div>
         </header>
 
+        {loadError && <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"><p className="font-bold">Phone parts could not be loaded</p><p className="mt-1 break-words">{loadError}</p><button type="button" onClick={refresh} className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800">Retry</button></section>}
+        {loading && <p role="status" className="rounded-xl border border-[#dfe6df] bg-white px-4 py-3 text-sm text-[#74837e]">Loading phone parts…</p>}
         <section className="rounded-3xl border border-[#dfe6df] bg-[#f8faf8] p-3 sm:p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">

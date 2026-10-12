@@ -69,17 +69,22 @@ export default function PartsCollectionPage() {
   async function load() {
     setLoading(true);
     setLoadError("");
-    const [movementResult, outstandingResult, inventoryResult] = await Promise.all([
-      engineerService.getTodayPartMovement(date),
-      engineerService.getOutstandingPartBalances(),
-      inventoryService.getInventory(),
-    ]);
-    const error = movementResult.error ?? outstandingResult.error ?? inventoryResult.error;
-    if (error) setLoadError(error.message || "Some parts records could not be loaded. Refresh and try again.");
-    setMovements((movementResult.data || []) as Movement[]);
-    setOutstanding((outstandingResult.data || []) as OutstandingPart[]);
-    setItems((inventoryResult.data || []) as InventoryItem[]);
-    setLoading(false);
+    try {
+      const [movementResult, outstandingResult, inventoryResult] = await Promise.all([
+        engineerService.getTodayPartMovement(date),
+        engineerService.getOutstandingPartBalances(),
+        inventoryService.getInventory(),
+      ]);
+      const error = movementResult.error ?? outstandingResult.error ?? inventoryResult.error;
+      if (error) setLoadError(error.message || "Some parts records could not be loaded. Refresh and try again.");
+      setMovements((movementResult.data || []) as Movement[]);
+      setOutstanding((outstandingResult.data || []) as OutstandingPart[]);
+      setItems((inventoryResult.data || []) as InventoryItem[]);
+    } catch (error: unknown) {
+      setLoadError(error instanceof Error ? error.message : "Parts records could not be loaded. Refresh and try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { void load(); }, [date]);
@@ -148,6 +153,7 @@ export default function PartsCollectionPage() {
           </div>
         </header>
 
+        {loadError && <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"><p className="font-bold">Some parts records could not be loaded</p><p className="mt-1 break-words">{loadError}</p><button type="button" onClick={() => void load()} className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800">Retry</button></section>}
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <Stat label="Collected" value={qty(collected)} icon={ArrowDownToLine} />
           <Stat label="Used" value={qty(used)} icon={CheckCircle2} />
