@@ -17,6 +17,7 @@ const securityHeaders = [
 ];
 
 const protectedRoutes = [
+  "workspace",
   "dashboard",
   "activity",
   "alerts",
