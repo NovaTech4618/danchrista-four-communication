@@ -29,7 +29,14 @@ export const settingsService = {
       .eq("id", companyId);
   },
 
-  async updateOwnerWhatsAppPhone(companyId: string, phone: string | null) {\n    return await supabase\n      .from("companies")\n      .update({ owner_whatsapp_phone: phone })\n      .eq("id", companyId);\n  },\n\n  async updateCompanyLogo(companyId: string, logoUrl: string | null) {
+  async updateOwnerWhatsAppPhone(companyId: string, phone: string | null) {
+    return await supabase
+      .from("companies")
+      .update({ owner_whatsapp_phone: phone })
+      .eq("id", companyId);
+  },
+
+  async updateCompanyLogo(companyId: string, logoUrl: string | null) {
     return await supabase
       .from("companies")
       .update({ logo_url: logoUrl })
