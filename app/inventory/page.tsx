@@ -136,6 +136,7 @@ export default function InventoryPage() {
             <div className="flex flex-wrap gap-2">
               <Link href="/inventory/stockroom" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-bold text-[#285c4d] transition hover:border-[#1d6a54]">Stockroom</Link>
               {isOwner && <Link href="/inventory/movements" className="inline-flex min-h-10 items-center rounded-xl border border-[#dfe6df] bg-white px-4 text-sm font-semibold text-[#285c4d] transition hover:border-[#1d6a54]">Stock history</Link>}
+              {isOwner && <Link href="/inventory/opening-stock-import" className="inline-flex min-h-10 items-center rounded-xl border border-amber-300 bg-amber-50 px-4 text-sm font-bold text-amber-900 transition hover:bg-amber-100">Opening stock CSV</Link>}
               {isOwner && <Link href="/inventory/import" className="inline-flex min-h-10 items-center rounded-xl bg-[#1d6a54] px-4 text-sm font-bold text-white transition hover:bg-[#175845]">Import</Link>}
             </div>
           </div>
