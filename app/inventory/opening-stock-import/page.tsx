@@ -143,7 +143,7 @@ export default function OpeningStockImportPage() {
         "",
         Number(item.cost_price || 0) > 0 ? item.cost_price : "",
         selling > 0 ? item.selling_price : "",
-        selling > 0 ? item.minimum_selling_price : "",
+        Number(item.minimum_selling_price || 0) > 0 && selling > 0 ? item.minimum_selling_price : "",
         item.minimum_stock ?? 5,
       ]);
     });
