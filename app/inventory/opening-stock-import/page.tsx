@@ -165,7 +165,7 @@ export default function OpeningStockImportPage() {
     setSummary("");
     setIssues([]);
 
-    let parsed: StockRow[] = [];
+    const parsed: StockRow[] = [];
     let skipped = 0;
     const validationIssues: ImportIssue[] = [];
 
