@@ -124,20 +124,21 @@ export const engineerService = {
   },
 
   async getOutstandingPartBalances() {
-    const [out, returned, used] = await Promise.all([
+    const [out, returned, used, paid] = await Promise.all([
       supabase.from("engineer_parts_out").select("engineer_id,inventory_id,quantity,unit_price,created_at"),
       supabase.from("engineer_parts_in").select("engineer_id,inventory_id,quantity,created_at"),
       supabase.from("engineer_parts_used").select("engineer_id,inventory_id,quantity,created_at"),
+      supabase.from("engineer_parts_paid").select("engineer_id,inventory_id,quantity,created_at"),
     ]);
-    const error = out.error ?? returned.error ?? used.error ?? null;
+    const error = out.error ?? returned.error ?? used.error ?? paid.error ?? null;
     if (error) return { data: [], error };
-    type Balance = { engineer_id: string; inventory_id: string; issued: number; returned: number; used: number };
+    type Balance = { engineer_id: string; inventory_id: string; issued: number; returned: number; used: number; paid: number };
     const balances = new Map<string, Balance>();
     const get = (engineer_id: string, inventory_id: string) => {
       const key = engineer_id + ":" + inventory_id;
       let row = balances.get(key);
       if (!row) {
-        row = { engineer_id, inventory_id, issued: 0, returned: 0, used: 0 };
+        row = { engineer_id, inventory_id, issued: 0, returned: 0, used: 0, paid: 0 };
         balances.set(key, row);
       }
       return row;
@@ -145,8 +146,9 @@ export const engineerService = {
     (out.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).issued += Number(row.quantity || 0); });
     (returned.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).returned += Number(row.quantity || 0); });
     (used.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).used += Number(row.quantity || 0); });
+    (paid.data ?? []).forEach((row) => { get(row.engineer_id, row.inventory_id).paid += Number(row.quantity || 0); });
     const open = [...balances.values()]
-      .map((row) => ({ ...row, quantity: Math.max(0, row.issued - row.returned - row.used) }))
+      .map((row) => ({ ...row, quantity: Math.max(0, row.issued - row.returned - row.used - row.paid) }))
       .filter((row) => row.quantity > 0);
     const engineerIds = [...new Set(open.map((row) => row.engineer_id))];
     const inventoryIds = [...new Set(open.map((row) => row.inventory_id))];
@@ -161,7 +163,6 @@ export const engineerService = {
       error: engineersRes.error ?? inventoryRes.error ?? null,
     };
   },
-
   async getDailyCollectionSummary(date?: string) {
     return await supabase.rpc("get_engineer_daily_collection_summary", { p_date: date ?? shopDateString() });
   },

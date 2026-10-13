@@ -30,6 +30,7 @@ type OutstandingPart = {
   issued: number;
   returned: number;
   used: number;
+  paid: number;
   item?: { id: string; item_name: string; brand?: string | null; compatible_models?: string | null; subcategory?: string | null } | null;
 };
 
@@ -197,7 +198,7 @@ export default function PartsCollectionPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Open items</p>
               <h2 className="mt-1 text-xl font-bold text-[#182a28]">Parts still with engineers</h2>
-              <p className="mt-1 text-sm text-[#74837e]">This list includes parts collected on earlier days too. Record each part as used or returned when its status is known.</p>
+              <p className="mt-1 text-sm text-[#74837e]">This list includes older collections too. Used, returned and paid quantities are closed out and no longer count as open.</p>
             </div>
             <span className="rounded-full bg-[#f6f1e9] px-3 py-1.5 text-xs font-bold text-[#285c4d]">{outstanding.length} engineer/part balances</span>
           </div>
@@ -214,13 +215,13 @@ export default function PartsCollectionPage() {
           {loadError && <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{loadError}</div>}
           <div className="mt-4 overflow-hidden rounded-2xl border border-[#e5ebe7]">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-sm">
+              <table className="w-full min-w-[820px] text-sm">
                 <thead className="bg-[#f8faf8] text-[10px] font-bold uppercase tracking-[0.14em] text-[#74837e]">
-                  <tr><th className="px-4 py-3 text-left">Engineer</th><th className="px-4 py-3 text-left">Part</th><th className="px-4 py-3 text-left">Collected</th><th className="px-4 py-3 text-left">Used</th><th className="px-4 py-3 text-left">Returned</th><th className="px-4 py-3 text-left">Still out</th><th className="px-4 py-3 text-right">Update</th></tr>
+                  <tr><th className="px-4 py-3 text-left">Engineer</th><th className="px-4 py-3 text-left">Part</th><th className="px-4 py-3 text-left">Collected</th><th className="px-4 py-3 text-left">Used</th><th className="px-4 py-3 text-left">Returned</th><th className="px-4 py-3 text-left">Paid</th><th className="px-4 py-3 text-left">Still open</th><th className="px-4 py-3 text-right">Update</th></tr>
                 </thead>
                 <tbody>
-                  {loading ? <tr><td colSpan={7} className="px-4 py-10 text-center text-[#87958f]">Loading outstanding parts...</td></tr> :
-                    outstanding.length === 0 ? <tr><td colSpan={7} className="px-4 py-10 text-center text-[#87958f]">No outstanding parts found. Once a part is given out, it will appear here until used or returned.</td></tr> :
+                  {loading ? <tr><td colSpan={8} className="px-4 py-10 text-center text-[#87958f]">Loading outstanding parts...</td></tr> :
+                    outstanding.length === 0 ? <tr><td colSpan={8} className="px-4 py-10 text-center text-[#87958f]">No outstanding parts found. Once a part is given out, it will appear here until used or returned.</td></tr> :
                     outstanding.filter((row) => {
                       const q = query.trim().toLowerCase();
                       const text = [row.engineer_name, row.item?.item_name, row.item?.brand, row.item?.compatible_models, row.item?.subcategory].filter(Boolean).join(" ").toLowerCase();
@@ -229,7 +230,7 @@ export default function PartsCollectionPage() {
                       <tr key={row.engineer_id + row.inventory_id} className="border-t border-[#edf1ee]">
                         <td className="px-4 py-3 font-semibold text-[#182a28]">{row.engineer_name}</td>
                         <td className="px-4 py-3"><p className="font-semibold text-[#182a28]">{row.item?.item_name || "Unknown part"}</p><p className="text-xs text-[#87958f]">{[row.item?.brand, row.item?.compatible_models, row.item?.subcategory].filter(Boolean).join(" · ")}</p></td>
-                        <td className="px-4 py-3">{row.issued}</td><td className="px-4 py-3">{row.used}</td><td className="px-4 py-3">{row.returned}</td><td className="px-4 py-3 font-bold text-amber-700">{row.quantity}</td>
+                        <td className="px-4 py-3">{row.issued}</td><td className="px-4 py-3">{row.used}</td><td className="px-4 py-3">{row.returned}</td><td className="px-4 py-3">{row.paid}</td><td className="px-4 py-3 font-bold text-amber-700">{row.quantity}</td>
                         <td className="px-4 py-3 text-right"><div className="flex justify-end gap-2"><button type="button" onClick={() => { setAction({ movement: row, type: "used" }); setActionQty(String(row.quantity)); }} className="rounded-lg border border-emerald-200 bg-white px-2.5 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Used</button><button type="button" onClick={() => { setAction({ movement: row, type: "returned" }); setActionQty(String(row.quantity)); }} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">Return</button></div></td>
                       </tr>
                     ))}
