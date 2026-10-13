@@ -12,21 +12,21 @@ import { hasPermission } from "@/lib/permissions";
 
 const tiles = [
   { title: "Daily Parts Collection", href: "/parts-collection", icon: ArrowLeftRight, permission: "inventory" as const },
-  { title: "Phone Parts", href: "/inventory", icon: Package, permission: "inventory" as const },
   { title: "Engineers", href: "/engineers", icon: UserRound, permission: "engineers" as const },
+  { title: "Daily Report", href: "/reports", icon: BarChart3, permission: "profit" as const },
+  { title: "Phone Parts", href: "/inventory", icon: Package, permission: "inventory" as const },
   { title: "Owed & Owing", href: "/owed-owing", icon: HandCoins, permission: "outstanding" as const },
+  { title: "Search", href: "/search", icon: Search, permission: "search" as const },
+  { title: "WhatsApp", href: "/whatsapp", icon: MessageCircle, permission: "whatsapp" as const },
+];
+
+const moreTools = [
   { title: "Sales", href: "/sales", icon: ShoppingCart, permission: "sales" as const },
   { title: "Repairs", href: "/repairs", icon: Wrench, permission: "repairs" as const },
   { title: "Money & Accounts", href: "/accounts", icon: Landmark, permission: "profit" as const },
   { title: "Alerts", href: "/alerts", icon: BellRing, permission: "profit" as const },
-];
-
-const moreTools = [
-  { title: "Reports", href: "/reports", icon: BarChart3, permission: "profit" as const },
   { title: "Daily Closing", href: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" as const },
   { title: "Staff", href: "/staff", icon: Users, permission: "staff" as const },
-  { title: "WhatsApp", href: "/whatsapp", icon: MessageCircle, permission: "whatsapp" as const },
-  { title: "Search", href: "/search", icon: Search, permission: "search" as const },
   { title: "Settings", href: "/settings", icon: Settings, permission: "settings" as const },
 ];
 
