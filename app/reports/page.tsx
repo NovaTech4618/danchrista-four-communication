@@ -32,6 +32,7 @@ type OutstandingPart = {
   issued: number;
   returned: number;
   used: number;
+  paid: number;
   item?: PartItem | null;
 };
 type Payment = {
@@ -281,7 +282,7 @@ export default function ReportsPage() {
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-4 py-4">
             <h2 className="text-lg font-bold text-slate-950">Parts still with engineers</h2>
-            <p className="mt-1 text-sm text-slate-500">Collected quantity minus returned and used quantity, based on recorded movements.</p>
+            <p className="mt-1 text-sm text-slate-500">Collected quantity minus returned, used and paid quantities, based on recorded movements.</p>
           </div>
           {loading ? <LoadingRows /> : outstanding.length === 0 ? <Empty text={outstandingError ? "Outstanding parts could not be verified." : "No outstanding parts are recorded for engineers."} /> :
             <div className="overflow-x-auto">
