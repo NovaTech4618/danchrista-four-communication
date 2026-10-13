@@ -139,3 +139,31 @@ UNION ALL SELECT 'invalid_debt_entries',count(*) FROM public.customer_debt_ledge
 SELECT 'repair_payment_deposit_mismatch' AS check_name,count(*) AS failures
 FROM public.repairs r LEFT JOIN (SELECT repair_id,coalesce(sum(amount),0) AS paid FROM public.repair_payments GROUP BY repair_id) p ON p.repair_id=r.id
 WHERE round(coalesce(r.deposit,0),2)<>round(coalesce(p.paid,0),2);
+
+DO $$
+DECLARE
+  v_return_def text;
+  v_used_def text;
+BEGIN
+  v_return_def := regexp_replace(
+    lower(pg_get_functiondef('public.engineer_part_return(uuid,uuid,integer,text,text)'::regprocedure)),
+    '\s+', '', 'g'
+  );
+  v_used_def := regexp_replace(
+    lower(pg_get_functiondef('public.engineer_part_used(uuid,uuid,integer,text)'::regprocedure)),
+    '\s+', '', 'g'
+  );
+
+  IF position('replacement_for_return_idisnull' IN v_return_def) > 0 THEN
+    RAISE EXCEPTION 'Engineer parts regression: returns must count zero-debt replacement issues';
+  END IF;
+  IF position('replacement_for_return_idisnull' IN v_used_def) > 0 THEN
+    RAISE EXCEPTION 'Engineer parts regression: usage must count zero-debt replacement issues';
+  END IF;
+  IF position('v_outstanding_qty:=v_issued_qty-v_returned_qty-v_used_qty-v_paid_qty' IN v_return_def) = 0 THEN
+    RAISE EXCEPTION 'Engineer parts regression: returns must exclude already returned, used, and paid quantities';
+  END IF;
+  IF position('v_available:=v_out-v_returned-v_used-v_paid' IN v_used_def) = 0 THEN
+    RAISE EXCEPTION 'Engineer parts regression: usage must exclude already returned, used, and paid quantities';
+  END IF;
+END $$;

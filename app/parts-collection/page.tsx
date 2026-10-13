@@ -17,7 +17,7 @@ type Movement = {
   unit_price?: number | null;
   created_at: string;
   notes?: string | null;
-  movement: "collected" | "returned" | "used" | "paid";
+  movement: "collected" | "replacement" | "returned" | "used" | "paid";
   return_condition?: "normal" | "faulty" | null;
   item?: { id: string; item_name: string; brand?: string | null; compatible_models?: string | null; subcategory?: string | null } | null;
 };
@@ -48,7 +48,7 @@ function qty(rows: Movement[]) {
 }
 
 function movementLabel(m: Movement["movement"]) {
-  return m === "collected" ? "Collected" : m === "returned" ? "Returned" : m === "used" ? "Used" : "Paid";
+  return m === "replacement" ? "Replacement issued" : m === "collected" ? "Collected" : m === "returned" ? "Returned" : m === "used" ? "Used" : "Paid";
 }
 
 export default function PartsCollectionPage() {
@@ -106,6 +106,7 @@ export default function PartsCollectionPage() {
   }, [movements, query, engineerFilter]);
 
   const collected = movements.filter((m) => m.movement === "collected");
+  const replacements = movements.filter((m) => m.movement === "replacement");
   const returned = movements.filter((m) => m.movement === "returned");
   const used = movements.filter((m) => m.movement === "used");
   const stillOut = outstanding.reduce((sum, row) => sum + row.quantity, 0);
@@ -157,8 +158,9 @@ export default function PartsCollectionPage() {
 
         {loadError && <section role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"><p className="font-bold">Some parts records could not be loaded</p><p className="mt-1 break-words">{loadError}</p><button type="button" onClick={() => void load()} className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800">Retry</button></section>}
         {!loading && !loadError && items.length > 0 && !hasAnyAvailablePart && <section role="status" className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-950"><p className="font-bold">No parts are available to issue</p><p className="mt-1 leading-6">Every active phone-part record currently has 0 quantity, so the issue form cannot offer a part. Confirm the physical count and record opening stock before using this page. Existing movement history is left untouched.</p><a href="/inventory#opening-stock-setup" className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-amber-900 px-4 py-2 text-xs font-bold text-white hover:bg-amber-800">Open Phone Parts stock setup</a></section>}
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Stat label="Collected" value={qty(collected)} icon={ArrowDownToLine} />
+          <Stat label="Replacements" value={qty(replacements)} icon={RotateCcw} />
           <Stat label="Used" value={qty(used)} icon={CheckCircle2} />
           <Stat label="Returned" value={qty(returned)} icon={Undo2} />
           <Stat label="Still with engineers" value={stillOut} icon={RotateCcw} warn={stillOut > 0} />
@@ -267,7 +269,7 @@ export default function PartsCollectionPage() {
                       <td className="px-4 py-3 font-semibold text-[#182a28]">{m.engineer_name}</td>
                       <td className="px-4 py-3"><p className="font-semibold text-[#182a28]">{m.item?.item_name || "Unknown part"}</p><p className="text-xs text-[#87958f]">{[m.item?.brand, m.item?.compatible_models, m.item?.subcategory].filter(Boolean).join(" · ")}</p></td>
                       <td className="px-4 py-3 font-bold">{m.quantity}</td>
-                      <td className="px-4 py-3"><span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${m.movement === "collected" ? "bg-amber-50 text-amber-700" : m.movement === "used" ? "bg-emerald-50 text-emerald-700" : m.movement === "returned" ? "bg-slate-100 text-slate-700" : "bg-blue-50 text-blue-700"}`}>{movementLabel(m.movement)}</span></td>
+                      <td className="px-4 py-3"><span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${m.movement === "collected" ? "bg-amber-50 text-amber-700" : m.movement === "used" ? "bg-emerald-50 text-emerald-700" : m.movement === "returned" ? "bg-slate-100 text-slate-700" : m.movement === "replacement" ? "bg-violet-50 text-violet-700" : "bg-blue-50 text-blue-700"}`}>{movementLabel(m.movement)}</span></td>
                       <td className="px-4 py-3 text-right text-xs text-[#87958f]">{m.movement === "paid" ? "Payment only" : "See open items"}</td>
                     </tr>
                   ))}

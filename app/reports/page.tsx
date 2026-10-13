@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { engineerService } from "@/services/engineerService";
 import type { Engineer } from "@/types/engineer";
 
-type MovementType = "collected" | "returned" | "used" | "paid";
+type MovementType = "collected" | "replacement" | "returned" | "used" | "paid";
 type PartItem = { item_name: string; brand?: string | null; compatible_models?: string | null; subcategory?: string | null };
 type Movement = {
   id: string;
@@ -73,6 +73,7 @@ function nextShopDate(day: string) {
 }
 function actionLabel(movement: MovementType, condition?: "normal" | "faulty" | null) {
   if (movement === "collected") return "Given out";
+  if (movement === "replacement") return "Replacement issued";
   if (movement === "returned") return condition === "faulty" ? "Faulty return" : "Returned";
   if (movement === "used") return "Marked used";
   return "Marked paid";
@@ -148,7 +149,7 @@ export default function ReportsPage() {
 
   const engineerNameMap = useMemo(() => new Map(engineers.map((engineer) => [engineer.id, engineer.name])), [engineers]);
 
-  const totalGiven = movements.filter((item) => item.movement === "collected").reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const totalGiven = movements.filter((item) => item.movement === "collected" || item.movement === "replacement").reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const totalReturned = movements.filter((item) => item.movement === "returned").reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const totalUsed = movements.filter((item) => item.movement === "used").reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const totalStillOut = outstanding.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
@@ -166,7 +167,7 @@ export default function ReportsPage() {
     };
     movements.forEach((item) => {
       const row = get(item.engineer_id, item.engineer_name);
-      if (item.movement === "collected") row.given += Number(item.quantity || 0);
+      if (item.movement === "collected" || item.movement === "replacement") row.given += Number(item.quantity || 0);
       if (item.movement === "returned") row.returned += Number(item.quantity || 0);
       if (item.movement === "used") row.used += Number(item.quantity || 0);
     });
@@ -258,7 +259,7 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[620px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500"><tr><th className="px-4 py-3">Time</th><th className="px-4 py-3">Engineer</th><th className="px-4 py-3">Part</th><th className="px-4 py-3">Action</th><th className="px-4 py-3 text-right">Qty</th></tr></thead>
-                <tbody>{currentActivity.slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).map((item) => <tr key={item.id} className="border-t border-slate-100"><td className="whitespace-nowrap px-4 py-3 text-slate-500">{timeLabel(item.created_at)}</td><td className="px-4 py-3 font-semibold text-slate-900">{item.engineer_name || engineerNameMap.get(item.engineer_id) || "Engineer"}</td><td className="px-4 py-3"><p className="font-medium text-slate-800">{item.item?.item_name || "Part name unavailable"}</p><p className="text-xs text-slate-500">{[item.item?.brand, item.item?.subcategory, item.item?.compatible_models].filter(Boolean).join(" · ")}</p></td><td className="px-4 py-3"><span className={"inline-flex rounded-full px-2.5 py-1 text-xs font-semibold " + (item.movement === "returned" ? "bg-blue-50 text-blue-700" : item.movement === "used" ? "bg-amber-50 text-amber-700" : item.movement === "paid" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-700")}>{actionLabel(item.movement, item.return_condition)}</span></td><td className="px-4 py-3 text-right font-bold tabular-nums">{quantity(item.quantity)}</td></tr>)}</tbody>
+                <tbody>{currentActivity.slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).map((item) => <tr key={item.id} className="border-t border-slate-100"><td className="whitespace-nowrap px-4 py-3 text-slate-500">{timeLabel(item.created_at)}</td><td className="px-4 py-3 font-semibold text-slate-900">{item.engineer_name || engineerNameMap.get(item.engineer_id) || "Engineer"}</td><td className="px-4 py-3"><p className="font-medium text-slate-800">{item.item?.item_name || "Part name unavailable"}</p><p className="text-xs text-slate-500">{[item.item?.brand, item.item?.subcategory, item.item?.compatible_models].filter(Boolean).join(" · ")}</p></td><td className="px-4 py-3"><span className={"inline-flex rounded-full px-2.5 py-1 text-xs font-semibold " + (item.movement === "returned" ? "bg-blue-50 text-blue-700" : item.movement === "used" ? "bg-amber-50 text-amber-700" : item.movement === "paid" ? "bg-emerald-50 text-emerald-700" : item.movement === "replacement" ? "bg-violet-50 text-violet-700" : "bg-slate-100 text-slate-700")}>{actionLabel(item.movement, item.return_condition)}</span></td><td className="px-4 py-3 text-right font-bold tabular-nums">{quantity(item.quantity)}</td></tr>)}</tbody>
               </table>
             </div>
           }
