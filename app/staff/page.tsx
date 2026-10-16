@@ -39,7 +39,9 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<ManageableRole>("apprentice");
-  const [sendingInvite, setSendingInvite] = useState(false);\n  const [invitationLink, setInvitationLink] = useState("");\n  const [invitationLinkEmail, setInvitationLinkEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [invitationLink, setInvitationLink] = useState("");
+  const [invitationLinkEmail, setInvitationLinkEmail] = useState("");
 
   useEffect(() => { void loadAll(); }, []);
 
