@@ -19,7 +19,6 @@ export const staffService = {
     const staff: StaffMember[] = (data || []).map((row) => {
       const rawBranches = (row as { user_branches?: unknown }).user_branches;
       const branchList = Array.isArray(rawBranches) ? rawBranches : [];
-
       return {
         id: row.id,
         full_name: row.full_name,
@@ -34,60 +33,35 @@ export const staffService = {
           .filter(Boolean) as StaffMember["branches"],
       };
     });
-
     return { data: staff, error: null };
   },
 
   async updateStaffRole(profileId: string, role: StaffRole) {
-    return await supabase.rpc("update_staff_role", {
-      p_profile_id: profileId,
-      p_role: role,
-    });
+    return await supabase.rpc("update_staff_role", { p_profile_id: profileId, p_role: role });
   },
 
   async setStaffActive(profileId: string, isActive: boolean) {
-    return await supabase.rpc("set_staff_active", {
-      p_profile_id: profileId,
-      p_is_active: isActive,
-    });
+    return await supabase.rpc("set_staff_active", { p_profile_id: profileId, p_is_active: isActive });
   },
 
   async getInvitations() {
-    return await supabase
-      .from("staff_invitations")
-      .select("*")
-      .order("created_at", { ascending: false });
+    return await supabase.from("staff_invitations").select("*").order("created_at", { ascending: false });
   },
 
   async inviteStaff(invitation: StaffInvitationInput) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return { data: null, error: new Error("Not authenticated") };
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("company_id")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile?.company_id) {
-      return { data: null, error: profileError ?? new Error("Company not found") };
-    }
-
-    const { data, error } = await supabase.rpc("create_staff_invitation", {
-      p_email: invitation.email.trim().toLowerCase(),
-      p_role: "apprentice",
-      p_branch_ids: invitation.branch_ids,
+    const email = invitation.email.trim().toLowerCase();
+    const { data, error } = await supabase.functions.invoke("invite-staff", {
+      body: { email, branch_ids: invitation.branch_ids },
     });
-    return { data, error };
+    if (error) {
+      const details = data && typeof data === "object" && "error" in data ? String(data.error) : error.message;
+      return { data: null, error: new Error(details || "Could not send staff invitation email.") };
+    }
+    if (!data?.ok) return { data: null, error: new Error(data?.error || "Could not send staff invitation email.") };
+    return { data, error: null };
   },
 
   async revokeInvitation(id: string) {
-    return await supabase
-      .from("staff_invitations")
-      .update({ status: "revoked" })
-      .eq("id", id);
+    return await supabase.from("staff_invitations").update({ status: "revoked" }).eq("id", id);
   },
 };
