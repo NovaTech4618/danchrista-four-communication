@@ -85,7 +85,7 @@ export default function StaffPage() {
     setSendingInvite(false);
     if (error) return toast.error(error.message);
     setInviteEmail("");
-    toast.success("Staff invitation created.");
+    toast.success("Invitation email sent. Ask the staff member to check their inbox and spam folder.");
     void loadAll();
   }
 
@@ -146,7 +146,7 @@ export default function StaffPage() {
             <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2">
               <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="staff@email.com" className={inputClass} />
               <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as ManageableRole)} className={inputClass}>{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>
-              <div className="md:col-span-2"><Button type="submit" disabled={sendingInvite || !shopBranchId}>{sendingInvite ? "Creating..." : "Create staff invitation"}</Button></div>
+              <div className="md:col-span-2"><Button type="submit" disabled={sendingInvite || !shopBranchId}>{sendingInvite ? "Sending invitation..." : "Send invitation email"}</Button></div>
             </form>
             {invitations.length > 0 && <div className="mt-6 space-y-2">{invitations.map((inv) => <div key={inv.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-sm"><div><span className="font-medium text-slate-900">{inv.email}</span><span className="ml-2 text-slate-500">{ROLE_LABELS[inv.role]} · {inv.status}</span></div>{inv.status === "pending" && <button onClick={() => void handleRevoke(inv.id)} className="text-xs font-medium text-rose-600 underline">Revoke</button>}</div>)}</div>}
           </CardContent>
