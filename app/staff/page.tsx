@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ShieldCheck, UserPlus } from "lucide-react";
+import { Copy, MessageCircle, ShieldCheck, UserPlus } from "lucide-react";
 
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +39,7 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<ManageableRole>("apprentice");
-  const [sendingInvite, setSendingInvite] = useState(false);
+  const [sendingInvite, setSendingInvite] = useState(false);\n  const [invitationLink, setInvitationLink] = useState("");\n  const [invitationLinkEmail, setInvitationLinkEmail] = useState("");
 
   useEffect(() => { void loadAll(); }, []);
 
@@ -81,11 +81,13 @@ export default function StaffPage() {
     if (!inviteEmail.trim()) return toast.error("Email is required.");
     if (!shopBranchId) return toast.error("The shop setup is missing its main record.");
     setSendingInvite(true);
-    const { error } = await staffService.inviteStaff({ email: inviteEmail.trim(), role: inviteRole, branch_ids: [shopBranchId] });
+    const { data, error } = await staffService.inviteStaff({ email: inviteEmail.trim(), role: inviteRole, branch_ids: [shopBranchId] });
     setSendingInvite(false);
     if (error) return toast.error(error.message);
+    setInvitationLink(data.actionLink);
+    setInvitationLinkEmail(data.email);
     setInviteEmail("");
-    toast.success("Invitation email sent. Ask the staff member to check their inbox and spam folder.");
+    toast.success("Secure invitation link created. Share it privately with the staff member.");
     void loadAll();
   }
 
@@ -146,8 +148,18 @@ export default function StaffPage() {
             <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2">
               <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="staff@email.com" className={inputClass} />
               <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as ManageableRole)} className={inputClass}>{MANAGEABLE_ROLES.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}</select>
-              <div className="md:col-span-2"><Button type="submit" disabled={sendingInvite || !shopBranchId}>{sendingInvite ? "Sending invitation..." : "Send invitation email"}</Button></div>
+              <div className="md:col-span-2"><Button type="submit" disabled={sendingInvite || !shopBranchId}>{sendingInvite ? "Creating secure link..." : "Create staff invitation link"}</Button></div>
             </form>
+            {invitationLink && <div className="mt-5 rounded-xl border border-teal-200 bg-teal-50 p-4">
+              <p className="text-sm font-semibold text-teal-950">Invitation ready for {invitationLinkEmail}</p>
+              <p className="mt-1 text-sm text-teal-900">Copy this one-time link and send it privately to that staff member on WhatsApp. Anyone who receives the link may be able to use it, so don&apos;t post it in a group.</p>
+              <input readOnly value={invitationLink} aria-label="Secure staff invitation link" className="mt-3 w-full rounded-lg border border-teal-200 bg-white px-3 py-2 text-xs text-slate-700" />
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" onClick={() => { void navigator.clipboard.writeText(invitationLink).then(() => toast.success("Invitation link copied.")).catch(() => toast.error("Copy failed. Select and copy the link manually.")); }}><Copy className="mr-2 size-4" />Copy invitation link</Button>
+                <Button type="button" variant="outline" onClick={() => window.open("https://wa.me/?text=" + encodeURIComponent("You have been invited to join Amezing Limited as an apprentice. Open this secure link to set your password and activate your access: " + invitationLink), "_blank", "noopener,noreferrer")}><MessageCircle className="mr-2 size-4" />Share on WhatsApp</Button>
+                <Button type="button" variant="ghost" onClick={() => { setInvitationLink(""); setInvitationLinkEmail(""); }}>Hide link</Button>
+              </div>
+            </div>}
             {invitations.length > 0 && <div className="mt-6 space-y-2">{invitations.map((inv) => <div key={inv.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 text-sm"><div><span className="font-medium text-slate-900">{inv.email}</span><span className="ml-2 text-slate-500">{ROLE_LABELS[inv.role]} · {inv.status}</span></div>{inv.status === "pending" && <button onClick={() => void handleRevoke(inv.id)} className="text-xs font-medium text-rose-600 underline">Revoke</button>}</div>)}</div>}
           </CardContent>
         </Card>
