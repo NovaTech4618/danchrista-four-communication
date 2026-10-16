@@ -57,8 +57,8 @@ export const staffService = {
       const details = data && typeof data === "object" && "error" in data ? String(data.error) : error.message;
       return { data: null, error: new Error(details || "Could not send staff invitation email.") };
     }
-    if (!data?.ok) return { data: null, error: new Error(data?.error || "Could not send staff invitation email.") };
-    return { data, error: null };
+    if (!data?.ok || !data?.actionLink) return { data: null, error: new Error(data?.error || "Could not create the staff invitation link.") };
+    return { data: data as { ok: true; invitationId: string; email: string; actionLink: string; message: string }, error: null };
   },
 
   async revokeInvitation(id: string) {
