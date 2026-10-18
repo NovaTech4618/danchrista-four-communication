@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Phone repair services from Amezing Limited, including screen, battery, charging and software-related repairs.",
   alternates: { canonical: "/phone-repairs" },
   keywords: [
-      "\"Amezing Limited\"",
+      "Amezing Limited",
       "phone repair Kubwa",
       "phone repair in Kubwa",
       "phone screen repair Kubwa",
