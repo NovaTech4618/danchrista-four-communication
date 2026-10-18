@@ -203,7 +203,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <DetailCard title="Location" text="Block A1, Shop 18, Central Market, Kubwa, Abuja" href="https://www.google.com/maps/search/?api=1&query=Central+Market+Kubwa+Abuja" />
+            <DetailCard title="Location" text="Block A1, Shop 18, Central Market, Kubwa, Abuja" href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja" />
             <DetailCard title="Opening hours" text="Every day · 9am to 10pm" />
             <DetailCard title="WhatsApp / Phone" text="0803 590 2087" href="https://wa.me/2348035902087" />
           </div>
