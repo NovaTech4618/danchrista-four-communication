@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BatteryCharging, Smartphone, Wrench, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Phone Repairs in Kubwa, Abuja",
+  title: "Phone Repairs in Kubwa, Abuja | Amezing Limited",
   description: "Phone repair services from Amezing Limited, including screen, battery, charging and software-related repairs.",
   alternates: { canonical: "/phone-repairs" },
   keywords: [
