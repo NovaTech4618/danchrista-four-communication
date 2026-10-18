@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Cpu, Package, Search } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Phone Parts | Amezing Limited",
+  title: "Phone Parts in Kubwa, Abuja",
   description: "Phone parts and replacement components from Amezing Limited, including charging flexes, downboards, back glass and other repair parts.",
   alternates: { canonical: "/phone-parts" },
   keywords: [

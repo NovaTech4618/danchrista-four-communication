@@ -5,7 +5,7 @@ import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-
 export const metadata: Metadata = {
   title: "Contact Amezing Limited | Kubwa, Abuja",
   description:
-    "Contact Amezing Limited in Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
+    "Contact Amezing Limited in Block A1, Shop 18, Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
   alternates: { canonical: "/contact" },
   keywords: [
       "Amezing Limited",
@@ -65,14 +65,14 @@ export default function ContactPage() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             <a
-              href="https://www.google.com/maps/search/?api=1&query=Central+Market+Kubwa+Abuja"
+              href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja"
               target="_blank"
               rel="noreferrer"
               className="rounded-xl border border-white/10 bg-[#101f1a] p-6 transition hover:bg-[#14251f]"
             >
               <MapPin className="size-5 text-[#e7b784]" />
               <h2 className="mt-4 text-sm font-bold">Location</h2>
-              <p className="mt-1 text-sm leading-6 text-[#93a69c]">Central Market, Kubwa, Abuja</p>
+              <p className="mt-1 text-sm leading-6 text-[#93a69c]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p>
               <p className="mt-3 text-xs text-[#e7b784]">Open in Maps →</p>
             </a>
 

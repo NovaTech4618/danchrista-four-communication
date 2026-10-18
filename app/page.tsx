@@ -10,7 +10,7 @@ const siteUrl =
 export const metadata: Metadata = {
   title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
   description:
-    "Amezing Limited in Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
+    "Amezing Limited in Block A1, Shop 18, Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   keywords: [
     "Amezing Limited",
     "phone repair Kubwa",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Amezing Limited | Kubwa, Abuja",
     description:
-      "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
+      "Phone repairs, phone parts, accessories and software services in Block A1, Shop 18, Central Market, Kubwa, Abuja.",
     url: "/",
     siteName: "Amezing Limited",
     type: "website",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Amezing Limited | Kubwa, Abuja",
     description:
-      "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
+      "Phone repairs, phone parts, accessories and software services in Block A1, Shop 18, Central Market, Kubwa, Abuja.",
   },
 };
 
@@ -44,17 +44,17 @@ const businessSchema = {
   url: siteUrl,
   telephone: "+2348035902087",
   description:
-    "Phone repairs, phone parts, accessories and software services in Central Market, Kubwa, Abuja.",
+    "Phone repairs, phone parts, accessories and software services in Block A1, Shop 18, Central Market, Kubwa, Abuja.",
   serviceType: [
     "Mobile phone repair",
     "Phone parts",
     "Phone accessories",
     "Phone software service",
   ],
-  hasMap: "https://www.google.com/maps/search/?api=1&query=Central+Market+Kubwa+Abuja",
+  hasMap: "https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Central Market",
+    streetAddress: "Block A1, Shop 18, Central Market",
     addressLocality: "Kubwa",
     addressRegion: "FCT",
     addressCountry: "NG",
@@ -129,7 +129,7 @@ export default function HomePage() {
               Your phone. Fixed, supplied and supported.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">
-              Amezing Limited serves customers from Central Market, Kubwa,
+              Amezing Limited serves customers from Block A1, Shop 18, Central Market, Kubwa,
               with practical phone repairs, phone parts, accessories and software services.
             </p>
 
@@ -151,7 +151,7 @@ export default function HomePage() {
             </div>
 
             <div className="mt-8 grid gap-3 text-sm sm:grid-cols-3">
-              <Info icon={MapPin} text="Central Market, Kubwa" />
+              <Info icon={MapPin} text="Block A1, Shop 18, Central Market, Kubwa" />
               <Info icon={Clock3} text="9am – 10pm daily" />
               <Info icon={MessageCircle} text="0803 590 2087" />
             </div>
@@ -203,7 +203,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <DetailCard title="Location" text="Central Market, Kubwa, Abuja" href="https://www.google.com/maps/search/?api=1&query=Central+Market+Kubwa+Abuja" />
+            <DetailCard title="Location" text="Block A1, Shop 18, Central Market, Kubwa, Abuja" href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja" />
             <DetailCard title="Opening hours" text="Every day · 9am to 10pm" />
             <DetailCard title="WhatsApp / Phone" text="0803 590 2087" href="https://wa.me/2348035902087" />
           </div>
