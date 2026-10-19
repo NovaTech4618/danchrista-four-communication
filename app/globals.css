@@ -5,6 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --font-display: Arial, Helvetica, sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --amezing-primary: #1d6a54;
   --amezing-primary-light: #63a28d;
   --amezing-primary-dark: #123b34;
