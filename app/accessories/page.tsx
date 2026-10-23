@@ -1,52 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BatteryCharging, Cable, Headphones, Package, ShieldCheck, Speaker } from "lucide-react";
+import { BatteryCharging, Cable, Headphones, MapPin, MessageCircle, Package, ShieldCheck, Speaker } from "lucide-react";
+import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 export const metadata: Metadata = {
-  title: "Phone Accessories in Kubwa, Abuja | Amezing Limited",
-  description: "Ask Amezing Limited in Kubwa, Abuja about phone chargers, cables, earphones, screen protectors, power banks and speakers. Availability depends on current stock.",
+  title: "Phone Accessories in Kubwa, Abuja",
+  description: "Ask Amezing Limited about phone chargers, cables, earphones, screen protectors, power banks and speakers at Central Market, Kubwa. Availability depends on current stock.",
   alternates: { canonical: "/accessories" },
-  keywords: [
-      "Amezing Limited",
-      "phone accessories Kubwa",
-      "chargers Kubwa",
-      "phone cables Kubwa",
-      "screen protectors Kubwa",
-      "power banks Kubwa",
-      "phone accessories Abuja"
-  ],
   robots: { index: true, follow: true },
 };
-
 const items = [
-  ["Chargers", "Everyday charging accessories for compatible devices.", BatteryCharging],
-  ["Cables", "Charging and data cables in common connector types.", Cable],
-  ["Earphones & Headsets", "Audio accessories for calls, music and everyday use.", Headphones],
-  ["Screen Protectors", "Protective accessories for phone displays.", ShieldCheck],
-  ["Power Banks", "Portable power for phones and other compatible devices.", Package],
-  ["Speakers", "Portable audio accessories for home and everyday use.", Speaker],
+  { title: "Chargers", text: "Charging accessories for compatible devices.", Icon: BatteryCharging },
+  { title: "Cables", text: "Charging and data cables in common connector types.", Icon: Cable },
+  { title: "Earphones and headsets", text: "Audio accessories for calls, music and everyday use.", Icon: Headphones },
+  { title: "Screen protectors", text: "Protective accessories for phone displays.", Icon: ShieldCheck },
+  { title: "Power banks", text: "Portable power for phones and compatible devices.", Icon: Package },
+  { title: "Speakers", text: "Portable audio accessories for everyday listening.", Icon: Speaker },
 ];
+const whatsapp = "https://wa.me/2348035902087";
+const maps = "https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja";
 
 export default function AccessoriesPage() {
-  return <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
-    <header className="border-b border-white/10">
-      <div className="mx-auto flex min-h-[72px] max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-7">
-        <Link href="/" aria-label="Amezing Limited home" className="font-heading text-lg font-bold tracking-tight">AMEZING</Link>
-        <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#c0cec6]">
-          <Link href="/phone-repairs" className="hover:text-white">Repairs</Link>
-          <Link href="/phone-parts" className="hover:text-white">Phone parts</Link>
-          <Link href="/accessories" className="hover:text-white">Accessories</Link>
-          <Link href="/about" className="hover:text-white">About</Link>
-          <Link href="/contact" className="rounded-lg bg-[#c98a4f] px-4 py-2.5 font-semibold text-[#1a1008] hover:bg-[#e7b784]">Contact us</Link>
-        </nav>
-      </div>
-    </header>
-    <section className="px-5 py-16 sm:px-7 sm:py-24"><div className="mx-auto max-w-6xl">
-      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#e7b784]">Accessories</p>
-      <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Useful accessories for everyday phone use.</h1>
-      <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">From charging essentials to audio and protection, Amezing offers practical phone accessories based on current stock.</p>
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([title,text,Icon]) => <article key={title as string} className="rounded-2xl border border-white/10 bg-[#101f1a] p-6"><Icon className="size-6 text-[#e7b784]" /><h2 className="mt-5 font-heading text-xl font-bold">{title as string}</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">{text as string}</p></article>)}</div>
-      <Link href="/contact" className="mt-10 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Ask about availability <ArrowRight className="size-4" /></Link>
-    </div></section>
-  </main>;
+ return <main id="main-content" className="min-h-screen bg-[#f7f6f0] text-[#142c25]">
+  <div className="bg-[#123c30] px-4 py-2.5 text-center text-xs font-medium tracking-wide text-white sm:text-sm">Amezing Limited · Central Market, Kubwa · Open daily, 9am–10pm</div>
+  <header className="border-b border-[#142c25]/10"><nav aria-label="Main navigation" className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8"><Link href="/" aria-label="Amezing Limited home"><AmezingLogo /></Link><div className="hidden items-center gap-6 lg:flex"><Link href="/phone-repairs" className="text-sm text-[#50655d] hover:text-[#123c30]">Repairs</Link><Link href="/phone-parts" className="text-sm text-[#50655d] hover:text-[#123c30]">Phone parts</Link><Link href="/accessories" className="text-sm font-semibold text-[#123c30]">Accessories</Link><Link href="/about" className="text-sm text-[#50655d] hover:text-[#123c30]">About</Link><Link href="/contact" className="text-sm text-[#50655d] hover:text-[#123c30]">Contact</Link></div><a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#123c30] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#1b5140]"><MessageCircle className="size-4" /> Ask about stock</a></nav></header>
+  <section className="px-5 py-16 sm:px-8 sm:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9a7133]">Phone accessories</p><h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#123c30] sm:text-6xl">Everyday accessories for your phone.</h1><p className="mt-6 max-w-2xl text-base leading-7 text-[#53675e] sm:text-lg">Looking for a charger, cable or audio accessory? Ask the shop about the item you need and confirm current availability before visiting.</p>
+   <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{items.map(({title,text,Icon})=><article key={title} className="rounded-3xl border border-[#123c30]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className="grid size-12 place-items-center rounded-2xl bg-[#eaf1e8] text-[#245c43]"><Icon className="size-5" /></div><h2 className="mt-5 text-xl font-semibold text-[#123c30]">{title}</h2><p className="mt-3 text-sm leading-6 text-[#617168]">{text}</p></article>)}</div>
+   <div className="mt-10 rounded-[2rem] bg-[#123c30] p-7 text-white sm:p-10"><h2 className="text-2xl font-semibold sm:text-3xl">Check availability before you visit.</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-[#c1d0c6]">Tell us what you are looking for and, where relevant, your phone model. Selection depends on current stock.</p><div className="mt-6 flex flex-wrap gap-3"><a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#d5b86d] px-6 py-3 text-sm font-bold text-[#173c2e]"><MessageCircle className="size-4" /> WhatsApp 0803 590 2087</a><a href={maps} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white"><MapPin className="size-4" /> Find the shop</a></div></div>
+  </div></section><SiteFooter />
+ </main>;
 }
+function SiteFooter() { return <footer className="border-t border-[#123c30]/10 bg-[#f0f0e8] px-5 py-8 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"><div><Link href="/" aria-label="Amezing Limited home"><AmezingLogo /></Link><p className="mt-2 text-xs text-[#617168]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p></div><div className="flex flex-wrap gap-4 text-sm text-[#53675e]"><Link href="/phone-repairs">Repairs</Link><Link href="/phone-parts">Phone parts</Link><Link href="/services">Services</Link><Link href="/about">About</Link><Link href="/contact">Contact</Link></div></div><p className="mx-auto mt-6 max-w-7xl border-t border-[#123c30]/10 pt-4 text-xs text-[#758178]">© {new Date().getFullYear()} Amezing Limited · Open daily, 9am–10pm</p></footer>; }
