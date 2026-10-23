@@ -225,61 +225,59 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[550px]">
-            <div className="absolute -inset-4 rounded-[2.5rem] bg-[#d9e5d9] rotate-[-4deg]" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[#123c30] p-5 shadow-2xl shadow-[#123c30]/15 sm:p-7">
+          <div className="relative mx-auto min-h-[470px] w-full overflow-hidden rounded-[2rem] border border-white/70 bg-[#123c30] shadow-2xl shadow-[#123c30]/20 sm:min-h-[560px]">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2EILqoULTkdkQfG491ramrfzlPHRKmiA4ErLfnHsdAA&s=10')",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#071b15]/95 via-[#071b15]/75 to-[#071b15]/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#071b15]/65 via-transparent to-[#071b15]/10" />
+
+            <div className="relative flex min-h-[470px] flex-col justify-between p-6 sm:min-h-[560px] sm:p-9">
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d8bc7c]">Amezing Limited</p>
-                  <h2 className="mt-2 max-w-xs text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
-                    Let&apos;s figure out what your phone needs.
+                <div className="max-w-xs">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c8f58a]">Find us in Kubwa</p>
+                  <h2 className="mt-3 text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl">
+                    Right here at Central Market.
                   </h2>
                 </div>
-                <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/15 bg-white/10 text-[#e5c982]">
-                  <Smartphone className="size-6" aria-hidden="true" />
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-black/25 text-[#c8f58a] backdrop-blur-sm">
+                  <MapPin className="size-6" aria-hidden="true" />
                 </div>
               </div>
 
-              <div className="relative mx-auto mt-7 max-w-[340px]">
-                <div className="relative mx-auto h-[285px] w-[158px] rounded-[2rem] border-[5px] border-[#d8d8cd] bg-[#1c2924] p-2 shadow-[0_24px_45px_rgba(0,0,0,0.25)] rotate-[5deg]">
-                  <div className="relative flex h-full flex-col overflow-hidden rounded-[1.45rem] bg-gradient-to-br from-[#d6b66e] via-[#8eb6a0] to-[#386b56] p-3">
-                    <div className="mx-auto h-4 w-14 rounded-full bg-[#182b24]" />
-                    <div className="mt-7 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#173c2e]/80">Device support</div>
-                    <div className="mt-2 text-2xl font-semibold leading-[1.05] tracking-tight text-[#123c30]">Help for your everyday phone.</div>
-                    <div className="mt-auto flex items-center justify-between rounded-xl border border-white/40 bg-white/35 p-2">
-                      <Wrench className="size-4 text-[#123c30]" aria-hidden="true" />
-                      <span className="text-[8px] font-bold text-[#123c30]">AMEZING LIMITED</span>
-                    </div>
-                  </div>
+              <div className="max-w-sm rounded-2xl border border-white/15 bg-[#071b15]/70 p-5 backdrop-blur-md sm:p-6">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#c8f58a]">Amezing Limited</p>
+                <p className="mt-3 text-xl font-semibold leading-snug text-white sm:text-2xl">
+                  Phone repairs, parts and accessories — close to the people we serve.
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/80">
+                  Block A1, Shop 18, Central Market, Kubwa, Abuja.
+                </p>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#c8f58a] px-5 py-3 text-sm font-bold text-[#10291e] transition hover:bg-[#d8ffab]"
+                  >
+                    <MessageCircle className="size-4" aria-hidden="true" />
+                    Chat with us
+                  </a>
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/40 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+                  >
+                    <MapPin className="size-4" aria-hidden="true" />
+                    Directions
+                  </a>
                 </div>
-                <div className="absolute -left-6 bottom-5 flex items-center gap-3 rounded-2xl border border-white/70 bg-[#fbfaf5] p-3.5 shadow-xl sm:-left-10">
-                  <div className="grid size-10 place-items-center rounded-xl bg-[#e3eee3] text-[#245c43]">
-                    <MapPin className="size-5" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#183d30]">Visit our shop</p>
-                    <p className="mt-0.5 text-[11px] text-[#66776e]">Central Market, Kubwa</p>
-                  </div>
-                </div>
-                <div className="absolute -right-1 top-16 grid size-12 place-items-center rounded-2xl bg-[#d9b76a] text-[#183d30] shadow-lg sm:-right-4">
-                  <MessageCircle className="size-5" aria-hidden="true" />
-                </div>
-              </div>
-
-              <div className="mt-7 flex items-center justify-between gap-4 border-t border-white/15 pt-5">
-                <div>
-                  <p className="text-sm font-semibold text-white">Not sure where to start?</p>
-                  <p className="mt-1 text-xs leading-5 text-[#c1d0c6]">Send your model and describe the problem.</p>
-                </div>
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Ask Amezing Limited on WhatsApp"
-                  className="grid size-11 shrink-0 place-items-center rounded-full bg-[#d5b86d] text-[#173c2e] transition hover:bg-[#e7cd8e]"
-                >
-                  <ArrowUpRight className="size-5" aria-hidden="true" />
-                </a>
               </div>
             </div>
           </div>
