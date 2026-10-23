@@ -23,11 +23,17 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
       <header className="border-b border-white/10">
-        <div className="mx-auto flex min-h-[72px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-7">
-          <Link href="/" className="font-heading text-lg font-bold">AMEZING</Link>
-          <Link href="/services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Services</Link>
-        </div>
-      </header>
+      <div className="mx-auto flex min-h-[72px] max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-7">
+        <Link href="/" aria-label="Amezing Limited home" className="font-heading text-lg font-bold tracking-tight">AMEZING</Link>
+        <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#c0cec6]">
+          <Link href="/phone-repairs" className="hover:text-white">Repairs</Link>
+          <Link href="/phone-parts" className="hover:text-white">Phone parts</Link>
+          <Link href="/accessories" className="hover:text-white">Accessories</Link>
+          <Link href="/about" className="hover:text-white">About</Link>
+          <Link href="/contact" className="rounded-lg bg-[#c98a4f] px-4 py-2.5 font-semibold text-[#1a1008] hover:bg-[#e7b784]">Contact us</Link>
+        </nav>
+      </div>
+    </header>
 
       <section className="px-5 py-16 sm:px-7 sm:py-24">
         <div className="mx-auto max-w-4xl">
