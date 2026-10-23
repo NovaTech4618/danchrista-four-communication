@@ -150,6 +150,7 @@ export default function HomePage() {
           </Link>
 
           <div className="hidden items-center gap-6 lg:flex">
+            <Link href="/shop" className="text-sm font-semibold text-[#C65D3A] transition hover:text-[#A94B2E]">Shop</Link>
             <Link href="/phone-repairs" className="text-sm font-medium text-[#766761] transition hover:text-[#C65D3A]">Repairs</Link>
             <Link href="/phone-parts" className="text-sm font-medium text-[#766761] transition hover:text-[#C65D3A]">Phone parts</Link>
             <Link href="/accessories" className="text-sm font-medium text-[#766761] transition hover:text-[#C65D3A]">Accessories</Link>
@@ -333,6 +334,19 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="bg-[#F1E6DA] px-5 py-16 sm:px-8 sm:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C65D3A]">Shop Amezing</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-[#30231F] sm:text-4xl">Browse phone accessories and parts.</h2>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-[#766761]">Explore our product categories and ask us about the exact item you need. We are building the catalogue with real shop photos and confirmed prices only.</p>
+          </div>
+          <Link href="/shop" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#C65D3A] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#A94B2E]">
+            Browse the shop <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
       <section className="bg-[#F5EDE5] px-5 py-20 sm:px-8 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
           <div>
@@ -419,6 +433,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3 text-sm text-[#766761]">
+            <Link href="/shop" className="hover:text-[#C65D3A]">Shop</Link>
             <Link href="/phone-repairs" className="hover:text-[#C65D3A]">Repairs</Link>
             <Link href="/phone-parts" className="hover:text-[#C65D3A]">Parts</Link>
             <Link href="/accessories" className="hover:text-[#C65D3A]">Accessories</Link>
