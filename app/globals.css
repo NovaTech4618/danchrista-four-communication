@@ -25,12 +25,12 @@
   --amezing-shadow-card: 0 8px 25px rgba(18, 59, 52, 0.08);
   --background: var(--amezing-background);
   --foreground: var(--amezing-ink);
-  --card: #111b20df9;
+  --card: #111b20;
   --card-foreground: var(--amezing-ink);
-  --popover: #111b20fff;
+  --popover: #111b20;
   --popover-foreground: var(--amezing-ink);
   --primary: var(--amezing-primary);
-  --primary-foreground: #111b20fff;
+  --primary-foreground: #111b20;
   --secondary: #d9e2e5;
   --secondary-foreground: var(--amezing-ink);
   --muted: #172328;
@@ -47,7 +47,7 @@
   --sidebar-primary: var(--amezing-amber);
   --sidebar-primary-foreground: #14252b;
   --sidebar-accent: #20383d;
-  --sidebar-accent-foreground: #111b20fff;
+  --sidebar-accent-foreground: #111b20;
   --sidebar-border: rgba(255,255,255,0.08);
   --sidebar-ring: var(--amezing-amber);
 }
@@ -183,12 +183,12 @@
 .control {
   width: 100%; min-width: 0; margin-top: 0.5rem;
   border-radius: var(--amezing-radius-md); border: 1px solid #2a3b41;
-  background: #111b20; padding: 0.72rem 0.9rem; color: #102620; box-shadow: none;
+  background: #111b20; padding: 0.72rem 0.9rem; color: #e7eef0; box-shadow: none;
   transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out;
 }
 .control::placeholder { color: #8fa1a7; }
 .control:hover { border-color: #35464c; }
-.control:focus { border-color: var(--amezing-primary); background: #111b20; box-shadow: 0 0 0 3px rgba(29, 106, 84, 0.12); outline: none; }
+.control:focus { border-color: var(--amezing-primary); background: #111b20; box-shadow: 0 0 0 3px rgba(120, 156, 150, 0.18); outline: none; }
 .icon + .control { padding-left: 3rem !important; }
 .icon { pointer-events: none; position: absolute; left: 0.9rem; top: calc(50% + 0.25rem); width: 1rem; height: 1rem; transform: translateY(-50%); color: #8fa1a7; z-index: 1; }
 button[aria-label="Show password"], button[aria-label="Hide password"] { top: calc(50% + 0.25rem) !important; }
