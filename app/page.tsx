@@ -15,7 +15,7 @@ import {
 import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://amezing-limited.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://danchrista-four-communication.vercel.app";
 
 const phoneNumber = "+2348035902087";
 const whatsappUrl = "https://wa.me/2348035902087";
