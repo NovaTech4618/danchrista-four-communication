@@ -1,122 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-react";
+import { Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-react";
+import { AmezingLogo } from "@/components/brand/AmezingLogo";
 
 export const metadata: Metadata = {
   title: "Contact Amezing Limited | Kubwa, Abuja",
-  description:
-    "Contact Amezing Limited in Block A1, Shop 18, Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
+  description: "Contact Amezing Limited at Block A1, Shop 18, Central Market, Kubwa, Abuja for phone repairs, phone parts, accessories and software services.",
   alternates: { canonical: "/contact" },
-  keywords: [
-      "Amezing Limited",
-      "Amezing Limited Kubwa",
-      "contact phone repair Kubwa",
-      "phone repair Kubwa",
-      "phone parts Kubwa",
-      "phone accessories Kubwa",
-      "Central Market Kubwa"
-  ],
   robots: { index: true, follow: true },
 };
+const whatsapp = "https://wa.me/2348035902087";
+const maps = "https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja";
 
 export default function ContactPage() {
-  return (
-    <main className="min-h-screen bg-[#0b1512] text-[#f4f1ea]">
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex min-h-[72px] max-w-6xl items-center justify-between gap-5 px-5 sm:px-7">
-          <Link href="/" className="font-heading text-lg font-bold">AMEZING</Link>
-          <Link href="/services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Services</Link>
-        </div>
-      </header>
-
-      <section className="px-5 py-16 sm:px-7 sm:py-24">
-        <div className="mx-auto max-w-4xl">
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#e7b784]">Contact</p>
-          <h1 className="mt-4 font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">
-            Need a repair, part or accessory?
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">
-            Message or call before you visit. For phone parts, send the exact model and part name so current stock can be checked.
-          </p>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <a
-              href="https://wa.me/2348035902087"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-2xl border border-[#c98a4f]/20 bg-[#101f1a] p-7 transition hover:bg-[#14251f]"
-            >
-              <MessageCircle className="size-6 text-[#e7b784]" />
-              <h2 className="mt-4 font-heading text-2xl font-bold">WhatsApp</h2>
-              <p className="mt-2 text-sm leading-6 text-[#93a69c]">0803 590 2087</p>
-              <p className="mt-4 text-xs font-semibold text-[#e7b784]">Start a chat →</p>
-            </a>
-
-            <a
-              href="tel:+2348035902087"
-              className="rounded-2xl border border-white/10 bg-[#101f1a] p-7 transition hover:bg-[#14251f]"
-            >
-              <Phone className="size-6 text-[#e7b784]" />
-              <h2 className="mt-4 font-heading text-2xl font-bold">Call</h2>
-              <p className="mt-2 text-sm leading-6 text-[#93a69c]">0803 590 2087</p>
-              <p className="mt-4 text-xs font-semibold text-[#e7b784]">Call the shop →</p>
-            </a>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl border border-white/10 bg-[#101f1a] p-6 transition hover:bg-[#14251f]"
-            >
-              <MapPin className="size-5 text-[#e7b784]" />
-              <h2 className="mt-4 text-sm font-bold">Location</h2>
-              <p className="mt-1 text-sm leading-6 text-[#93a69c]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p>
-              <p className="mt-3 text-xs text-[#e7b784]">Open in Maps →</p>
-            </a>
-
-            <div className="rounded-xl border border-white/10 bg-[#101f1a] p-6">
-              <Clock3 className="size-5 text-[#e7b784]" />
-              <h2 className="mt-4 text-sm font-bold">Opening hours</h2>
-              <p className="mt-1 text-sm leading-6 text-[#93a69c]">Every day · 9am to 10pm</p>
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-[#101f1a] p-6">
-              <Wrench className="size-5 text-[#e7b784]" />
-              <h2 className="mt-4 text-sm font-bold">For repair enquiries</h2>
-              <p className="mt-1 text-sm leading-6 text-[#93a69c]">Send the phone model and describe the problem.</p>
-            </div>
-          </div>
-
-          <div className="mt-10 rounded-2xl border border-white/10 bg-[#101f1a] p-7">
-            <h2 className="font-heading text-2xl font-bold">For phone parts</h2>
-            <p className="mt-3 text-sm leading-6 text-[#93a69c]">
-              Send the exact phone model and the part you need. Examples: “Tecno Spark 10 charging flex” or “iPhone 11 earpiece flex.” Availability depends on current stock.
-            </p>
-            <a
-              href="https://wa.me/2348035902087"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]"
-            >
-              <MessageCircle className="size-4" /> Send a WhatsApp enquiry
-            </a>
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-5 text-sm">
-            <Link href="/" className="inline-flex items-center gap-2 font-semibold text-[#e7b784]">
-              <ArrowLeft className="size-4" /> Back home
-            </Link>
-            <Link href="/phone-parts" className="font-semibold text-[#e7b784]">Browse phone parts →</Link>
-            <Link href="/phone-repairs" className="font-semibold text-[#e7b784]">Browse repairs →</Link>
-          </div>
-
-          <p className="mt-10 text-xs leading-5 text-[#5c6b64]">
-            Social-media pages are not listed yet because no official account details have been provided.
-          </p>
-        </div>
-      </section>
-    </main>
-  );
+ return <main id="main-content" className="min-h-screen bg-[#FAF5EE] text-[#30231F]">
+  <div className="bg-[#3B2825] px-4 py-2.5 text-center text-xs font-medium tracking-wide text-white sm:text-sm">Amezing Limited · Central Market, Kubwa · Open daily, 9am–10pm</div>
+  <header className="border-b border-[#30231F]/10"><nav aria-label="Main navigation" className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8"><Link href="/" aria-label="Amezing Limited home"><AmezingLogo /></Link><div className="hidden items-center gap-6 lg:flex"><Link href="/shop" className="text-sm text-[#766761] hover:text-[#C65D3A]">Shop</Link><Link href="/phone-repairs" className="text-sm text-[#766761] hover:text-[#C65D3A]">Repairs</Link><Link href="/phone-parts" className="text-sm text-[#766761] hover:text-[#C65D3A]">Phone parts</Link><Link href="/accessories" className="text-sm text-[#766761] hover:text-[#C65D3A]">Accessories</Link><Link href="/about" className="text-sm text-[#766761] hover:text-[#C65D3A]">About</Link><Link href="/contact" className="text-sm font-semibold text-[#30231F]">Contact</Link></div><a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#3B2825] px-4 py-2.5 text-sm font-bold text-white"><MessageCircle className="size-4" /> WhatsApp</a></nav></header>
+  <section className="px-5 py-16 sm:px-8 sm:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C65D3A]">Contact the shop</p><h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#30231F] sm:text-6xl">Tell us what you need.</h1><p className="mt-6 max-w-2xl text-base leading-7 text-[#766761] sm:text-lg">Message or call before visiting. For a repair, describe the problem and phone model. For parts, include the exact model and part name so availability can be checked.</p>
+   <div className="mt-10 grid gap-4 md:grid-cols-2"><a href={whatsapp} target="_blank" rel="noreferrer" className="group rounded-3xl border border-[#766761]/10 bg-[#FFFFFF] p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className="grid size-12 place-items-center rounded-2xl bg-[#F5EDE5] text-[#C65D3A]"><MessageCircle className="size-5" /></div><h2 className="mt-5 text-2xl font-semibold text-[#30231F]">WhatsApp</h2><p className="mt-2 text-sm leading-6 text-[#766761]">0803 590 2087</p><p className="mt-5 text-sm font-bold text-[#C65D3A]">Start a chat →</p></a><a href="tel:+2348035902087" className="group rounded-3xl border border-[#766761]/10 bg-[#FFFFFF] p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className="grid size-12 place-items-center rounded-2xl bg-[#F5EDE5] text-[#C65D3A]"><Phone className="size-5" /></div><h2 className="mt-5 text-2xl font-semibold text-[#30231F]">Call the shop</h2><p className="mt-2 text-sm leading-6 text-[#766761]">0803 590 2087</p><p className="mt-5 text-sm font-bold text-[#C65D3A]">Call now →</p></a></div>
+   <div className="mt-4 grid gap-4 md:grid-cols-3"><a href={maps} target="_blank" rel="noreferrer" className="rounded-3xl border border-[#766761]/10 bg-[#FFFFFF] p-6 transition hover:shadow-lg"><MapPin className="size-5 text-[#C65D3A]" /><h2 className="mt-4 font-semibold text-[#30231F]">Shop location</h2><p className="mt-2 text-sm leading-6 text-[#766761]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p><p className="mt-4 text-sm font-bold text-[#C65D3A]">Open in Google Maps →</p></a><article className="rounded-3xl border border-[#766761]/10 bg-[#FFFFFF] p-6"><Clock3 className="size-5 text-[#C65D3A]" /><h2 className="mt-4 font-semibold text-[#30231F]">Opening hours</h2><p className="mt-2 text-sm leading-6 text-[#766761]">Every day, 9am–10pm</p></article><article className="rounded-3xl border border-[#766761]/10 bg-[#FFFFFF] p-6"><Wrench className="size-5 text-[#C65D3A]" /><h2 className="mt-4 font-semibold text-[#30231F]">Repair enquiries</h2><p className="mt-2 text-sm leading-6 text-[#766761]">Send the phone model and describe what is happening.</p></article></div>
+   <div className="mt-10 rounded-[2rem] bg-[#F5EDE5] p-7 sm:p-9"><h2 className="text-2xl font-semibold text-[#30231F]">Asking about a phone part?</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-[#766761]">Include the exact model and part name—for example, “Tecno Spark 10 charging flex.” Availability depends on current stock.</p><a href={whatsapp} target="_blank" rel="noreferrer" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-[#3B2825] px-6 py-3 text-sm font-bold text-white"><MessageCircle className="size-4" /> Send a WhatsApp enquiry</a></div>
+  </div></section><SiteFooter />
+ </main>;
 }
+function SiteFooter() { return <footer className="border-t border-[#766761]/10 bg-[#F1E6DA] px-5 py-8 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"><div><Link href="/" aria-label="Amezing Limited home"><AmezingLogo /></Link><p className="mt-2 text-xs text-[#766761]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p></div><div className="flex flex-wrap gap-4 text-sm text-[#766761]"><Link href="/phone-repairs">Repairs</Link><Link href="/phone-parts">Phone parts</Link><Link href="/accessories">Accessories</Link><Link href="/services">Services</Link><Link href="/about">About</Link></div></div><p className="mx-auto mt-6 max-w-7xl border-t border-[#766761]/10 pt-4 text-xs text-[#8D7A72]">© {new Date().getFullYear()} Amezing Limited · Open daily, 9am–10pm</p></footer>; }
