@@ -1,4 +1,4 @@
-export type ShopExpenseCategory = "transportation" | "water" | "other";
+export type ShopExpenseCategory = "transportation" | "feeding" | "electricity" | "water" | "other";
 export type ShopExpensePaymentMethod = "cash" | "transfer" | "pos" | "card" | "other";
 
 export type ShopExpense = {
