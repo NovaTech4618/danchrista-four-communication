@@ -7,8 +7,16 @@ import { supabase, getCurrentSession } from "@/lib/supabase";
 
 const PAGE_TITLES: Record<string, string> = {
   "/workspace": "Home", "/dashboard": "Home", "/customers": "Customers", "/devices": "Devices",
+  "/customer-requests": "Customer Requests", "/phone-parts": "Phone Parts",
+  "/inventory/accessories": "Accessories & Gadgets", "/inventory/purchases": "Supplier Purchases",
+  "/inventory/movements": "Stock History", "/inventory/stockroom": "Stockroom",
+  "/inventory/verify": "Verify Stock", "/inventory/import": "Inventory Import",
+  "/inventory/opening-stock-import": "Opening Stock Import", "/inventory/suppliers": "Inventory Suppliers",
+  "/reports/daily-closing": "Daily Expenses & Closing", "/accounts": "Accounts",
+  "/credit": "People Amezing Owes", "/parts-credit": "Customer Parts Credit",
+  "/outstanding": "People Who Owe Us", "/tickets": "Support Tickets", "/assistant": "Amezing Assistant",
   "/repairs": "Repairs", "/inventory": "Phone Parts", "/sales": "Sales", "/finance": "Finance",
-  "/accounts": "Money & Balances", "/reports": "Reports", "/settings": "Settings",
+  "/reports": "Engineer Daily Report", "/settings": "Settings",
   "/help": "Help & Support", "/technical-services": "Technical Services", "/staff": "Staff",
   "/alerts": "Alerts", "/search": "Search", "/whatsapp": "WhatsApp",
   "/engineer-workflow": "Engineer Workflow", "/technician-ledger": "Parts Ledger",
