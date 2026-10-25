@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -191,6 +192,7 @@ export default function SoftwareServicesPage() {
           </Link>
         </div>
       </section>
+          <FloatingWhatsApp />
     </main>
   );
 }
