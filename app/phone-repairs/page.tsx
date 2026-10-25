@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BatteryCharging, Smartphone, Wrench, Zap } from "lucide-react";
@@ -53,5 +54,6 @@ export default function PhoneRepairsPage() {
         </div>
       </div>
     </section>
-  </main>;
+        <FloatingWhatsApp />
+    </main>;
 }

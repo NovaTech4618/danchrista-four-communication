@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, MapPin, MessageCircle, Phone } from "lucide-react";
@@ -133,6 +134,7 @@ export default function PhoneRepairGuidePage() {
           </section>
         </div>
       </article>
+          <FloatingWhatsApp />
     </main>
   );
 }
