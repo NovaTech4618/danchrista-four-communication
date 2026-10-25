@@ -40,6 +40,13 @@ export const workspaceGroups: SectionGroup[] = [
         icon: ArrowLeftRight,
       },
       {
+        title: "Engineer Work",
+        href: "/engineer-workflow",
+        description: "A quick-entry form to record parts collected, returns, and work done for one selected engineer. Use Daily Parts Collection to review the day's wider movement history.",
+        permission: "engineer_work",
+        icon: ClipboardCheck,
+      },
+      {
         title: "Engineers",
         href: "/engineers",
         description: "Open an engineer’s record to manage part issues, returns, work entries, payments, balances, and statements.",
@@ -52,6 +59,13 @@ export const workspaceGroups: SectionGroup[] = [
         description: "Review parts given out, returned, used, engineer payments, and parts still outstanding for the selected day. This is not the customer-sales report.",
         permission: "profit",
         icon: BarChart3,
+      },
+      {
+        title: "Technician Parts Ledger",
+        href: "/technician-ledger",
+        description: "Track parts used for a specific repair, returns against that repair, and the remaining part quantity. This is repair-specific, not the general engineer account.",
+        permission: "engineers",
+        icon: Boxes,
       },
       {
         title: "Daily Expenses & Closing",
@@ -72,6 +86,13 @@ export const workspaceGroups: SectionGroup[] = [
         description: "Manage phone-repair parts, model compatibility, prices, quantities, low-stock levels, purchases and stock history.",
         permission: "inventory",
         icon: Package,
+      },
+      {
+        title: "Stock History",
+        href: "/inventory/movements",
+        description: "Review why inventory quantities changed—purchases, sales, repair use, engineer issue/return or a recorded stock adjustment.",
+        permission: "inventory",
+        icon: Activity,
       },
       {
         title: "Accessories & Gadgets",
@@ -183,27 +204,9 @@ export const workspaceGroups: SectionGroup[] = [
     title: "Control, communication & help",
     description: "Tools for finding records, managing access, and checking what happened.",
     items: [
-      {
-        title: "Engineer Work",
-        href: "/engineer-workflow",
-        description: "A quick-entry form to record parts collected, returns, and work done for one selected engineer. Use Daily Parts Collection to review the day's wider movement history.",
-        permission: "engineer_work",
-        icon: ClipboardCheck,
-      },
-      {
-        title: "Technician Parts Ledger",
-        href: "/technician-ledger",
-        description: "Track parts used for a specific repair, returns against that repair, and the remaining part quantity. This is repair-specific, not the general engineer account.",
-        permission: "engineers",
-        icon: Boxes,
-      },
-      {
-        title: "Stock History",
-        href: "/inventory/movements",
-        description: "Review why inventory quantities changed—purchases, sales, repair use, engineer issue/return or a recorded stock adjustment.",
-        permission: "inventory",
-        icon: Activity,
-      },
+
+
+
       {
         title: "Alerts",
         href: "/alerts",
