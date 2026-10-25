@@ -9,8 +9,6 @@ const siteUrl =
 
 const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
 
-const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
-
 export const metadata: Metadata = {
   title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
   description:
