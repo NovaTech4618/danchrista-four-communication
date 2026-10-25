@@ -32,6 +32,12 @@ export default function ServicesPage() {
       <h1 className="mt-4 max-w-3xl font-heading text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Repairs, parts and accessories in one place.</h1>
       <p className="mt-6 max-w-2xl text-base leading-7 text-[#93a69c] sm:text-lg">A straightforward service experience for customers and a clear record of work for the business.</p>
       <div className="mt-12 grid gap-4 md:grid-cols-2">{services.map(([title,text,Icon]) => <article key={title as string} className="rounded-2xl border border-white/10 bg-[#101f1a] p-7"><Icon className="size-6 text-[#e7b784]" /><h2 className="mt-5 font-heading text-2xl font-bold">{title as string}</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">{text as string}</p></article>)}</div>
+      <div className="mt-8 rounded-2xl border border-[#c98a4f]/20 bg-[#101f1a] p-7">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#e7b784]">Specialist support</p>
+        <h2 className="mt-3 font-heading text-2xl font-bold">Phone software and firmware problems</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#93a69c]">Learn about boot-loop diagnosis, firmware recovery and owner-authorized account or network enquiries. Availability depends on the phone model and the case.</p>
+        <Link href="/software-services" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#e7b784]">View software services <ArrowRight className="size-4" /></Link>
+      </div>
       <div className="mt-12 rounded-2xl border border-white/10 bg-[#101f1a] p-7"><h2 className="font-heading text-2xl font-bold">Need help with something specific?</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">Contact Amezing with the phone model, the problem or the item you need so availability can be checked.</p><Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Contact us <ArrowRight className="size-4" /></Link></div>
     </div></section>
   </main>;
