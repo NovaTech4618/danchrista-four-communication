@@ -7,6 +7,8 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   "https://danchrista-four-communication.vercel.app";
 
+const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
+
 export const metadata: Metadata = {
   title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
   description:
@@ -51,7 +53,7 @@ const businessSchema = {
     "Phone accessories",
     "Phone software service",
   ],
-  hasMap: "https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja",
+  hasMap: mapsUrl,
   address: {
     "@type": "PostalAddress",
     streetAddress: "Block A1, Shop 18, Central Market",
@@ -187,6 +189,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="border-y border-white/10 px-5 py-16 sm:px-7">
+        <div className="mx-auto max-w-6xl">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#e7b784]">
+            A clear repair conversation
+          </p>
+          <h2 className="mt-2 max-w-3xl font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            Know what to ask before approving a phone repair.
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-[#93a69c]">
+            A phone problem can have more than one cause. Share the model and symptoms, ask what needs
+            to be done, and discuss the expected cost and timing before deciding how to proceed.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <article className="rounded-xl border border-white/10 bg-[#101f1a] p-5">
+              <p className="font-mono text-xs text-[#e7b784]">01 / Explain</p>
+              <h3 className="mt-3 font-heading text-lg font-bold">Tell us what happened</h3>
+              <p className="mt-2 text-sm leading-6 text-[#93a69c]">
+                Share the phone model, the fault and whether the phone was dropped, exposed to liquid or repaired before.
+              </p>
+            </article>
+            <article className="rounded-xl border border-white/10 bg-[#101f1a] p-5">
+              <p className="font-mono text-xs text-[#e7b784]">02 / Agree</p>
+              <h3 className="mt-3 font-heading text-lg font-bold">Understand the job</h3>
+              <p className="mt-2 text-sm leading-6 text-[#93a69c]">
+                Ask about the diagnosis, part needed, expected cost and estimated timeline before approving the work.
+              </p>
+            </article>
+            <article className="rounded-xl border border-white/10 bg-[#101f1a] p-5">
+              <p className="font-mono text-xs text-[#e7b784]">03 / Check</p>
+              <h3 className="mt-3 font-heading text-lg font-bold">Test before leaving</h3>
+              <p className="mt-2 text-sm leading-6 text-[#93a69c]">
+                When collecting the phone, check the issue that brought you in and any related functions you can safely test.
+              </p>
+            </article>
+          </div>
+          <div className="mt-6 flex flex-col gap-4 rounded-xl border border-[#c98a4f]/20 bg-[#101f1a] p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-semibold">A simple checklist for customers</h3>
+              <p className="mt-1 text-sm leading-6 text-[#93a69c]">
+                Backing up data, explaining symptoms and asking the right questions can make a repair visit clearer.
+              </p>
+            </div>
+            <Link href="/phone-repair-guide" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-[#e7b784] hover:text-[#f4f1ea]">
+              Read the repair guide <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="border-y border-white/10 bg-[#101f1a] px-5 py-20 sm:px-7">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
@@ -203,7 +254,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <DetailCard title="Location" text="Block A1, Shop 18, Central Market, Kubwa, Abuja" href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja" />
+            <DetailCard title="Location" text="Block A1, Shop 18, Central Market, Kubwa, Abuja" href={mapsUrl} />
             <DetailCard title="Opening hours" text="Every day · 9am to 10pm" />
             <DetailCard title="WhatsApp / Phone" text="0803 590 2087" href="https://wa.me/2348035902087" />
           </div>
