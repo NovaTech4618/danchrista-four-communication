@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BatteryCharging, Cable, Headphones, Package, ShieldCheck, Speaker } from "lucide-react";
@@ -37,5 +38,6 @@ export default function AccessoriesPage() {
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([title,text,Icon]) => <article key={title as string} className="rounded-2xl border border-white/10 bg-[#101f1a] p-6"><Icon className="size-6 text-[#e7b784]" /><h2 className="mt-5 font-heading text-xl font-bold">{title as string}</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">{text as string}</p></article>)}</div>
       <Link href="/contact" className="mt-10 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Ask about availability <ArrowRight className="size-4" /></Link>
     </div></section>
-  </main>;
+        <FloatingWhatsApp />
+    </main>;
 }
