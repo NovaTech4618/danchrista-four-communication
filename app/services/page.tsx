@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CircleDollarSign, PackageCheck, Smartphone, Wrench } from "lucide-react";
@@ -40,5 +41,6 @@ export default function ServicesPage() {
       </div>
       <div className="mt-12 rounded-2xl border border-white/10 bg-[#101f1a] p-7"><h2 className="font-heading text-2xl font-bold">Need help with something specific?</h2><p className="mt-2 text-sm leading-6 text-[#93a69c]">Contact Amezing with the phone model, the problem or the item you need so availability can be checked.</p><Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Contact us <ArrowRight className="size-4" /></Link></div>
     </div></section>
-  </main>;
+        <FloatingWhatsApp />
+    </main>;
 }
