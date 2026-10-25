@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeftRight, BarChart3, BellRing, Boxes, ClipboardList, HandCoins,
+  ArrowLeftRight, BarChart3, BellRing, Boxes, Cable, ClipboardList, HandCoins,
   Landmark, Package, Search, Settings, ShoppingCart, UserRound, Users, Wrench, MessageCircle
 } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
@@ -15,6 +15,8 @@ const tiles = [
   { title: "Engineers", href: "/engineers", icon: UserRound, permission: "engineers" as const },
   { title: "Daily Report", href: "/reports", icon: BarChart3, permission: "profit" as const },
   { title: "Phone Parts", href: "/inventory", icon: Package, permission: "inventory" as const },
+  { title: "Accessories", href: "/inventory/accessories", icon: Cable, permission: "inventory" as const },
+  { title: "Daily Expenses", href: "/reports/daily-closing", icon: ClipboardList, permission: "daily_closing" as const },
   { title: "Owed & Owing", href: "/owed-owing", icon: HandCoins, permission: "outstanding" as const },
   { title: "Search", href: "/search", icon: Search, permission: "search" as const },
   { title: "WhatsApp", href: "/whatsapp", icon: MessageCircle, permission: "whatsapp" as const },
