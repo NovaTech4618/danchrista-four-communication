@@ -24,11 +24,17 @@ const PHONE_PARTS: Record<string, string[]> = {
   ...Object.fromEntries(ANDROID_BRANDS.map((brand) => [brand, ["Down Board", "Power Flex"]])),
 };
 const money = (n: number) => `₦${Number(n || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+function isAccessory(item: InventoryItem) {
+  const category = (item.category || "").trim().toLowerCase();
+  return item.item_type === "accessory" || item.item_type === "gadget" || category === "accessories" || category === "gadgets & accessories";
+}
 const selectClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-[#1d6a54] focus:ring-2 focus:ring-[#1d6a54]/10";
 
 export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [customers, setCustomers] = useState<{ id: string; full_name: string; phone?: string | null }[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [saleSection, setSaleSection] = useState<"Phone Parts" | "Accessories">("Phone Parts");
+  const [accessoryQuery, setAccessoryQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("iPhone");
   const [selectedPartType, setSelectedPartType] = useState("Charging Flex");
   const [selectedModel, setSelectedModel] = useState("");
@@ -58,6 +64,12 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     return item.category === "Phone Parts" && Boolean(item.brand && types?.includes(item.subcategory || ""));
   }), [inventory]);
 
+  const accessories = useMemo(() => inventory.filter(isAccessory), [inventory]);
+  const visibleAccessories = useMemo(() => {
+    const needle = accessoryQuery.trim().toLowerCase();
+    return accessories.filter((item) => !needle || `${item.item_name} ${item.subcategory || ""} ${item.brand || ""} ${item.sku || ""}`.toLowerCase().includes(needle));
+  }, [accessories, accessoryQuery]);
+
   const partTypes = PHONE_PARTS[selectedBrand] || [];
 
   const models = useMemo(() => Array.from(new Set(phoneParts
@@ -68,6 +80,15 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const modelItems = useMemo(() => phoneParts.filter((item) => item.brand === selectedBrand && item.subcategory === selectedPartType && item.compatible_models === selectedModel), [phoneParts, selectedBrand, selectedPartType, selectedModel]);
 
   const variants = useMemo(() => Array.from(new Set(modelItems.map((item) => item.item_name.match(/ - (.+)$/)?.[1]).filter((variant): variant is string => Boolean(variant)))), [modelItems]);
+
+  function chooseSaleSection(section: "Phone Parts" | "Accessories") {
+    setSaleSection(section);
+    setSelectedItemId("");
+    setSelectedQty("1");
+    setSelectedModel("");
+    setSelectedVariant("");
+    setAccessoryQuery("");
+  }
 
   function resetSelection() {
     setSelectedModel(""); setSelectedVariant(""); setSelectedItemId("");
@@ -164,7 +185,16 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
       </header>
 
       <div className="space-y-5 p-5 sm:p-6">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Choose goods type">
+          {(["Phone Parts", "Accessories"] as const).map((section) => (
+            <button key={section} type="button" onClick={() => chooseSaleSection(section)} aria-pressed={saleSection === section}
+              className={`min-h-10 rounded-xl border px-4 text-sm font-bold transition ${saleSection === section ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+              {section}
+            </button>
+          ))}
+        </div>
         
+        {saleSection === "Phone Parts" ? (
           <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Phone brand</p>
             <div className="flex flex-wrap gap-2">{Object.keys(PHONE_PARTS).map((value) => <button key={value} type="button" onClick={() => chooseBrand(value)} className={`rounded-xl border px-4 py-2.5 text-sm font-bold ${selectedBrand === value ? "border-[#123b34] bg-[#123b34] text-white" : "border-slate-200 bg-white text-slate-700"}`}>{value}</button>)}</div>
@@ -195,8 +225,37 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
               </>
             )}
 
-            {selectedItem && <SelectedItem item={selectedItem} quantity={selectedQty} onQuantityChange={setSelectedQty} onAdd={addToCart} />}
+            {selectedItem && !isAccessory(selectedItem) && <SelectedItem item={selectedItem} quantity={selectedQty} onQuantityChange={setSelectedQty} onAdd={addToCart} />}
           </div>
+        ) : (
+          <div className="rounded-2xl border border-[#e6ebe7] bg-[#fbfcfa] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div><p className="text-xs font-bold uppercase tracking-wide text-slate-500">Shop accessories</p><p className="mt-1 text-sm text-slate-600">Choose an accessory from actual inventory. Stock and pricing come from the inventory record.</p></div>
+              <Input aria-label="Search accessories" placeholder="Search name, brand or code…" value={accessoryQuery} onChange={(event) => setAccessoryQuery(event.target.value)} className="sm:max-w-xs" />
+            </div>
+            {visibleAccessories.length ? (
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {visibleAccessories.map((item) => (
+                  <button key={item.id} type="button" disabled={item.quantity <= 0} onClick={() => { setSelectedItemId(item.id); setSelectedQty("1"); }}
+                    aria-pressed={selectedItemId === item.id}
+                    className={`min-w-0 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${selectedItemId === item.id ? "border-[#1d6a54] bg-[#eef4f1] ring-2 ring-[#1d6a54]/10" : "border-slate-200 bg-white hover:border-slate-300"}`}>
+                    <InventoryImage src={item.image_url} alt={item.item_name} size="sm" />
+                    <p className="mt-2 line-clamp-2 text-sm font-bold text-slate-800">{item.item_name}</p>
+                    <p className="mt-1 truncate text-xs text-slate-500">{[item.brand, item.subcategory].filter(Boolean).join(" · ") || "Accessory"}</p>
+                    <p className="mt-2 text-sm font-bold text-[#123b34]">{money(Number(item.selling_price))}</p>
+                    <p className="mt-1 text-[10px] text-slate-500">{item.quantity > 0 ? `${item.quantity} in stock` : "Out of stock"}</p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center">
+                <p className="text-sm font-semibold text-slate-800">{accessoryQuery.trim() ? "No matching accessories" : "No accessories in inventory yet"}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Add real stock under Home → Accessories before recording an accessories sale.</p>
+              </div>
+            )}
+            {selectedItem && isAccessory(selectedItem) && <SelectedItem item={selectedItem} quantity={selectedQty} onQuantityChange={setSelectedQty} onAdd={addToCart} />}
+          </div>
+        )}
 
         {cart.length > 0 ? (
           <div className="overflow-x-auto rounded-2xl border border-[#e6ebe7]">
