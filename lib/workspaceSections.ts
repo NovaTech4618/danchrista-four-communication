@@ -142,7 +142,7 @@ export const workspaceGroups: SectionGroup[] = [
         title: "Stock History",
         href: "/inventory/movements",
         description: "Review why inventory quantities changed—purchases, sales, repair use, engineer issue/return or a recorded stock adjustment.",
-        permission: "inventory",
+        permission: "profit",
         showOnHome: false,
         icon: Activity,
       },
