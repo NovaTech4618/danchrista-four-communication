@@ -26,7 +26,7 @@ export function permissionForPath(pathname: string): Permission | null {
     ["/expenses", "expenses"],
     ["/inventory/verify", "profit"], ["/inventory/opening-stock-import", "profit"], ["/inventory/import", "profit"],
     ["/inventory/purchases", "suppliers"], ["/inventory/suppliers", "suppliers"],
-    ["/inventory/stockroom", "inventory"], ["/inventory/movements", "inventory"], ["/inventory/accessories", "inventory"],
+    ["/inventory/stockroom", "inventory"], ["/inventory/movements", "profit"], ["/inventory/accessories", "inventory"],
     ["/inventory", "inventory"], ["/phone-parts", "inventory"], ["/parts-collection", "inventory"], ["/customers", "customers"],
     ["/suppliers", "suppliers"], ["/accounts", "profit"], ["/engineer-workflow", "engineer_work"], ["/engineers", "engineers"],
     ["/technician-ledger", "engineers"], ["/finance", "payments"], ["/credit", "payments"], ["/parts-credit", "payments"],
