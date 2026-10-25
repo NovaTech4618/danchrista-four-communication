@@ -49,6 +49,10 @@ export default function PhoneRepairsPage() {
           <h2 className="font-heading text-2xl font-bold">Not sure what your phone needs?</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#93a69c]">Bring the device in for assessment. The exact repair, parts requirement and cost can be discussed before work proceeds.</p>
           <Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Contact Amezing <ArrowRight className="size-4" /></Link>
+          <p className="mt-5 text-sm leading-6 text-[#93a69c]">
+            Preparing for a repair visit? Read our{" "}
+            <Link href="/phone-repair-guide" className="font-semibold text-[#e7b784] underline underline-offset-4">phone repair checklist for customers</Link>.
+          </p>
         </div>
       </div>
     </section>
