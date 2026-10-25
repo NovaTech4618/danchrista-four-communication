@@ -20,7 +20,7 @@ export function permissionsFor(role: StaffRole | null | undefined) {
 
 export function permissionForPath(pathname: string): Permission | null {
   const rules: Array<[string, Permission]> = [
-    ["/dashboard", "dashboard"], ["/workspace", "dashboard"], ["/repairs", "repairs"], ["/technical-services", "repairs"],
+    ["/dashboard", "dashboard"], ["/repairs", "repairs"], ["/technical-services", "repairs"],
     ["/tickets", "repairs"], ["/devices", "repairs"], ["/customer-requests", "customers"],
     ["/sales/mobile", "mobile_sales"], ["/sales", "sales"], ["/invoices", "invoices"],
     ["/expenses", "expenses"], ["/inventory", "inventory"], ["/phone-parts", "inventory"], ["/parts-collection", "inventory"], ["/customers", "customers"],
