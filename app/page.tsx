@@ -10,7 +10,7 @@ const siteUrl =
 const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
 
 export const metadata: Metadata = {
-  title: "Amezing Limited | Phone Repairs, Parts & Accessories in Kubwa",
+  title: "Amezing Limited | Phone Repair, Parts & Software in Kubwa",
   description:
     "Amezing Limited in Block A1, Shop 18, Central Market, Kubwa, Abuja offers phone repairs, phone parts, accessories and software services. Open daily from 9am to 10pm.",
   keywords: [
@@ -20,6 +20,8 @@ export const metadata: Metadata = {
     "phone accessories Kubwa",
     "phone repair Abuja",
     "phone parts Abuja",
+    "phone software repair Kubwa",
+    "firmware repair Kubwa",
   ],
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
@@ -86,9 +88,9 @@ const services = [
   },
   {
     icon: BatteryCharging,
-    title: "Software Services",
-    text: "Software-related phone service and support.",
-    href: "/services",
+    title: "Software & Firmware",
+    text: "Troubleshooting, firmware recovery and supported phone software cases.",
+    href: "/software-services",
   },
 ];
 
@@ -111,6 +113,7 @@ export default function HomePage() {
             <Link href="/phone-parts" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Parts</Link>
             <Link href="/accessories" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Accessories</Link>
             <Link href="/services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Services</Link>
+            <Link href="/software-services" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Software</Link>
             <Link href="/about" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">About</Link>
             <Link href="/contact" className="text-sm text-[#93a69c] hover:text-[#f4f1ea]">Contact</Link>
           </div>
@@ -270,6 +273,7 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#6b7d74]">
             <Link href="/about" className="hover:text-[#e7b784]">About</Link>
             <Link href="/services" className="hover:text-[#e7b784]">Services</Link>
+            <Link href="/software-services" className="hover:text-[#e7b784]">Software services</Link>
             <Link href="/contact" className="hover:text-[#e7b784]">Contact</Link>
             <Link href="/login" className="hover:text-[#e7b784]">Staff sign in</Link>
           </div>
