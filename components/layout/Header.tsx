@@ -20,7 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/help": "Help & Support", "/technical-services": "Technical Services", "/staff": "Staff",
   "/alerts": "Alerts", "/search": "Search", "/whatsapp": "WhatsApp",
   "/engineer-workflow": "Engineer Work", "/technician-ledger": "Parts Ledger",
-  "/customer-requests": "Customer Requests", "/invoices": "Invoices", "/outstanding": "Debit",
+  "/invoices": "Invoices",
   "/activity": "Activity History", "/expenses": "Expenses", "/suppliers": "Suppliers",
   "/parts-collection": "Daily Parts Collection", "/engineers": "Engineers", "/owed-owing": "Owed & Owing",
 };
