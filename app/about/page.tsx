@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ClipboardList, Handshake, ShieldCheck } from "lucide-react";
@@ -28,5 +29,6 @@ export default function AboutPage() {
       </div>
       <Link href="/services" className="mt-10 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Explore services <ArrowRight className="size-4" /></Link>
     </div></section>
-  </main>;
+        <FloatingWhatsApp />
+    </main>;
 }
