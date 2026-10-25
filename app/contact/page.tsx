@@ -4,8 +4,6 @@ import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-
 
 const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
 
-const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
-
 export const metadata: Metadata = {
   title: "Contact Amezing Limited | Kubwa, Abuja",
   description:
