@@ -23,8 +23,12 @@ export function permissionForPath(pathname: string): Permission | null {
     ["/dashboard", "dashboard"], ["/repairs", "repairs"], ["/technical-services", "repairs"],
     ["/tickets", "repairs"], ["/devices", "repairs"], ["/customer-requests", "customers"],
     ["/sales/mobile", "mobile_sales"], ["/sales", "sales"], ["/invoices", "invoices"],
-    ["/expenses", "expenses"], ["/inventory", "inventory"], ["/customers", "customers"],
-    ["/suppliers", "suppliers"], ["/engineer-workflow", "engineer_work"], ["/engineers", "engineers"],
+    ["/expenses", "expenses"],
+    ["/inventory/verify", "profit"], ["/inventory/opening-stock-import", "profit"], ["/inventory/import", "profit"],
+    ["/inventory/purchases", "suppliers"], ["/inventory/suppliers", "suppliers"],
+    ["/inventory/stockroom", "inventory"], ["/inventory/movements", "profit"], ["/inventory/accessories", "inventory"],
+    ["/inventory", "inventory"], ["/phone-parts", "inventory"], ["/parts-collection", "inventory"], ["/customers", "customers"],
+    ["/suppliers", "suppliers"], ["/accounts", "profit"], ["/engineer-workflow", "engineer_work"], ["/engineers", "engineers"],
     ["/technician-ledger", "engineers"], ["/finance", "payments"], ["/credit", "payments"], ["/parts-credit", "payments"],
     ["/outstanding", "outstanding"], ["/owed-owing", "outstanding"], ["/reports/daily-closing", "daily_closing"], ["/reports", "profit"],
     ["/audit", "staff"], ["/activity", "staff"], ["/alerts", "profit"], ["/whatsapp", "whatsapp"],
@@ -36,5 +40,5 @@ export function permissionForPath(pathname: string): Permission | null {
 }
 
 export const DEFAULT_ROLE_PATH: Record<StaffRole, string> = {
-  owner: "/dashboard", apprentice: "/repairs",
+  owner: "/workspace", apprentice: "/workspace",
 };
