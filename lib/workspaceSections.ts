@@ -13,6 +13,7 @@ export type SectionItem = {
   description: string;
   permission: Permission;
   icon: LucideIcon;
+  showOnHome?: boolean;
 };
 export type SectionGroup = {
   title: string;
@@ -44,6 +45,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/engineer-workflow",
         description: "A quick-entry form to record parts collected, returns, and work done for one selected engineer. Use Daily Parts Collection to review the day's wider movement history.",
         permission: "engineer_work",
+        showOnHome: false,
         icon: ClipboardCheck,
       },
       {
@@ -65,6 +67,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/technician-ledger",
         description: "Track parts used for a specific repair, returns against that repair, and the remaining part quantity. This is repair-specific, not the general engineer account.",
         permission: "engineers",
+        showOnHome: false,
         icon: Boxes,
       },
       {
@@ -88,10 +91,59 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Package,
       },
       {
+        title: "Stockroom",
+        href: "/inventory/stockroom",
+        description: "Browse the current catalogue by shelf or stock grouping, like finding goods in the physical shop.",
+        permission: "inventory",
+        showOnHome: false,
+        icon: Boxes,
+      },
+      {
+        title: "Supplier Purchase History",
+        href: "/inventory/purchases",
+        description: "Review recorded stock purchases, payment status, and the amount still outstanding on purchase records.",
+        permission: "suppliers",
+        showOnHome: false,
+        icon: FileText,
+      },
+      {
+        title: "Supplier Payables",
+        href: "/inventory/suppliers",
+        description: "Review supplier purchases and record a payment against a specific outstanding purchase invoice.",
+        permission: "suppliers",
+        showOnHome: false,
+        icon: CreditCard,
+      },
+      {
+        title: "Physical Stock Verification",
+        href: "/inventory/verify",
+        description: "Owner-only stock count: compare real quantities and prices with the catalogue and mark items verified without creating new products.",
+        permission: "profit",
+        showOnHome: false,
+        icon: ClipboardCheck,
+      },
+      {
+        title: "Bulk Opening Stock",
+        href: "/inventory/opening-stock-import",
+        description: "Owner-only bulk workflow to establish opening quantities and verified prices after physically counting stock.",
+        permission: "profit",
+        showOnHome: false,
+        icon: FileText,
+      },
+      {
+        title: "Import Inventory Catalog",
+        href: "/inventory/import",
+        description: "Owner-only CSV import for loading or updating catalogue rows in bulk. Use the template and verify the file before importing.",
+        permission: "profit",
+        showOnHome: false,
+        icon: FileText,
+      },
+      {
         title: "Stock History",
         href: "/inventory/movements",
         description: "Review why inventory quantities changed—purchases, sales, repair use, engineer issue/return or a recorded stock adjustment.",
         permission: "inventory",
+        showOnHome: false,
         icon: Activity,
       },
       {
@@ -134,6 +186,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/technical-services",
         description: "Maintain the shop’s service catalogue and labour/service prices used when quoting or selling technical work.",
         permission: "repairs",
+        showOnHome: false,
         icon: Zap,
       },
     ],
@@ -161,6 +214,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/outstanding",
         description: "Use the customer debit book for a person who collected goods or value and has not fully paid; record the amount paid and balance.",
         permission: "outstanding",
+        showOnHome: false,
         icon: HandCoins,
       },
       {
@@ -168,6 +222,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/credit",
         description: "Record goods or value the shop received from another person on credit, then track payments and the remaining payable.",
         permission: "payments",
+        showOnHome: false,
         icon: CreditCard,
       },
       {
@@ -175,6 +230,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/parts-credit",
         description: "Track a customer taking a specific stocked part on credit. Use it only for this parts-credit workflow, not as a normal completed sale.",
         permission: "payments",
+        showOnHome: false,
         icon: Boxes,
       },
       {
@@ -212,6 +268,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/alerts",
         description: "Review operational warnings that need attention, such as stock or account exceptions.",
         permission: "profit",
+        showOnHome: false,
         icon: BellRing,
       },
       {
@@ -219,6 +276,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/activity",
         description: "Review the timeline of important business actions when you need to know what changed and when.",
         permission: "staff",
+        showOnHome: false,
         icon: Activity,
       },
       {
@@ -226,6 +284,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/search",
         description: "Find a customer, repair, stock item or other available record without opening each section one by one.",
         permission: "search",
+        showOnHome: false,
         icon: Search,
       },
       {
@@ -261,6 +320,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/assistant",
         description: "Open the in-app assistant for help understanding how to use the workspace.",
         permission: "assistant",
+        showOnHome: false,
         icon: Sparkles,
       },
       {
@@ -268,6 +328,7 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/tickets",
         description: "Open or review a support request when an issue needs follow-up.",
         permission: "help",
+        showOnHome: false,
         icon: CircleHelp,
       },
     ],
