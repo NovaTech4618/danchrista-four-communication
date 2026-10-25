@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-react";
@@ -119,6 +120,7 @@ export default function ContactPage() {
           </p>
         </div>
       </section>
+          <FloatingWhatsApp />
     </main>
   );
 }
