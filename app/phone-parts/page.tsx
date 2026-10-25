@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Cpu, Package, Search } from "lucide-react";
@@ -42,5 +43,6 @@ export default function PhonePartsPage() {
       </div>
       <Link href="/contact" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]">Ask about a part <ArrowRight className="size-4" /></Link>
     </div></section>
-  </main>;
+        <FloatingWhatsApp />
+    </main>;
 }
