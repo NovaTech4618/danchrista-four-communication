@@ -42,7 +42,7 @@ export default function WorkspacePage() {
         ) : (
           <div className="space-y-8">
             {workspaceGroups.map((group) => {
-              const items = group.items.filter((item) => hasPermission(role, item.permission));
+              const items = group.items.filter((item) => item.showOnHome !== false && hasPermission(role, item.permission));
               if (!items.length) return null;
               const headingId = group.title.replaceAll(" ", "-").toLowerCase();
               return (
