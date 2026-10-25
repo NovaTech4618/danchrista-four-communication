@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone, Wrench } from "lucide-react";
 
+const mapsUrl = "https://maps.app.goo.gl/9w9zwbcZ5SJWKxwr5";
+
 export const metadata: Metadata = {
   title: "Contact Amezing Limited | Kubwa, Abuja",
   description:
@@ -41,7 +43,7 @@ export default function ContactPage() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-2">
             <a
-              href="https://wa.me/2348035902087"
+              href="https://wa.me/2348035902087?text=Hello%20Amezing%20Limited%2C%20I%20want%20to%20ask%20about%20a%20phone%20repair%20or%20service."
               target="_blank"
               rel="noreferrer"
               className="rounded-2xl border border-[#c98a4f]/20 bg-[#101f1a] p-7 transition hover:bg-[#14251f]"
@@ -65,7 +67,7 @@ export default function ContactPage() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             <a
-              href="https://www.google.com/maps/search/?api=1&query=Block+A1+Shop+18+Central+Market+Kubwa+Abuja"
+              href={mapsUrl}
               target="_blank"
               rel="noreferrer"
               className="rounded-xl border border-white/10 bg-[#101f1a] p-6 transition hover:bg-[#14251f]"
@@ -73,7 +75,7 @@ export default function ContactPage() {
               <MapPin className="size-5 text-[#e7b784]" />
               <h2 className="mt-4 text-sm font-bold">Location</h2>
               <p className="mt-1 text-sm leading-6 text-[#93a69c]">Block A1, Shop 18, Central Market, Kubwa, Abuja</p>
-              <p className="mt-3 text-xs text-[#e7b784]">Open in Maps →</p>
+              <p className="mt-3 text-xs text-[#e7b784]">Get directions in Google Maps →</p>
             </a>
 
             <div className="rounded-xl border border-white/10 bg-[#101f1a] p-6">
@@ -95,7 +97,7 @@ export default function ContactPage() {
               Send the exact phone model and the part you need. Examples: “Tecno Spark 10 charging flex” or “iPhone 11 earpiece flex.” Availability depends on current stock.
             </p>
             <a
-              href="https://wa.me/2348035902087"
+              href="https://wa.me/2348035902087?text=Hello%20Amezing%20Limited%2C%20I%20need%20a%20phone%20part.%20My%20phone%20model%20is%3A%20____.%20The%20part%20I%20need%20is%3A%20____."
               target="_blank"
               rel="noreferrer"
               className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#c98a4f] px-5 py-3 text-sm font-semibold text-[#1a1008]"

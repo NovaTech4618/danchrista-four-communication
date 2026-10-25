@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight, BatteryCharging, Cable, Headphones, Package, ShieldCheck, Speaker } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Phone Accessories | Amezing Limited",
-  description: "Phone accessories from Amezing Limited, including chargers, cables, earphones, screen protectors, power banks and speakers.",
+  title: "Phone Accessories in Kubwa, Abuja | Amezing Limited",
+  description: "Find phone accessories in Kubwa, Abuja at Amezing Limited: chargers, cables, earphones, screen protectors, power banks and speakers, subject to current stock.",
   alternates: { canonical: "/accessories" },
   keywords: [
       "Amezing Limited",
