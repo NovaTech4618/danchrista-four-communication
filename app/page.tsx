@@ -54,6 +54,7 @@ const businessSchema = {
     "Phone parts",
     "Phone accessories",
     "Phone software service",
+    "Phone firmware troubleshooting",
   ],
   hasMap: mapsUrl,
   address: {
