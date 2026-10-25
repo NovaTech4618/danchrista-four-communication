@@ -40,5 +40,5 @@ export function permissionForPath(pathname: string): Permission | null {
 }
 
 export const DEFAULT_ROLE_PATH: Record<StaffRole, string> = {
-  owner: "/workspace", apprentice: "/repairs",
+  owner: "/workspace", apprentice: "/workspace",
 };
