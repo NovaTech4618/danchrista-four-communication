@@ -205,9 +205,9 @@ export default function ReportsPage() {
       <main className="mx-auto w-full max-w-6xl space-y-5 pb-8">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Amezing Limited · Engineer records</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Daily Report</h1>
-            <p className="mt-1 text-sm text-slate-500">Four quick answers: parts given out, returned, used, and what remains with engineers.</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Amezing Limited · Engineer parts & account activity</p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Engineer Daily Report</h1>
+            <p className="mt-1 text-sm text-slate-500">Review engineer parts given out, returned and used, payments received from engineers, and what remains outstanding. Customer sales and repair revenue are not included on this page.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link href="/workspace" className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"><ArrowLeft className="size-4" />Home</Link>
@@ -218,7 +218,7 @@ export default function ReportsPage() {
 
         <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
           <span className="font-semibold text-slate-900">{dateLabel(date)}</span>
-          <span className="ml-2">· Amounts show payments recorded from engineers only. This page does not include customer sales or repair records.</span>
+          <span className="ml-2">· This report covers engineer parts movements and engineer payments only. It does not include customer sales, repair revenue or shop expenses.</span>
         </div>
 
         {reportHasError && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
