@@ -48,6 +48,26 @@ export default function HelpPage() {
           Record each transaction once.
         </p>
 
+        <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="device-help-title">
+          <h2 id="device-help-title" className="font-heading text-lg font-bold text-[#182a28]">Use Amezing on any device</h2>
+          <p className="mt-1 text-sm leading-6 text-[#74837e]">Use the same website on a phone, tablet, or computer. You can install it for quicker access, but installation is optional.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-[#e3e9e4] bg-[#fbfcfa] p-3">
+              <h3 className="text-sm font-bold text-[#263a35]">Android</h3>
+              <p className="mt-1 text-xs leading-5 text-[#74837e]">Open Amezing in Chrome. Open the browser menu and choose “Install app” or “Add to Home screen” if shown.</p>
+            </div>
+            <div className="rounded-xl border border-[#e3e9e4] bg-[#fbfcfa] p-3">
+              <h3 className="text-sm font-bold text-[#263a35]">iPhone or iPad</h3>
+              <p className="mt-1 text-xs leading-5 text-[#74837e]">Open Amezing in Safari, tap Share, then choose “Add to Home Screen”.</p>
+            </div>
+            <div className="rounded-xl border border-[#e3e9e4] bg-[#fbfcfa] p-3">
+              <h3 className="text-sm font-bold text-[#263a35]">Computer</h3>
+              <p className="mt-1 text-xs leading-5 text-[#74837e]">Use Chrome, Edge, or another supported browser. If an install icon is available in the address bar, use it to add Amezing.</p>
+            </div>
+          </div>
+          <p className="mt-3 rounded-xl bg-[#f4f8f5] px-3 py-2.5 text-xs leading-5 text-[#40534d]">Internet is required to load and save live shop records. If Amezing shows “You are offline”, reconnect before recording sales, payments, repairs, or stock movements.</p>
+        </section>
+
         <div className="space-y-6">
           {workspaceGroups.map((group) => (
             <section key={group.title} aria-labelledby={group.title.replaceAll(" ", "-").toLowerCase()}>
