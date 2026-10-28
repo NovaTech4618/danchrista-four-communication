@@ -83,7 +83,7 @@ export default function Header() {
   const displayName = fullName || "Staff member";
   const initial = displayName.charAt(0).toUpperCase();
   const iconButtonClass = "inline-flex size-10 sm:size-9 items-center justify-center rounded-xl border border-[#dfe6df] bg-white text-[#5b6d68] transition hover:border-[#c8d3ce] hover:bg-[#f5f7f4] hover:text-[#123b34] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]";
-  const mobileLinks: Array<{ title: string; href: string; permission: Permission | null; icon: typeof Home }> = [
+  const allMobileLinks: Array<{ title: string; href: string; permission: Permission | null; icon: typeof Home }> = [
     { title: "Home", href: "/workspace", permission: null, icon: Home },
     { title: "New repair", href: "/repairs/new", permission: "repairs", icon: Wrench },
     { title: "Parts out", href: "/parts-collection", permission: "inventory", icon: Boxes },
@@ -95,7 +95,8 @@ export default function Header() {
     { title: "Search", href: "/search", permission: "search", icon: Search },
     { title: "Settings", href: "/settings", permission: "settings", icon: Settings },
     { title: "Staff", href: "/staff", permission: "staff", icon: Users },
-  ].filter((item) => !item.permission || hasPermission(role, item.permission));
+  ];
+  const mobileLinks = allMobileLinks.filter((item) => !item.permission || hasPermission(role, item.permission));
 
   return (
     <header className="sticky top-0 z-40 flex min-h-16 items-center justify-between gap-2 border-b border-[#dfe6df] bg-[#fbfaf7]/95 px-3 backdrop-blur-xl sm:gap-3 sm:px-5 md:min-h-[72px] md:px-8" role="banner">
