@@ -172,8 +172,8 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
         <Metric title="Late" value={metrics ? String(metrics.overdue.length) : "—"} icon={AlertTriangle} href="/repairs" tone={Boolean(metrics?.overdue.length) ? "amber" : "normal"} />
         {canSeeOwnerSummary && (
           <>
-            <Metric title="Owing" value={summary ? money(summary.outstanding_customer) : "—"} icon={Wallet} href="/outstanding" />
-            <Metric title="Engineers" value={summary ? money(summary.engineer_debit) : "—"} icon={UserRound} href="/engineers" />
+            <Metric title="Customer debt" value={summary ? money(summary.outstanding_customer) : "—"} icon={Wallet} href="/outstanding" />
+            <Metric title="Engineer debt" value={summary ? money(summary.engineer_debit) : "—"} icon={UserRound} href="/engineers" />
             <Metric title="Low stock" value={summary ? String(summary.low_stock_count) : "—"} icon={Package} href="/inventory" tone={summary?.low_stock_count ? "amber" : "normal"} />
           </>
         )}
