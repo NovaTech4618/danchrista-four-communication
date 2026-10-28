@@ -78,7 +78,7 @@ function deviceLabel(repair: RepairRow) {
 }
 
 function customerLabel(repair: RepairRow) {
-  const device = related(repair.devices);
+  const device = firstDevice(repair.devices);
   const customer = firstCustomer(device?.customers);
   return customer?.full_name || "Customer name unavailable";
 }
@@ -230,7 +230,7 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Repair flow</p>
               <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Current pipeline</h3>
-              <p className="mt-1 text-xs text-[#74837e]">Received ${monthRangeLabel}; each job is counted by its current status.</p>
+              <p className="mt-1 text-xs text-[#74837e]">Received {monthRangeLabel}; each job is counted by its current status.</p>
             </div>
             <Link href="/repairs" className="shrink-0 text-xs font-bold text-[#1d6a54] hover:underline">All repairs</Link>
           </div>
