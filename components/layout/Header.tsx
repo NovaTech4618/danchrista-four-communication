@@ -7,22 +7,22 @@ import { supabase, getCurrentSession } from "@/lib/supabase";
 
 const PAGE_TITLES: Record<string, string> = {
   "/workspace": "Home", "/dashboard": "Home", "/customers": "Customers", "/devices": "Devices",
-  "/customer-requests": "Customer Requests", "/phone-parts": "Phone Parts",
-  "/inventory/accessories": "Accessories & Gadgets", "/inventory/purchases": "Supplier Purchases",
-  "/inventory/movements": "Stock History", "/inventory/stockroom": "Stockroom",
-  "/inventory/verify": "Physical Verification", "/inventory/import": "Inventory Import",
-  "/inventory/opening-stock-import": "Bulk Opening Stock", "/inventory/suppliers": "Supplier Payables",
-  "/reports/daily-closing": "Daily Expenses & Closing", "/accounts": "Accounts",
-  "/credit": "People Amezing Owes", "/parts-credit": "Customer Parts Credit",
-  "/outstanding": "People Who Owe Us", "/tickets": "Support Tickets", "/assistant": "Amezing Assistant",
-  "/repairs": "Repairs", "/inventory": "Phone Parts", "/sales": "Sales", "/finance": "Money Movement",
-  "/reports": "Engineer Daily Report", "/settings": "Settings",
-  "/help": "Help & Support", "/technical-services": "Technical Services", "/staff": "Staff",
+  "/customer-requests": "Requests", "/phone-parts": "Phone Parts",
+  "/inventory/accessories": "Accessories", "/inventory/purchases": "Purchases",
+  "/inventory/movements": "History", "/inventory/stockroom": "Stockroom",
+  "/inventory/verify": "Verify Stock", "/inventory/import": "Import",
+  "/inventory/opening-stock-import": "Opening Stock", "/inventory/suppliers": "Payables",
+  "/reports/daily-closing": "Closing", "/accounts": "Accounts",
+  "/credit": "Shop Debt", "/parts-credit": "Parts Credit",
+  "/outstanding": "Owing", "/tickets": "Support", "/assistant": "Assistant",
+  "/repairs": "Repairs", "/inventory": "Phone Parts", "/sales": "Sales", "/finance": "Money",
+  "/reports": "Report", "/settings": "Settings",
+  "/help": "Help", "/technical-services": "Services", "/staff": "Staff",
   "/alerts": "Alerts", "/search": "Search", "/whatsapp": "WhatsApp",
-  "/engineer-workflow": "Engineer Work", "/technician-ledger": "Parts Ledger",
+  "/engineer-workflow": "Part Entry", "/technician-ledger": "Repair Parts",
   "/invoices": "Invoices",
-  "/activity": "Activity History", "/expenses": "Expenses", "/suppliers": "Suppliers",
-  "/parts-collection": "Daily Parts Collection", "/engineers": "Engineers", "/owed-owing": "Owed & Owing",
+  "/activity": "Activity", "/expenses": "Expenses", "/suppliers": "Suppliers",
+  "/parts-collection": "Parts Out", "/engineers": "Engineers", "/owed-owing": "Debts",
 };
 function getPageTitle(pathname: string) {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
@@ -74,7 +74,7 @@ export default function Header() {
           </button>
         )}
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Amezing workspace</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Amezing</p>
           <h1 className="truncate font-heading text-lg font-bold tracking-tight text-[#182a28] md:text-xl">{getPageTitle(pathname)}</h1>
         </div>
       </div>
