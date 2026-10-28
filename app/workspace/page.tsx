@@ -22,6 +22,19 @@ export default function WorkspacePage() {
     return () => { active = false; };
   }, []);
 
+  const query = pageSearch.trim().toLowerCase();
+  const visibleGroups = role === null ? [] : workspaceGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (item.href === "/inventory/accessories" || !hasPermission(role, item.permission)) return false;
+        if (!query || group.title.toLowerCase().includes(query)) return true;
+        return (item.title + " " + item.description + " " + item.href).toLowerCase().includes(query);
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
+  const visiblePageCount = visibleGroups.reduce((count, group) => count + group.items.length, 0);
+
   return (
     <AppLayout>
       <main className="mx-auto max-w-7xl space-y-7 pb-8">
@@ -61,14 +74,17 @@ export default function WorkspacePage() {
           </div>
         ) : (
           <div className="space-y-7">
-            {workspaceGroups.map((group) => {
-              const query = pageSearch.trim().toLowerCase();
-              const items = group.items.filter((item) => {
-                if (item.href === "/inventory/accessories" || !hasPermission(role, item.permission)) return false;
-                if (!query || group.title.toLowerCase().includes(query)) return true;
-                return `${item.title} ${item.description} ${item.href}`.toLowerCase().includes(query);
-              });
-              if (!items.length) return null;
+            {query && visiblePageCount > 0 && (
+              <p role="status" className="text-sm text-[#53635d]">Found {visiblePageCount} page{visiblePageCount === 1 ? "" : "s"} for “{pageSearch.trim()}”.</p>
+            )}
+            {query && visiblePageCount === 0 ? (
+              <section className="rounded-2xl border border-dashed border-[#dfe6df] bg-white p-6 text-center">
+                <h2 className="font-heading text-lg font-bold text-[#263a35]">No pages found</h2>
+                <p className="mt-1 text-sm text-[#74837e]">Try a shorter word, or clear your search to see all pages.</p>
+                <button type="button" onClick={() => setPageSearch("")} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#123b34] px-4 text-sm font-bold text-white hover:bg-[#1d6a54]">Show all pages</button>
+              </section>
+            ) : visibleGroups.map((group) => {
+              const items = group.items;
               const headingId = group.title.replaceAll(" ", "-").toLowerCase();
               return (
                 <section key={group.title} aria-labelledby={headingId}>
