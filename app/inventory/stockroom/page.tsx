@@ -36,10 +36,18 @@ function matchesGroup(item: InventoryItem, matches: readonly string[]) {
   return matches.some(match => value === match.toLowerCase());
 }
 function matchesPartGroup(item: InventoryItem, groupName: string, matches: readonly string[]) {
+  if (groupFor(item) !== "parts") return false;
   if (groupName === "iPhone") return item.brand === "iPhone" && matchesGroup(item, matches);
   if (groupName === "Samsung") return item.brand === "Samsung" && matchesGroup(item, matches);
   if (groupName === "Android") return item.brand !== "iPhone" && item.brand !== "Samsung" && matchesGroup(item, matches);
-  return matchesGroup(item, matches);
+
+  // "Other Phone Parts" is the catch-all shelf for valid parts not already
+  // shown in the named groups. Do not require a hard-coded subcategory list.
+  const belongsToNamedGroup =
+    (item.brand === "iPhone" && matchesGroup(item, PART_GROUPS[0].matches)) ||
+    (item.brand === "Samsung" && matchesGroup(item, PART_GROUPS[1].matches)) ||
+    (item.brand !== "iPhone" && item.brand !== "Samsung" && matchesGroup(item, PART_GROUPS[2].matches));
+  return !belongsToNamedGroup;
 }
 
 function money(value: number) {
