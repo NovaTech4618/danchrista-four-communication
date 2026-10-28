@@ -23,8 +23,8 @@ export type SectionGroup = {
 
 export const workspaceGroups: SectionGroup[] = [
   {
-    title: "Daily shop work",
-    description: "The main jobs to complete during a normal day.",
+    title: "Work",
+    description: "Work",
     items: [
       {
         title: "Repairs",
@@ -34,14 +34,14 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Wrench,
       },
       {
-        title: "Daily Parts Collection",
+        title: "Parts Out",
         href: "/parts-collection",
         description: "Record parts issued to engineers, mark parts used or returned, and check what is still out on a selected date.",
         permission: "inventory",
         icon: ArrowLeftRight,
       },
       {
-        title: "Engineer Work",
+        title: "Part Entry",
         href: "/engineer-workflow",
         description: "A quick-entry form to record parts collected, returns, and work done for one selected engineer. Use Daily Parts Collection to review the day's wider movement history.",
         permission: "engineer_work",
@@ -56,14 +56,14 @@ export const workspaceGroups: SectionGroup[] = [
         icon: UserRound,
       },
       {
-        title: "Engineer Daily Report",
+        title: "Report",
         href: "/reports",
         description: "Review parts given out, returned, used, engineer payments, and parts still outstanding for the selected day. This is not the customer-sales report.",
         permission: "profit",
         icon: BarChart3,
       },
       {
-        title: "Technician Parts Ledger",
+        title: "Repair Parts",
         href: "/technician-ledger",
         description: "Track parts used for a specific repair, returns against that repair, and the remaining part quantity. This is repair-specific, not the general engineer account.",
         permission: "engineers",
@@ -71,7 +71,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Boxes,
       },
       {
-        title: "Daily Expenses & Closing",
+        title: "Closing",
         href: "/reports/daily-closing",
         description: "Record transport, feeding, electricity, water and other shop expenses; reconcile the day against actual cash and payment totals.",
         permission: "daily_closing",
@@ -80,8 +80,8 @@ export const workspaceGroups: SectionGroup[] = [
     ],
   },
   {
-    title: "Stock, customers & sales",
-    description: "Keep goods, customer records and shop sales in the right place.",
+    title: "Stock",
+    description: "Stock",
     items: [
       {
         title: "Phone Parts",
@@ -99,7 +99,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Boxes,
       },
       {
-        title: "Supplier Purchase History",
+        title: "Purchases",
         href: "/inventory/purchases",
         description: "Review recorded stock purchases, payment status, and the amount still outstanding on purchase records.",
         permission: "suppliers",
@@ -107,7 +107,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: FileText,
       },
       {
-        title: "Supplier Payables",
+        title: "Payables",
         href: "/inventory/suppliers",
         description: "Review supplier purchases and record a payment against a specific outstanding purchase invoice.",
         permission: "suppliers",
@@ -115,7 +115,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: CreditCard,
       },
       {
-        title: "Physical Stock Verification",
+        title: "Verify Stock",
         href: "/inventory/verify",
         description: "Owner-only stock count: compare real quantities and prices with the catalogue and mark items verified without creating new products.",
         permission: "profit",
@@ -123,7 +123,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: ClipboardCheck,
       },
       {
-        title: "Bulk Opening Stock",
+        title: "Opening Stock",
         href: "/inventory/opening-stock-import",
         description: "Owner-only bulk workflow to establish opening quantities and verified prices after physically counting stock.",
         permission: "profit",
@@ -131,7 +131,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: FileText,
       },
       {
-        title: "Import Inventory Catalog",
+        title: "Import Stock",
         href: "/inventory/import",
         description: "Owner-only CSV import for loading or updating catalogue rows in bulk. Use the template and verify the file before importing.",
         permission: "profit",
@@ -139,7 +139,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: FileText,
       },
       {
-        title: "Stock History",
+        title: "History",
         href: "/inventory/movements",
         description: "Review why inventory quantities changed—purchases, sales, repair use, engineer issue/return or a recorded stock adjustment.",
         permission: "profit",
@@ -147,10 +147,11 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Activity,
       },
       {
-        title: "Accessories & Gadgets",
+        title: "Accessories",
         href: "/inventory/accessories",
         description: "Manage retail accessories separately from repair parts, including their own quantities, selling prices and low-stock levels.",
         permission: "inventory",
+        showOnHome: false,
         icon: Cable,
       },
       {
@@ -175,14 +176,14 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Smartphone,
       },
       {
-        title: "Customer Requests",
+        title: "Requests",
         href: "/customer-requests",
         description: "Review incoming requests before or while they are turned into a proper customer or repair record.",
         permission: "customers",
         icon: MessageCircle,
       },
       {
-        title: "Technical Services",
+        title: "Services",
         href: "/technical-services",
         description: "Maintain the shop’s service catalogue and labour/service prices used when quoting or selling technical work.",
         permission: "repairs",
@@ -192,25 +193,25 @@ export const workspaceGroups: SectionGroup[] = [
     ],
   },
   {
-    title: "Debts, money & purchasing",
-    description: "Use the section that matches the transaction being recorded; these books serve different purposes.",
+    title: "Money",
+    description: "Money",
     items: [
       {
-        title: "Owed & Owing",
+        title: "Debts",
         href: "/owed-owing",
         description: "Get a follow-up view of customer and engineer balances and amounts payable to suppliers, including people reaching a reminder threshold.",
         permission: "outstanding",
         icon: HandCoins,
       },
       {
-        title: "Invoices & Receipts",
+        title: "Invoices",
         href: "/invoices",
         description: "Create a customer invoice, collect full or partial payments, view the remaining balance, and print receipts.",
         permission: "invoices",
         icon: FileText,
       },
       {
-        title: "People Who Owe Us",
+        title: "Customer Debt",
         href: "/outstanding",
         description: "Use the customer debit book for a person who collected goods or value and has not fully paid; record the amount paid and balance.",
         permission: "outstanding",
@@ -218,7 +219,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: HandCoins,
       },
       {
-        title: "People Amezing Owes",
+        title: "Shop Debt",
         href: "/credit",
         description: "Record goods or value the shop received from another person on credit, then track payments and the remaining payable.",
         permission: "payments",
@@ -226,7 +227,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: CreditCard,
       },
       {
-        title: "Customer Parts Credit",
+        title: "Parts Credit",
         href: "/parts-credit",
         description: "Track a customer taking a specific stocked part on credit. Use it only for this parts-credit workflow, not as a normal completed sale.",
         permission: "payments",
@@ -234,7 +235,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Boxes,
       },
       {
-        title: "Money Movement",
+        title: "Money",
         href: "/finance",
         description: "Review the recorded financial ledger: money in, money out, and net movement over a selected period. Entries come from real business events.",
         permission: "payments",
@@ -248,7 +249,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Landmark,
       },
       {
-        title: "Suppliers & Purchases",
+        title: "Suppliers",
         href: "/suppliers",
         description: "Maintain supplier details, review purchasing history, and track the amount still payable to each supplier.",
         permission: "suppliers",
@@ -257,8 +258,8 @@ export const workspaceGroups: SectionGroup[] = [
     ],
   },
   {
-    title: "Control, communication & help",
-    description: "Tools for finding records, managing access, and checking what happened.",
+    title: "More",
+    description: "More",
     items: [
 
 
@@ -272,7 +273,7 @@ export const workspaceGroups: SectionGroup[] = [
         icon: BellRing,
       },
       {
-        title: "Activity History",
+        title: "Activity",
         href: "/activity",
         description: "Review the timeline of important business actions when you need to know what changed and when.",
         permission: "staff",
@@ -309,14 +310,14 @@ export const workspaceGroups: SectionGroup[] = [
         icon: Settings,
       },
       {
-        title: "Help & Section Guide",
+        title: "Help",
         href: "/help",
         description: "Read what each section does, how the workflows relate, and where to go for a task.",
         permission: "help",
         icon: BookOpen,
       },
       {
-        title: "Amezing Assistant",
+        title: "Assistant",
         href: "/assistant",
         description: "Open the in-app assistant for help understanding how to use the workspace.",
         permission: "assistant",
