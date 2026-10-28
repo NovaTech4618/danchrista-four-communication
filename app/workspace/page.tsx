@@ -7,6 +7,7 @@ import { staffService } from "@/services/staffService";
 import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
+import WorkspaceOverview from "@/components/workspace/WorkspaceOverview";
 
 export default function WorkspacePage() {
   const [role, setRole] = useState<StaffRole | null>(null);
@@ -34,6 +35,8 @@ export default function WorkspacePage() {
             <Link href="/help" className="rounded-full border border-[#dfe6df] px-3 py-1.5 font-semibold text-[#1d6a54] hover:bg-[#f5f8f5]">Read the section guide →</Link>
           </div>
         </header>
+
+        {role !== null && <WorkspaceOverview role={role} />}
 
         {role === null ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading workspace" aria-busy="true">
