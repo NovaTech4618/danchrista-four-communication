@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Activity, AlertTriangle, ArrowRight, ArrowUpRight, Banknote, Boxes,
-  ClipboardList, Package, RefreshCw, UserRound, Wallet, Wrench,
+  Activity, AlertTriangle, ArrowUpRight, Banknote, Boxes, ClipboardList,
+  Package, RefreshCw, UserRound, Wallet, Wrench,
 } from "lucide-react";
 import { dashboardService, type DashboardSummary } from "@/services/dashboardService";
 import { repairService } from "@/services/repairService";
@@ -28,10 +28,10 @@ type OverviewProps = { role: StaffRole };
 const TERMINAL_STATUSES = ["Collected", "Cancelled", "No Fix", "Failed Repair", "Returned Unrepaired"];
 const REPAIR_PIPELINE = [
   { label: "Received", statuses: ["Received"] },
-  { label: "Diagnosis / quote", statuses: ["Diagnosis", "Estimate Sent", "Customer Approved"] },
-  { label: "Repairing", statuses: ["Repairing"] },
-  { label: "Testing", statuses: ["Testing"] },
-  { label: "Ready for pickup", statuses: ["Completed"] },
+  { label: "Quote", statuses: ["Diagnosis", "Estimate Sent", "Customer Approved"] },
+  { label: "Repair", statuses: ["Repairing"] },
+  { label: "Test", statuses: ["Testing"] },
+  { label: "Ready", statuses: ["Completed"] },
   { label: "Collected", statuses: ["Collected"] },
 ];
 
@@ -46,10 +46,7 @@ function firstCustomer(value: CustomerRelation | undefined): CustomerRow | null 
 function shopDate(value: string | Date) {
   const date = value instanceof Date ? value : new Date(value);
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Africa/Lagos",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+    timeZone: "Africa/Lagos", year: "numeric", month: "2-digit", day: "2-digit",
   }).formatToParts(date);
   const part = (name: string) => parts.find((item) => item.type === name)?.value ?? "";
   return `${part("year")}-${part("month")}-${part("day")}`;
@@ -57,46 +54,36 @@ function shopDate(value: string | Date) {
 
 function displayDate(value: string) {
   return new Intl.DateTimeFormat("en-NG", {
-    timeZone: "Africa/Lagos",
-    day: "numeric",
-    month: "short",
+    timeZone: "Africa/Lagos", day: "numeric", month: "short",
   }).format(new Date(value));
 }
 
 function money(value: number) {
   return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    maximumFractionDigits: 0,
+    style: "currency", currency: "NGN", maximumFractionDigits: 0,
   }).format(Number(value || 0));
 }
 
 function deviceLabel(repair: RepairRow) {
   const device = firstDevice(repair.devices);
   const label = [device?.brand, device?.model].filter(Boolean).join(" ");
-  return label || "Device details unavailable";
+  return label || "Unknown device";
 }
 
 function customerLabel(repair: RepairRow) {
   const device = firstDevice(repair.devices);
   const customer = firstCustomer(device?.customers);
-  return customer?.full_name || "Customer name unavailable";
+  return customer?.full_name || "Unknown customer";
 }
 
 function statusLabel(status: string) {
-  return status === "Completed" ? "Ready for pickup" : status;
+  return status === "Completed" ? "Ready" : status;
 }
 
 function statusStyle(status: string) {
-  if (status === "Completed" || status === "Collected") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  }
-  if (["No Fix", "Failed Repair", "Returned Unrepaired", "Cancelled"].includes(status)) {
-    return "border-slate-200 bg-slate-100 text-slate-600";
-  }
-  if (status === "Repairing" || status === "Testing") {
-    return "border-sky-200 bg-sky-50 text-sky-700";
-  }
+  if (status === "Completed" || status === "Collected") return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  if (["No Fix", "Failed Repair", "Returned Unrepaired", "Cancelled"].includes(status)) return "border-slate-200 bg-slate-100 text-slate-600";
+  if (status === "Repairing" || status === "Testing") return "border-sky-200 bg-sky-50 text-sky-700";
   return "border-amber-200 bg-amber-50 text-amber-800";
 }
 
@@ -139,7 +126,6 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
 
   const today = shopDate(new Date());
   const monthKey = today.slice(0, 7);
-  const monthRangeLabel = `${displayDate(`${monthKey}-01T12:00:00+01:00`)} – ${displayDate(new Date().toISOString())}`;
   const monthRepairs = repairs?.filter((repair) => shopDate(repair.created_at).slice(0, 7) === monthKey) ?? [];
   const metrics = useMemo(() => {
     if (!repairs) return null;
@@ -152,90 +138,78 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
 
   const recentRepairs = repairs?.slice(0, 5) ?? [];
   const readyRepairs = metrics?.ready.slice(0, 4) ?? [];
-  const actions: Array<{ title: string; detail: string; href: string; permission: Permission; icon: typeof Wrench }> =
+  const actions: Array<{ title: string; href: string; permission: Permission; icon: typeof Wrench }> =
     role === "owner"
       ? [
-          { title: "New repair", detail: "Receive a phone and record its fault", href: "/repairs/new", permission: "repairs", icon: Wrench },
-          { title: "Daily parts collection", detail: "Track parts given to or returned by engineers", href: "/parts-collection", permission: "inventory", icon: Boxes },
-          { title: "Engineers & balances", detail: "Review parts, payments and outstanding balances", href: "/engineers", permission: "engineers", icon: UserRound },
-          { title: "Engineer daily report", detail: "Check today's part movements and payments", href: "/reports", permission: "profit", icon: ClipboardList },
-          { title: "Expenses & closing", detail: "Record costs and reconcile the day", href: "/reports/daily-closing", permission: "daily_closing", icon: Wallet },
+          { title: "New repair", href: "/repairs/new", permission: "repairs", icon: Wrench },
+          { title: "Parts out", href: "/parts-collection", permission: "inventory", icon: Boxes },
+          { title: "Engineers", href: "/engineers", permission: "engineers", icon: UserRound },
+          { title: "Report", href: "/reports", permission: "profit", icon: ClipboardList },
+          { title: "Closing", href: "/reports/daily-closing", permission: "daily_closing", icon: Wallet },
         ]
       : [
-          { title: "New repair", detail: "Receive a phone and record its fault", href: "/repairs/new", permission: "repairs", icon: Wrench },
-          { title: "Daily parts collection", detail: "Track parts given out and returned", href: "/parts-collection", permission: "inventory", icon: Boxes },
-          { title: "Phone parts", detail: "Find stock and check quantities", href: "/inventory", permission: "inventory", icon: Package },
-          { title: "Sales / POS", detail: "Record a shop sale", href: "/sales", permission: "sales", icon: Banknote },
-          { title: "Expenses & closing", detail: "Record shop expenses", href: "/reports/daily-closing", permission: "daily_closing", icon: Wallet },
+          { title: "New repair", href: "/repairs/new", permission: "repairs", icon: Wrench },
+          { title: "Parts out", href: "/parts-collection", permission: "inventory", icon: Boxes },
+          { title: "Stock", href: "/inventory", permission: "inventory", icon: Package },
+          { title: "Sale", href: "/sales", permission: "sales", icon: Banknote },
+          { title: "Closing", href: "/reports/daily-closing", permission: "daily_closing", icon: Wallet },
         ];
   const visibleActions = actions.filter((action) => hasPermission(role, action.permission));
 
   return (
-    <section className="space-y-5" aria-labelledby="shop-activity-heading">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop activity</p>
-          <h2 id="shop-activity-heading" className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#182a28]">At a glance</h2>
-          <p className="mt-1 text-sm text-[#74837e]">Live repair work and the main tasks for the shop.</p>
-        </div>
-        <button type="button" onClick={() => void load()} disabled={refreshing} className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-[#dfe6df] bg-white px-3 text-sm font-semibold text-[#285c4d] hover:bg-[#f5f8f5] disabled:opacity-60 sm:self-auto">
-          <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+    <section className="space-y-4" aria-labelledby="overview-title">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="overview-title" className="font-heading text-xl font-bold tracking-tight text-[#182a28]">Overview</h2>
+        <button type="button" onClick={() => void load()} disabled={refreshing} aria-label="Refresh" title="Refresh" className="inline-flex size-10 items-center justify-center rounded-xl border border-[#dfe6df] bg-white text-[#285c4d] hover:bg-[#f5f8f5] disabled:opacity-60">
+          <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric title="Repairs received today" value={metrics ? String(metrics.receivedToday) : "—"} detail="New repair records" icon={Wrench} href="/repairs" />
-        <Metric title="In the workshop" value={metrics ? String(metrics.active.length) : "—"} detail="Still being worked on" icon={Activity} href="/repairs" />
-        <Metric title="Ready for pickup" value={metrics ? String(metrics.ready.length) : "—"} detail="Completed, awaiting collection" icon={ArrowUpRight} href="/repairs" />
-        <Metric title="Overdue jobs" value={metrics ? String(metrics.overdue.length) : "—"} detail="Past expected date, still in progress" icon={AlertTriangle} href="/repairs" tone={Boolean(metrics?.overdue.length) ? "amber" : "normal"} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
+        <Metric title="New today" value={metrics ? String(metrics.receivedToday) : "—"} icon={Wrench} href="/repairs" />
+        <Metric title="Active" value={metrics ? String(metrics.active.length) : "—"} icon={Activity} href="/repairs" />
+        <Metric title="Ready" value={metrics ? String(metrics.ready.length) : "—"} icon={ArrowUpRight} href="/repairs" />
+        <Metric title="Late" value={metrics ? String(metrics.overdue.length) : "—"} icon={AlertTriangle} href="/repairs" tone={Boolean(metrics?.overdue.length) ? "amber" : "normal"} />
         {canSeeOwnerSummary && (
           <>
-            <Metric title="Customer balances due" value={summary ? money(summary.outstanding_customer) : "—"} detail="Outstanding across customer accounts" icon={Wallet} href="/outstanding" />
-            <Metric title="Engineer balances" value={summary ? money(summary.engineer_debit) : "—"} detail="Engineer account overview" icon={UserRound} href="/engineers" />
-            <Metric title="Low-stock items" value={summary ? String(summary.low_stock_count) : "—"} detail="Check quantities before issuing parts" icon={Package} href="/inventory" tone={summary?.low_stock_count ? "amber" : "normal"} />
+            <Metric title="Owing" value={summary ? money(summary.outstanding_customer) : "—"} icon={Wallet} href="/outstanding" />
+            <Metric title="Engineers" value={summary ? money(summary.engineer_debit) : "—"} icon={UserRound} href="/engineers" />
+            <Metric title="Low stock" value={summary ? String(summary.low_stock_count) : "—"} icon={Package} href="/inventory" tone={summary?.low_stock_count ? "amber" : "normal"} />
           </>
         )}
       </div>
       {(repairError || summaryError) && (
-        <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Some live figures could not be loaded. Refresh to try again; unavailable values are shown as a dash rather than a misleading zero.
-        </div>
+        <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Some data did not load. Refresh to retry.
+        </p>
       )}
 
       <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)] sm:p-5">
-        <div className="mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Quick actions</p>
-          <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Start the next task</h3>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <h3 className="mb-3 font-heading text-lg font-bold text-[#182a28]">Quick links</h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
           {visibleActions.map((action) => {
             const Icon = action.icon;
             return (
-              <Link key={action.title} href={action.href} className="group flex min-h-24 items-start gap-3 rounded-xl border border-[#e3e9e4] p-3 transition hover:border-[#bfd2c8] hover:bg-[#f7faf7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]">
+              <Link key={action.title} href={action.href} className="flex min-h-20 items-center gap-3 rounded-xl border border-[#e3e9e4] p-3 transition hover:border-[#bfd2c8] hover:bg-[#f7faf7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]">
                 <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#eef4f1] text-[#1d6a54]"><Icon className="size-4" /></span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold text-[#263a35]">{action.title}</span>
-                  <span className="mt-1 block text-xs leading-5 text-[#74837e]">{action.detail}</span>
-                  <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#1d6a54]">Open <ArrowRight className="size-3" /></span>
-                </span>
+                <span className="text-sm font-bold text-[#263a35]">{action.title}</span>
               </Link>
             );
           })}
         </div>
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)] sm:p-5">
-          <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Repair flow</p>
-              <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Current pipeline</h3>
-              <p className="mt-1 text-xs text-[#74837e]">Received {monthRangeLabel}; each job is counted by its current status.</p>
+              <h3 className="font-heading text-lg font-bold text-[#182a28]">Repairs</h3>
+              <p className="text-xs text-[#74837e]">This month</p>
             </div>
-            <Link href="/repairs" className="shrink-0 text-xs font-bold text-[#1d6a54] hover:underline">All repairs</Link>
+            <Link href="/repairs" className="text-xs font-bold text-[#1d6a54] hover:underline">All</Link>
           </div>
           {repairs === null ? (
-            <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">{repairError ? "Repair status counts are unavailable." : "Loading repair statuses…"}</p>
+            <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">{repairError ? "Can't load repairs." : "Loading…"}</p>
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {REPAIR_PIPELINE.map((stage) => {
@@ -248,29 +222,23 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
             </div>
           )}
           {metrics && metrics.overdue.length > 0 && (
-            <Link href="/repairs" className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-              <span><strong>{metrics.overdue.length} overdue {metrics.overdue.length === 1 ? "job needs" : "jobs need"} attention.</strong> Check the expected completion dates and update the repair records.</span>
+            <Link href="/repairs" className="mt-3 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              <AlertTriangle className="size-4 shrink-0" />
+              <span>{metrics.overdue.length} late</span>
             </Link>
           )}
         </section>
 
         <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)] sm:p-5">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Customer collection</p>
-              <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Ready for pickup</h3>
-              <p className="mt-1 text-xs text-[#74837e]">Completed repairs that have not been marked collected.</p>
-            </div>
-            <Link href="/repairs" className="shrink-0 text-xs font-bold text-[#1d6a54] hover:underline">View all</Link>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="font-heading text-lg font-bold text-[#182a28]">Ready</h3>
+            <Link href="/repairs" className="text-xs font-bold text-[#1d6a54] hover:underline">All</Link>
           </div>
           {repairs === null ? (
-            <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">Ready-for-pickup jobs could not be confirmed.</p>
+            <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">Can't load repairs.</p>
           ) : readyRepairs.length === 0 ? (
-            <div className="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-[#dfe6df] bg-[#fbfcfa] p-4 text-center">
-              <Wrench className="size-5 text-[#9aa9a4]" />
-              <p className="mt-2 text-sm font-semibold text-[#263a35]">No devices waiting for pickup</p>
-              <p className="mt-1 text-xs text-[#74837e]">When a repair is marked completed, it will appear here until collected.</p>
+            <div className="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-[#dfe6df] bg-[#fbfcfa] p-4 text-center">
+              <p className="text-sm font-semibold text-[#263a35]">All clear</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -279,9 +247,8 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold text-[#263a35]">{deviceLabel(repair)}</span>
                     <span className="mt-1 block truncate text-xs text-[#74837e]">{customerLabel(repair)}</span>
-                    <span className="mt-1 block text-[11px] text-[#89958f]">Received {displayDate(repair.created_at)}</span>
                   </span>
-                  <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">Ready</span>
+                  <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">Ready</span>
                 </Link>
               ))}
             </div>
@@ -290,19 +257,15 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
       </div>
 
       <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_8px_24px_rgba(18,59,52,0.04)] sm:p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Latest records</p>
-            <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Recent repair jobs</h3>
-          </div>
-          <Link href="/repairs" className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[#1d6a54] hover:underline">View all <ArrowRight className="size-3.5" /></Link>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h3 className="font-heading text-lg font-bold text-[#182a28]">Recent repairs</h3>
+          <Link href="/repairs" className="text-xs font-bold text-[#1d6a54] hover:underline">All</Link>
         </div>
         {repairs === null ? (
-          <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">Recent repair jobs could not be loaded.</p>
+          <p className="rounded-xl bg-[#f7f8f5] p-4 text-sm text-[#74837e]">Can't load repairs.</p>
         ) : recentRepairs.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[#dfe6df] p-6 text-center">
-            <p className="text-sm font-semibold text-[#263a35]">No repair jobs recorded yet</p>
-            <p className="mt-1 text-xs text-[#74837e]">New repair records will appear here after they are saved.</p>
+            <p className="text-sm font-semibold text-[#263a35]">No repairs yet</p>
           </div>
         ) : (
           <div className="divide-y divide-[#edf0ed]">
@@ -311,7 +274,6 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold text-[#263a35]">{deviceLabel(repair)}</span>
                   <span className="mt-1 block truncate text-xs text-[#74837e]">{customerLabel(repair)} · {displayDate(repair.created_at)}</span>
-                  <span className="mt-1 block max-w-full truncate text-xs text-[#89958f]">{repair.issue || "No issue description saved"}</span>
                 </span>
                 <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusStyle(repair.status)}`}>{statusLabel(repair.status)}</span>
               </Link>
@@ -324,23 +286,21 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
 }
 
 function Metric({
-  title, value, detail, icon: Icon, href, tone = "normal",
+  title, value, icon: Icon, href, tone = "normal",
 }: {
   title: string;
   value: string;
-  detail: string;
   icon: typeof Wrench;
   href: string;
   tone?: "normal" | "amber";
 }) {
   return (
-    <Link href={href} className={`rounded-2xl border p-4 shadow-[0_4px_16px_rgba(18,59,52,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm ${tone === "amber" ? "border-amber-200 bg-amber-50/70" : "border-[#dfe6df] bg-white hover:border-[#bfd2c8]"}`}>
-      <div className="flex items-start justify-between gap-3">
+    <Link href={href} className={`rounded-2xl border p-3 shadow-[0_4px_16px_rgba(18,59,52,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm sm:p-4 ${tone === "amber" ? "border-amber-200 bg-amber-50/70" : "border-[#dfe6df] bg-white hover:border-[#bfd2c8]"}`}>
+      <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-[#74837e]">{title}</span>
         <Icon className={`size-4 shrink-0 ${tone === "amber" ? "text-amber-700" : "text-[#1d6a54]"}`} />
       </div>
-      <span className="mt-3 block font-heading text-2xl font-bold tracking-tight text-[#182a28]">{value}</span>
-      <span className="mt-1 block text-[11px] leading-5 text-[#89958f]">{detail}</span>
+      <span className="mt-2 block break-words font-heading text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{value}</span>
     </Link>
   );
 }
