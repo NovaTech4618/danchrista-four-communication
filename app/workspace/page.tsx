@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { Search } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import { staffService } from "@/services/staffService";
 import { hasPermission } from "@/lib/permissions";
@@ -30,7 +30,7 @@ export default function WorkspacePage() {
             <h1 className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-[#182a28]">Home</h1>
           </div>
           <Link href="/search" aria-label="Search" className="inline-flex size-10 items-center justify-center rounded-xl border border-[#dfe6df] text-[#285c4d] hover:bg-[#f5f8f5]">
-            <ArrowRight className="size-4" />
+            <Search className="size-4" />
           </Link>
         </header>
 
