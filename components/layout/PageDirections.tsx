@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 
 type Guide = {
   steps: readonly [string, string, string];
@@ -41,6 +41,10 @@ const guides: Record<string, Guide> = {
   "/reports/daily-closing": {
     steps: ["Enter the cash available at the start of the day.", "Record shop expenses and count the money received by payment type.", "Review the figures carefully before saving the day's closing."],
     nextHref: "/finance", nextLabel: "View money records",
+  },
+  "/phone-parts": {
+    steps: ["Search for the part or browse the list.", "Check the available quantity and part details.", "Use Parts Out to give parts to an engineer, or Sales to sell an item."],
+    nextHref: "/inventory", nextLabel: "Open Phone Parts",
   },
   "/inventory": {
     steps: ["Search for a part or browse the list.", "Use Add item for a new part, or Edit to correct an item.", "Check the quantity before giving parts out or selling them."],
