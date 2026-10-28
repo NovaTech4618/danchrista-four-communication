@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Header from "./Header";
+import NetworkStatus from "./NetworkStatus";
 import PageDirections from "./PageDirections";
 import FloatingAssistant from "@/components/assistant/FloatingAssistant";
 import { getCurrentSession, supabase } from "@/lib/supabase";
@@ -61,6 +62,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen min-w-0 flex-col">
       <Header />
+      <NetworkStatus />
       <main id="main-content" className="w-full min-w-0 flex-1" tabIndex={-1}>
         <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
           <PageDirections pathname={pathname} />
