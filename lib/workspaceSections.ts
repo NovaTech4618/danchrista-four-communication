@@ -13,7 +13,6 @@ export type SectionItem = {
   description: string;
   permission: Permission;
   icon: LucideIcon;
-  showOnHome?: boolean;
 };
 export type SectionGroup = {
   title: string;
@@ -45,7 +44,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/engineer-workflow",
         description: "Log parts and work for one engineer.",
         permission: "engineer_work",
-        showOnHome: false,
         icon: ClipboardCheck,
       },
       {
@@ -67,7 +65,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/technician-ledger",
         description: "Parts linked to one repair.",
         permission: "engineers",
-        showOnHome: false,
         icon: Boxes,
       },
       {
@@ -95,7 +92,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/stockroom",
         description: "Browse all stock.",
         permission: "inventory",
-        showOnHome: false,
         icon: Boxes,
       },
       {
@@ -103,7 +99,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/purchases",
         description: "Track stock purchases.",
         permission: "suppliers",
-        showOnHome: false,
         icon: FileText,
       },
       {
@@ -111,7 +106,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/suppliers",
         description: "Pay supplier bills.",
         permission: "suppliers",
-        showOnHome: false,
         icon: CreditCard,
       },
       {
@@ -119,7 +113,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/verify",
         description: "Check counted stock.",
         permission: "profit",
-        showOnHome: false,
         icon: ClipboardCheck,
       },
       {
@@ -127,7 +120,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/opening-stock-import",
         description: "Set opening stock.",
         permission: "profit",
-        showOnHome: false,
         icon: FileText,
       },
       {
@@ -135,7 +127,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/import",
         description: "Import stock lists.",
         permission: "profit",
-        showOnHome: false,
         icon: FileText,
       },
       {
@@ -143,7 +134,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/movements",
         description: "See stock changes.",
         permission: "profit",
-        showOnHome: false,
         icon: Activity,
       },
       {
@@ -151,7 +141,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/inventory/accessories",
         description: "Track accessories.",
         permission: "inventory",
-        showOnHome: false,
         icon: Cable,
       },
       {
@@ -187,7 +176,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/technical-services",
         description: "Set service prices.",
         permission: "repairs",
-        showOnHome: false,
         icon: Zap,
       },
     ],
@@ -215,7 +203,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/outstanding",
         description: "Track customer debt.",
         permission: "outstanding",
-        showOnHome: false,
         icon: HandCoins,
       },
       {
@@ -223,7 +210,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/credit",
         description: "Track shop debts.",
         permission: "payments",
-        showOnHome: false,
         icon: CreditCard,
       },
       {
@@ -231,7 +217,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/parts-credit",
         description: "Track parts sold on credit.",
         permission: "payments",
-        showOnHome: false,
         icon: Boxes,
       },
       {
@@ -269,7 +254,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/alerts",
         description: "Items needing attention.",
         permission: "profit",
-        showOnHome: false,
         icon: BellRing,
       },
       {
@@ -277,7 +261,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/activity",
         description: "See who changed what.",
         permission: "staff",
-        showOnHome: false,
         icon: Activity,
       },
       {
@@ -285,7 +268,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/search",
         description: "Find records fast.",
         permission: "search",
-        showOnHome: false,
         icon: Search,
       },
       {
@@ -321,7 +303,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/assistant",
         description: "Get app help.",
         permission: "assistant",
-        showOnHome: false,
         icon: Sparkles,
       },
       {
@@ -329,7 +310,6 @@ export const workspaceGroups: SectionGroup[] = [
         href: "/tickets",
         description: "Track help requests.",
         permission: "help",
-        showOnHome: false,
         icon: CircleHelp,
       },
     ],
