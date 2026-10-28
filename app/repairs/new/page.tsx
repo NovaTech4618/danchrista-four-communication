@@ -81,7 +81,7 @@ export default function NewRepairPage() {
 
   return (
     <AppLayout>
-      <main className="mx-auto w-full max-w-4xl space-y-5 p-5 sm:p-6 lg:p-8">
+      <main className="mx-auto w-full max-w-4xl space-y-5 p-2 sm:p-4 lg:p-6">
         <div className="flex items-center gap-3">
           <Link href="/repairs" className="inline-flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"><ArrowLeft className="size-4" /></Link>
           <div><p className="text-sm font-medium text-teal-700">Repair desk</p><h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">New walk-in repair</h1><p className="mt-1 text-sm text-slate-500">Create the customer, device and repair job together at the counter.</p></div>

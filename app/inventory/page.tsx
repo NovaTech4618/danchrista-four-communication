@@ -24,10 +24,10 @@ type Section = "Phone Parts";
 type StockFilter = "all" | "ok" | "low" | "out";
 
 function isPhonePart(item: InventoryItem) {
-  const brand = item.brand;
-  if (item.category !== "Phone Parts" || !brand) return false;
-  const partTypes = PHONE_PARTS[brand];
-  return Boolean(partTypes?.includes(item.subcategory || ""));
+  // The category is the source of truth. Do not hide valid parts just because
+  // their brand or subcategory is not yet listed in the quick-browse catalogue.
+  // This keeps newly added and less-common parts searchable in inventory.
+  return item.category === "Phone Parts";
 }
 
 function stockState(item: InventoryItem): "ok" | "low" | "out" {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { supabase } from "@/lib/supabase";
@@ -8,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 type Supplier={id:string;name:string;phone:string|null;email:string|null;address:string|null;notes:string|null;is_active:boolean};
 type Purchase={id:string;supplier_id:string|null;supplier:string;total_amount:number;amount_paid:number;payment_status:string;purchase_date:string;invoice_reference:string|null};
 
-export default function SupplierDetail({params}:{params:{id:string}}){const[id]=useState(params.id),[supplier,setSupplier]=useState<Supplier|null>(null),[purchases,setPurchases]=useState<Purchase[]>([]),[amount,setAmount]=useState(""),[method,setMethod]=useState("cash"),[notes,setNotes]=useState(""),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
+export default function SupplierDetail(){const {id}=useParams<{id:string}>();const[supplier,setSupplier]=useState<Supplier|null>(null),[purchases,setPurchases]=useState<Purchase[]>([]),[amount,setAmount]=useState(""),[method,setMethod]=useState("cash"),[notes,setNotes]=useState(""),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
 async function load(){setLoading(true);setError("");const[s,p]=await Promise.all([supabase.from("suppliers").select("id,name,phone,email,address,notes,is_active").eq("id",id).single(),supabase.from("inventory_purchases").select("id,supplier_id,supplier,total_amount,amount_paid,payment_status,purchase_date,invoice_reference").eq("supplier_id",id).order("purchase_date",{ascending:true}).order("created_at",{ascending:true}).limit(500)]);if(s.error)setError(s.error.message);else setSupplier(s.data as Supplier);if(p.error&&!s.error)setError(p.error.message);else setPurchases((p.data??[])as Purchase[]);setLoading(false)}useEffect(()=>{void load()},[id]);
 const totals=useMemo(()=>purchases.reduce((a,p)=>({total:a.total+Number(p.total_amount||0),paid:a.paid+Number(p.amount_paid||0)}),{total:0,paid:0}),[purchases]);const outstanding=Math.max(totals.total-totals.paid,0);
 async function pay(e:React.FormEvent){e.preventDefault();setError("");const n=Number(amount);if(!Number.isFinite(n)||n<=0||n>outstanding)return setError("Enter a valid payment within the supplier's outstanding balance.");setSaving(true);const{error:e1}=await supabase.rpc("record_supplier_account_payment",{p_supplier_id:id,p_amount:n,p_payment_method:method,p_notes:notes.trim()||null});if(e1)setError(e1.message);else{setAmount("");setNotes("");await load()}setSaving(false)}
