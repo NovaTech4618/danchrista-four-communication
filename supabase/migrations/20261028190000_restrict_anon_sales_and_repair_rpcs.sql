@@ -24,3 +24,53 @@ revoke execute on function public.request_sale_price_override(
 grant execute on function public.request_sale_price_override(
   uuid, text, text, numeric, text, text, jsonb, text
 ) to authenticated, service_role;
+
+-- Fail the migration if the intended API boundary was not established.
+do $verify_rpc_grants$
+begin
+  if has_function_privilege(
+    'anon',
+    'public.create_sale(uuid, text, text, numeric, text, text, jsonb, uuid, uuid, numeric)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Anonymous execution is still enabled for public.create_sale';
+  end if;
+  if not has_function_privilege(
+    'authenticated',
+    'public.create_sale(uuid, text, text, numeric, text, text, jsonb, uuid, uuid, numeric)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Authenticated execution is missing for public.create_sale';
+  end if;
+
+  if has_function_privilege(
+    'anon',
+    'public.create_walk_in_repair(text, text, text, text, text, text, text, text, text, numeric, numeric, text, text, date, text)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Anonymous execution is still enabled for the service-type walk-in repair RPC';
+  end if;
+  if not has_function_privilege(
+    'authenticated',
+    'public.create_walk_in_repair(text, text, text, text, text, text, text, text, text, numeric, numeric, text, text, date, text)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Authenticated execution is missing for the service-type walk-in repair RPC';
+  end if;
+
+  if has_function_privilege(
+    'anon',
+    'public.request_sale_price_override(uuid, text, text, numeric, text, text, jsonb, text)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Anonymous execution is still enabled for public.request_sale_price_override';
+  end if;
+  if not has_function_privilege(
+    'authenticated',
+    'public.request_sale_price_override(uuid, text, text, numeric, text, text, jsonb, text)'::regprocedure,
+    'EXECUTE'
+  ) then
+    raise exception 'Authenticated execution is missing for public.request_sale_price_override';
+  end if;
+end
+$verify_rpc_grants$;
