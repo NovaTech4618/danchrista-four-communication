@@ -11,16 +11,10 @@ import { repairService } from "@/services/repairService";
 import { hasPermission, type Permission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 
-type CustomerRelation = { full_name: string | null } | { full_name: string | null }[] | null;
-type DeviceRelation = {
-  brand: string | null;
-  model: string | null;
-  customers: CustomerRelation;
-} | {
-  brand: string | null;
-  model: string | null;
-  customers: CustomerRelation;
-}[] | null;
+type CustomerRow = { full_name: string | null };
+type CustomerRelation = CustomerRow | CustomerRow[] | null;
+type DeviceRow = { brand: string | null; model: string | null; customers: CustomerRelation };
+type DeviceRelation = DeviceRow | DeviceRow[] | null;
 type RepairRow = {
   id: string;
   issue: string;
@@ -41,7 +35,11 @@ const REPAIR_PIPELINE = [
   { label: "Collected", statuses: ["Collected"] },
 ];
 
-function related<T>(value: T | T[] | null | undefined): T | null {
+function firstDevice(value: DeviceRelation): DeviceRow | null {
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
+function firstCustomer(value: CustomerRelation | undefined): CustomerRow | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
@@ -74,14 +72,14 @@ function money(value: number) {
 }
 
 function deviceLabel(repair: RepairRow) {
-  const device = related(repair.devices);
+  const device = firstDevice(repair.devices);
   const label = [device?.brand, device?.model].filter(Boolean).join(" ");
   return label || "Device details unavailable";
 }
 
 function customerLabel(repair: RepairRow) {
   const device = related(repair.devices);
-  const customer = related(device?.customers);
+  const customer = firstCustomer(device?.customers);
   return customer?.full_name || "Customer name unavailable";
 }
 
@@ -140,6 +138,9 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
   useEffect(() => { void load(); }, [load]);
 
   const today = shopDate(new Date());
+  const monthKey = today.slice(0, 7);
+  const monthRangeLabel = `${displayDate(`${monthKey}-01T12:00:00+01:00`)} – ${displayDate(new Date().toISOString())}`;
+  const monthRepairs = repairs?.filter((repair) => shopDate(repair.created_at).slice(0, 7) === monthKey) ?? [];
   const metrics = useMemo(() => {
     if (!repairs) return null;
     const receivedToday = repairs.filter((repair) => shopDate(repair.created_at) === today).length;
@@ -229,7 +230,7 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Repair flow</p>
               <h3 className="mt-1 font-heading text-lg font-bold text-[#182a28]">Current pipeline</h3>
-              <p className="mt-1 text-xs text-[#74837e]">Counts are based on saved repair statuses.</p>
+              <p className="mt-1 text-xs text-[#74837e]">Received ${monthRangeLabel}; each job is counted by its current status.</p>
             </div>
             <Link href="/repairs" className="shrink-0 text-xs font-bold text-[#1d6a54] hover:underline">All repairs</Link>
           </div>
@@ -238,7 +239,7 @@ export default function WorkspaceOverview({ role }: OverviewProps) {
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {REPAIR_PIPELINE.map((stage) => {
-                const count = repairs.filter((repair) => stage.statuses.includes(repair.status)).length;
+                const count = monthRepairs.filter((repair) => stage.statuses.includes(repair.status)).length;
                 return <Link key={stage.label} href="/repairs" className="rounded-xl border border-[#e6ebe6] bg-[#fbfcfa] p-3 transition hover:border-[#bfd2c8] hover:bg-[#f4f8f4]">
                   <span className="text-xs font-medium text-[#74837e]">{stage.label}</span>
                   <span className="mt-1 block font-heading text-2xl font-bold text-[#182a28]">{count}</span>
