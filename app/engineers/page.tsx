@@ -30,19 +30,10 @@ const transactionLabel: Record<string, string> = {
 const emptyEngineer: EngineerInput = { name: "", phone: "", business_name: "", address: "", notes: "" };
 
 function isEngineerPart(item: InventoryItem) {
-  const text = [item.item_name, item.category, item.subcategory, item.brand, item.compatible_models]
-    .filter(Boolean).join(" ").toLowerCase();
-
-  const screenGuard = /screen\s*guard|tempered|protector/.test(text);
-  if (screenGuard) return true;
-
-  const androidBrands = /tecno|infinix|itel|huawei|redmi|nokia|oppo|vivo|gionee/.test(text);
-  const samsung = /samsung/.test(text);
-  const androidPart = /down\s*board|power\s*flex/.test(text);
-  const iphone = /iphone|apple/.test(text);
-  const iphonePart = /charging\s*flex|back\s*glass|earpiece\s*flex|home\s*button/.test(text);
-
-  return (androidBrands && androidPart) || (samsung && androidPart) || (iphone && iphonePart);
+  // Keep this ledger consistent with the inventory and part-issue panel.
+  // The saved item type/category is authoritative; brand and subcategory
+  // whitelists can hide valid or newly added phone parts.
+  return item.item_type === "part" || item.category === "Phone Parts";
 }
 type Action = "parts" | "return" | "replacement" | "used" | "part-paid" | "payment" | "payment-out" | "work" | "opening" | null;
 type Period = "all" | "day" | "week" | "month" | "year";
