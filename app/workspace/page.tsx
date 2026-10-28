@@ -50,16 +50,17 @@ export default function WorkspacePage() {
                 <section key={group.title} aria-labelledby={headingId}>
                   <h2 id={headingId} className="mb-3 font-heading text-base font-bold text-[#263a35]">{group.title}</h2>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {items.map(({ title, href, icon: Icon }) => (
+                    {items.map(({ title, href, description, icon: Icon }) => (
                       <Link
                         key={title}
                         href={href}
-                        className="group flex min-h-28 flex-col items-center justify-center gap-3 rounded-2xl border border-[#e3e9e4] bg-white px-3 py-4 text-center shadow-[0_2px_6px_rgba(24,42,40,0.03)] transition hover:-translate-y-0.5 hover:border-[#bfd2c8] hover:shadow-[0_8px_18px_rgba(18,59,52,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]"
+                        className="group flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border border-[#e3e9e4] bg-white px-3 py-4 text-center shadow-[0_2px_6px_rgba(24,42,40,0.03)] transition hover:-translate-y-0.5 hover:border-[#bfd2c8] hover:shadow-[0_8px_18px_rgba(18,59,52,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]"
                       >
                         <span className="grid size-11 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54] transition group-hover:bg-[#123b34] group-hover:text-[#d7a95a]">
                           <Icon className="size-5" strokeWidth={1.8} />
                         </span>
                         <span className="text-sm font-bold text-[#263a35]">{title}</span>
+                        <span className="line-clamp-2 max-w-44 text-[11px] leading-4 text-[#74837e]">{description}</span>
                       </Link>
                     ))}
                   </div>
