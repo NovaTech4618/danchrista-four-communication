@@ -53,7 +53,7 @@ export default function HelpPage() {
             <section key={group.title} aria-labelledby={group.title.replaceAll(" ", "-").toLowerCase()}>
               <h2 id={group.title.replaceAll(" ", "-").toLowerCase()} className="mb-3 font-heading text-lg font-bold text-[#263a35]">{group.title}</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-                {group.items.map(({ title, href, description, permission, icon: Icon }) => {
+                {group.items.filter((item) => item.href !== "/inventory/accessories").map(({ title, href, description, permission, icon: Icon }) => {
                   const available = role !== null && hasPermission(role, permission);
                   const cardClass = `flex min-h-24 items-center gap-3 rounded-2xl border p-3 transition ${available ? "border-[#e3e9e4] bg-white hover:border-[#bfd2c8] hover:bg-[#f7faf7]" : "border-dashed border-slate-200 bg-slate-50/70"}`;
                   const card = (
