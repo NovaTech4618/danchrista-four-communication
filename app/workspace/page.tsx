@@ -12,6 +12,7 @@ import WorkspaceOverview from "@/components/workspace/WorkspaceOverview";
 
 export default function WorkspacePage() {
   const [role, setRole] = useState<StaffRole | null>(null);
+  const [pageSearch, setPageSearch] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -36,6 +37,24 @@ export default function WorkspacePage() {
 
         {role !== null && <WorkspaceOverview role={role} />}
 
+        {role !== null && (
+          <section className="rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-sm sm:p-5" aria-label="Find a page">
+            <label htmlFor="page-search" className="mb-2 block text-sm font-bold text-[#263a35]">Find a page</label>
+            <div className="flex items-center gap-2 rounded-xl border border-[#dfe6df] bg-[#fbfcfa] px-3 focus-within:border-[#1d6a54] focus-within:ring-2 focus-within:ring-[#1d6a54]/10">
+              <Search className="size-4 shrink-0 text-[#74837e]" aria-hidden="true" />
+              <input
+                id="page-search"
+                type="search"
+                value={pageSearch}
+                onChange={(event) => setPageSearch(event.target.value)}
+                placeholder="Try: debt, stock, engineer, sales…"
+                className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[#263a35] outline-none placeholder:text-[#98a49f]"
+              />
+            </div>
+            <p className="mt-2 text-xs text-[#74837e]">All pages you can access are listed below. Choose a page to open it.</p>
+          </section>
+        )}
+
         {role === null ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5" aria-label="Loading" aria-busy="true">
             {Array.from({ length: 10 }, (_, index) => <div key={index} className="h-28 animate-pulse rounded-2xl border border-[#e5ebe6] bg-white" />)}
@@ -43,7 +62,12 @@ export default function WorkspacePage() {
         ) : (
           <div className="space-y-7">
             {workspaceGroups.map((group) => {
-              const items = group.items.filter((item) => item.showOnHome !== false && hasPermission(role, item.permission));
+              const query = pageSearch.trim().toLowerCase();
+              const items = group.items.filter((item) => {
+                if (item.href === "/inventory/accessories" || !hasPermission(role, item.permission)) return false;
+                if (!query || group.title.toLowerCase().includes(query)) return true;
+                return `${item.title} ${item.description} ${item.href}`.toLowerCase().includes(query);
+              });
               if (!items.length) return null;
               const headingId = group.title.replaceAll(" ", "-").toLowerCase();
               return (
