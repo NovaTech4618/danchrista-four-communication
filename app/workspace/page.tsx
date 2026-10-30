@@ -8,7 +8,7 @@ import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
 import {
-  ArrowRight, ArrowUpRight, Boxes, CalendarDays, CircleHelp, Home, Package,
+  ArrowRight, Boxes, CalendarDays, CircleHelp,
   Search, ShoppingCart, UserRound, Wrench, X,
 } from "lucide-react";
 
@@ -57,7 +57,7 @@ export default function WorkspacePage() {
 
   return (
     <AppLayout>
-      <main className="mx-auto max-w-[1400px] space-y-6 pb-24 lg:pb-8">
+      <main className="mx-auto max-w-[1400px] space-y-6 pb-4 lg:pb-8">
         <section className="relative isolate overflow-hidden rounded-[28px] border border-[#24483f] bg-[#0d211c] px-5 py-6 text-white shadow-[0_24px_70px_rgba(10,35,28,0.18)] sm:px-8 sm:py-8 lg:px-10">
           <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-28 -z-10 size-80 rounded-full bg-[#28755e]/25 blur-3xl" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-36 left-1/3 -z-10 size-72 rounded-full bg-[#d7a95a]/10 blur-3xl" />
@@ -171,20 +171,6 @@ export default function WorkspacePage() {
             </div>
           )}
         </section>
-
-        <nav aria-label="Quick mobile navigation" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 gap-1 rounded-2xl border border-[#d9e3dc] bg-white/95 p-2 shadow-[0_12px_40px_rgba(13,42,33,0.18)] backdrop-blur-xl lg:hidden">
-          {[
-            { label: "Home", href: "/workspace", icon: Home, permission: null },
-            { label: "Sales", href: "/sales", icon: ShoppingCart, permission: "sales" as const },
-            { label: "Repairs", href: "/repairs", icon: Wrench, permission: "repairs" as const },
-            { label: "Parts", href: "/inventory", icon: Package, permission: "inventory" as const },
-            { label: "Debts", href: "/owed-owing", icon: ArrowUpRight, permission: "outstanding" as const },
-          ].filter((item) => item.permission === null || (role !== null && hasPermission(role, item.permission))).map(({ label, href, icon: Icon }) => (
-            <Link key={label} href={href} aria-current={href === "/workspace" ? "page" : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${href === "/workspace" ? "bg-[#123b34] text-white" : "text-[#60766b] hover:bg-[#eef4f0] hover:text-[#123b34]"}`}>
-              <Icon className="size-[18px]" strokeWidth={1.9} /><span>{label}</span>
-            </Link>
-          ))}
-        </nav>
 
         <p className="pb-2 text-center text-[11px] leading-5 text-[#8b9991]">
           Only sections allowed for your account are shown. Use the Help &amp; Section Guide if you are unsure which record to update.
