@@ -174,7 +174,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Sale recorded. Stock reduced automatically.");
-    setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted();
+    setCart([]); setCustomerId(""); setDiscount("0"); setCashReceived(""); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted();
   }
 
   const selectedItem = inventory.find((item) => item.id === selectedItemId);
