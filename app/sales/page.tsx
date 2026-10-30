@@ -25,8 +25,8 @@ export default function SalesPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop sales</p><h1 className="text-3xl font-bold tracking-tight text-slate-950">Sales</h1><p className="text-sm text-slate-500">Sell stock quickly. Choose the item, quantity and payment.</p></div></header>
+      <div className="mx-auto max-w-[1180px] space-y-5 pb-4">
+        <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Shop sales</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl text-[#182a28]">Sales</h1><p className="text-sm text-[#74837e]">Sell stock quickly. Choose the item, quantity and payment.</p></div></header>
         <SaleForm onSaleCompleted={handleSaleCompleted} />
         {myRole === "owner" && <SalePriceApprovals />}
         <ReturnApprovalPanel />
