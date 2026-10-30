@@ -1,82 +1,194 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { staffService } from "@/services/staffService";
 import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
+import {
+  ArrowDownLeft, ArrowRight, ArrowUpRight, Bell, Boxes, CalendarDays,
+  CircleHelp, ClipboardList, Home, Package, Plus, Search, ShoppingCart,
+  Smartphone, Sparkles, UserRound, Wrench, X,
+} from "lucide-react";
+
+const quickLinks = [
+  { title: "New sale", detail: "Record a customer purchase", href: "/sales", permission: "sales" as const, icon: ShoppingCart },
+  { title: "Receive repair", detail: "Register a phone for repair", href: "/repairs/new", permission: "repairs" as const, icon: Wrench },
+  { title: "Parts collection", detail: "Record parts issued or returned", href: "/parts-collection", permission: "inventory" as const, icon: Boxes },
+  { title: "Engineer accounts", detail: "Review work and balances", href: "/engineers", permission: "engineers" as const, icon: UserRound },
+];
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function WorkspacePage() {
   const [role, setRole] = useState<StaffRole | null>(null);
+  const [search, setSearch] = useState("");
+  const [welcome, setWelcome] = useState("Welcome back");
+  const [today, setToday] = useState("");
 
   useEffect(() => {
     let active = true;
     void staffService.getMyRole().then((result) => {
       if (active && result.data) setRole(result.data);
     });
+    setWelcome(greeting());
+    setToday(new Intl.DateTimeFormat("en-NG", {
+      weekday: "long", day: "numeric", month: "short", year: "numeric",
+    }).format(new Date()));
     return () => { active = false; };
   }, []);
 
+  const groups = useMemo(() => workspaceGroups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) =>
+      item.showOnHome !== false &&
+      (!role || hasPermission(role, item.permission)) &&
+      (search.trim() === "" || `${item.title} ${item.description} ${group.title}`.toLowerCase().includes(search.trim().toLowerCase()))
+    ),
+  })).filter((group) => group.items.length > 0), [role, search]);
+
+  const actions = quickLinks.filter((item) => role && hasPermission(role, item.permission));
+
   return (
     <AppLayout>
-      <main className="mx-auto max-w-7xl space-y-8 pb-8">
-        <header className="rounded-3xl border border-[#dfe6df] bg-white px-5 py-7 text-center shadow-sm sm:px-8 sm:py-9">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#1d6a54]">Amezing Limited</p>
-          <h1 className="mt-2 font-heading text-3xl font-extrabold tracking-tight text-[#182a28] sm:text-4xl">Shop workspace</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#65766f]">
-            Choose the section that matches the job. Each card explains what it records and when to use it. Finish a task, then use Home to return here.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs text-[#52675e]">
-            <span className="rounded-full border border-[#dfe6df] px-3 py-1.5">Real shop records only</span>
-            <span className="rounded-full border border-[#dfe6df] px-3 py-1.5">Stock and money remain traceable</span>
-            <Link href="/help" className="rounded-full border border-[#dfe6df] px-3 py-1.5 font-semibold text-[#1d6a54] hover:bg-[#f5f8f5]">Read the section guide →</Link>
+      <main className="mx-auto max-w-[1400px] space-y-6 pb-24 lg:pb-8">
+        <section className="relative isolate overflow-hidden rounded-[28px] border border-[#24483f] bg-[#0d211c] px-5 py-6 text-white shadow-[0_24px_70px_rgba(10,35,28,0.18)] sm:px-8 sm:py-8 lg:px-10">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-28 -z-10 size-80 rounded-full bg-[#28755e]/25 blur-3xl" />
+          <div aria-hidden="true" className="pointer-events-none absolute -bottom-36 left-1/3 -z-10 size-72 rounded-full bg-[#d7a95a]/10 blur-3xl" />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#c4d9cf]">
+              <span className="size-2 rounded-full bg-[#70c49a]" /> AMEZING WORKSPACE
+            </div>
+            <div className="inline-flex items-center gap-2 text-xs text-[#b5c9c0]">
+              <CalendarDays className="size-4" /> {today || "Your shop workspace"}
+            </div>
           </div>
-        </header>
+          <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="text-sm font-medium text-[#d7a95a]">{welcome}, welcome to Amezing.</p>
+              <h1 className="mt-2 max-w-2xl font-heading text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl lg:text-5xl">
+                Let’s get the shop <span className="text-[#83c4a6]">running smoothly.</span>
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#b0c4bb] sm:text-base">
+                Your daily work, stock records and accounts in one place. Choose a task below to get started.
+              </p>
+            </div>
+            <Link href="/help" className="inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.07] px-4 text-sm font-semibold text-white transition hover:bg-white/[0.12]">
+              <CircleHelp className="size-4" /> How to use Amezing <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="mt-7 flex flex-wrap gap-2 text-xs text-[#c4d9cf]">
+            <span className="rounded-lg border border-white/10 bg-black/10 px-3 py-2">Real business records</span>
+            <span className="rounded-lg border border-white/10 bg-black/10 px-3 py-2">Access based on your role</span>
+            <span className="rounded-lg border border-white/10 bg-black/10 px-3 py-2">Phone and desktop ready</span>
+          </div>
+        </section>
 
-        {role === null ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading workspace" aria-busy="true">
-            {Array.from({ length: 6 }, (_, index) => <div key={index} className="h-36 animate-pulse rounded-2xl border border-[#e5ebe6] bg-white" />)}
+        <section aria-labelledby="quick-actions-heading">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Get things done</p>
+              <h2 id="quick-actions-heading" className="mt-1 font-heading text-xl font-bold text-[#182a28] sm:text-2xl">Quick actions</h2>
+            </div>
+            <span className="hidden text-xs text-[#74837e] sm:block">Your most-used workflows</span>
           </div>
-        ) : (
-          <div className="space-y-8">
-            {workspaceGroups.map((group) => {
-              const items = group.items.filter((item) => item.showOnHome !== false && hasPermission(role, item.permission));
-              if (!items.length) return null;
-              const headingId = group.title.replaceAll(" ", "-").toLowerCase();
-              return (
-                <section key={group.title} aria-labelledby={headingId}>
-                  <header className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                    <h2 id={headingId} className="font-heading text-xl font-bold text-[#182a28] sm:text-2xl">{group.title}</h2>
-                    <p className="text-sm text-[#74837e]">{group.description}</p>
-                  </header>
+          {role === null ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+              {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl border border-[#dfe6df] bg-white" />)}
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {actions.map(({ title, detail, href, icon: Icon }) => (
+                <Link key={title} href={href} className="group flex min-h-[112px] items-center gap-3 rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:-translate-y-0.5 hover:border-[#b8d1c4] hover:shadow-[0_12px_26px_rgba(18,59,52,0.09)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54]">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#eaf3ed] text-[#1d6a54] transition group-hover:bg-[#123b34] group-hover:text-[#f2d8a5]"><Icon className="size-5" strokeWidth={1.9} /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-[#203a32]">{title}</span>
+                    <span className="mt-1 block text-xs leading-5 text-[#74837e]">{detail}</span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-[#91a49a] transition group-hover:translate-x-0.5 group-hover:text-[#1d6a54]" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section aria-labelledby="all-sections-heading">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Everything in its place</p>
+              <h2 id="all-sections-heading" className="mt-1 font-heading text-xl font-bold text-[#182a28] sm:text-2xl">Shop sections</h2>
+              <p className="mt-1 text-sm text-[#74837e]">Open a section to record or review actual shop activity.</p>
+            </div>
+            <label className="relative block w-full sm:max-w-sm">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#82938b]" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find sales, repairs, parts…" aria-label="Search shop sections" className="h-11 w-full rounded-xl border border-[#dfe6df] bg-white pl-10 pr-10 text-sm text-[#182a28] outline-none transition placeholder:text-[#8a9992] focus:border-[#1d6a54] focus:ring-4 focus:ring-[#1d6a54]/10" />
+              {search && <button type="button" onClick={() => setSearch("")} aria-label="Clear search" className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-[#74837e] hover:bg-[#eef4f1]"><X className="size-4" /></button>}
+            </label>
+          </div>
+
+          {role === null ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+              {Array.from({ length: 6 }, (_, i) => <div key={i} className="h-32 animate-pulse rounded-2xl border border-[#dfe6df] bg-white" />)}
+            </div>
+          ) : groups.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[#cbd8d0] bg-white p-8 text-center">
+              <Search className="mx-auto size-7 text-[#789087]" />
+              <p className="mt-3 font-semibold text-[#203a32]">No matching sections</p>
+              <p className="mt-1 text-sm text-[#74837e]">Try another search term.</p>
+              <button type="button" onClick={() => setSearch("")} className="mt-4 rounded-xl bg-[#123b34] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1d6a54]">Clear search</button>
+            </div>
+          ) : (
+            <div className="space-y-7">
+              {groups.map((group) => (
+                <section key={group.title} aria-labelledby={group.title.replaceAll(" ", "-").toLowerCase()}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 id={group.title.replaceAll(" ", "-").toLowerCase()} className="font-heading text-base font-bold text-[#263a35] sm:text-lg">{group.title}</h3>
+                      <p className="mt-0.5 text-xs text-[#829088]">{group.description}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full border border-[#dfe6df] bg-white px-2.5 py-1 text-[10px] font-semibold text-[#6b7e74]">{group.items.length} sections</span>
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map(({ title, href, description, icon: Icon }) => (
-                      <Link
-                        key={title}
-                        href={href}
-                        className="group flex min-h-36 min-w-0 gap-3 rounded-2xl border border-[#e3e9e4] bg-white p-4 shadow-[0_2px_6px_rgba(24,42,40,0.04)] transition hover:-translate-y-0.5 hover:border-[#bfd2c8] hover:shadow-[0_8px_18px_rgba(18,59,52,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54] sm:p-5"
-                      >
-                        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54] transition group-hover:bg-[#123b34] group-hover:text-[#d7a95a]">
-                          <Icon className="size-5" strokeWidth={1.8} />
-                        </span>
+                    {group.items.map(({ title, href, description, icon: Icon }) => (
+                      <Link key={title} href={href} className="group flex min-h-[126px] min-w-0 gap-3 rounded-2xl border border-[#e0e7e1] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#bdd1c5] hover:shadow-[0_10px_25px_rgba(18,59,52,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54] sm:p-5">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eff5f1] text-[#1d6a54] transition group-hover:bg-[#123b34] group-hover:text-[#f2d8a5]"><Icon className="size-[18px]" strokeWidth={1.9} /></span>
                         <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-bold text-[#263a35] sm:text-base">{title}</span>
-                          <span className="mt-1.5 block text-xs leading-5 text-[#74837e] sm:text-sm sm:leading-5">{description}</span>
-                          <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]">Open section <span aria-hidden="true">→</span></span>
+                          <span className="block text-sm font-bold text-[#263a35]">{title}</span>
+                          <span className="mt-1.5 block text-xs leading-5 text-[#74837e]">{description}</span>
+                          <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]">Open section <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></span>
                         </span>
                       </Link>
                     ))}
                   </div>
                 </section>
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </section>
 
-        <p className="text-center text-xs leading-5 text-[#89958f]">
-          Only sections allowed for your account are shown. If a task does not match these descriptions, stop and check the guide before entering the same transaction in a different book.
+        <nav aria-label="Quick mobile navigation" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 gap-1 rounded-2xl border border-[#d9e3dc] bg-white/95 p-2 shadow-[0_12px_40px_rgba(13,42,33,0.18)] backdrop-blur-xl lg:hidden">
+          {[
+            { label: "Home", href: "/workspace", icon: Home, permission: null },
+            { label: "Sales", href: "/sales", icon: ShoppingCart, permission: "sales" as const },
+            { label: "Repairs", href: "/repairs", icon: Wrench, permission: "repairs" as const },
+            { label: "Parts", href: "/inventory", icon: Package, permission: "inventory" as const },
+            { label: "Debts", href: "/owed-owing", icon: ArrowUpRight, permission: "outstanding" as const },
+          ].filter((item) => item.permission === null || (role !== null && hasPermission(role, item.permission))).map(({ label, href, icon: Icon }) => (
+            <Link key={label} href={href} aria-current={href === "/workspace" ? "page" : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${href === "/workspace" ? "bg-[#123b34] text-white" : "text-[#60766b] hover:bg-[#eef4f0] hover:text-[#123b34]"}`}>
+              <Icon className="size-[18px]" strokeWidth={1.9} /><span>{label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <p className="pb-2 text-center text-[11px] leading-5 text-[#8b9991]">
+          Only sections allowed for your account are shown. Use the Help &amp; Section Guide if you are unsure which record to update.
         </p>
       </main>
     </AppLayout>
