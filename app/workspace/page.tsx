@@ -7,8 +7,13 @@ import { staffService } from "@/services/staffService";
 import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
+import { saleService } from "@/services/saleService";
+import { inventoryService } from "@/services/inventoryService";
+import { businessOperationsService } from "@/services/businessOperationsService";
+import type { Sale } from "@/types/sale";
+import type { InventoryItem } from "@/types/inventory";
 import {
-  ArrowRight, Boxes, CalendarDays, CircleHelp,
+  ArrowRight, Boxes, CalendarDays, CircleHelp, TrendingUp, Package, HandCoins, AlertTriangle,
   Search, ShoppingCart, UserRound, Wrench, X,
 } from "lucide-react";
 
@@ -31,6 +36,7 @@ export default function WorkspacePage() {
   const [search, setSearch] = useState("");
   const [welcome, setWelcome] = useState("Welcome back");
   const [today, setToday] = useState("");
+  const [overview, setOverview] = useState({ salesToday: 0, salesTodayCount: 0, salesWeek: 0, lowStock: 0, customerOutstanding: 0, loading: true });
 
   useEffect(() => {
     let active = true;
@@ -43,6 +49,47 @@ export default function WorkspacePage() {
     }).format(new Date()));
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!role) return;
+    let active = true;
+    async function loadOverview() {
+      const [salesResult, stockResult, balancesResult] = await Promise.all([
+        hasPermission(role, "sales") ? saleService.getSales() : Promise.resolve(null),
+        hasPermission(role, "inventory") ? inventoryService.getInventory() : Promise.resolve(null),
+        hasPermission(role, "outstanding") ? businessOperationsService.getCustomerBalances() : Promise.resolve(null),
+      ]);
+      if (!active) return;
+
+      const now = new Date();
+      const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(startToday);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const startWeek = new Date(startToday);
+      startWeek.setDate(startWeek.getDate() - ((startWeek.getDay() + 6) % 7));
+      const sales = (salesResult?.data ?? []) as Sale[];
+      const todaySales = sales.filter((sale) => {
+        const date = new Date(sale.sale_date);
+        return date >= startToday && date < tomorrow;
+      });
+      const weekSales = sales.filter((sale) => {
+        const date = new Date(sale.sale_date);
+        return date >= startWeek && date < tomorrow;
+      });
+      const stock = (stockResult?.data ?? []) as InventoryItem[];
+      const balances = (balancesResult?.data ?? []) as Array<{ balance?: number | string | null }>;
+      setOverview({
+        salesToday: todaySales.reduce((sum, sale) => sum + Number(sale.total || 0), 0),
+        salesTodayCount: todaySales.length,
+        salesWeek: weekSales.reduce((sum, sale) => sum + Number(sale.total || 0), 0),
+        lowStock: stock.filter((item) => Number(item.quantity) <= Number(item.minimum_stock)).length,
+        customerOutstanding: balances.reduce((sum, item) => sum + Math.max(0, Number(item.balance || 0)), 0),
+        loading: false,
+      });
+    }
+    void loadOverview();
+    return () => { active = false; };
+  }, [role]);
 
   const groups = useMemo(() => workspaceGroups.map((group) => ({
     ...group,
@@ -88,6 +135,37 @@ export default function WorkspacePage() {
             <span className="rounded-lg border border-white/10 bg-black/10 px-3 py-2">Access based on your role</span>
             <span className="rounded-lg border border-white/10 bg-black/10 px-3 py-2">Phone and desktop ready</span>
           </div>
+        </section>
+
+        <section aria-label="Business overview" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          {hasPermission(role, "sales") && (
+            <>
+              <Link href="/sales" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
+                <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Sales today</span><span className="grid size-8 place-items-center rounded-xl bg-[#e8f5ec] text-[#187044]"><TrendingUp className="size-4" /></span></div>
+                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.salesToday.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+                <p className="mt-1 text-xs text-[#7b8a82]">{overview.loading ? "Checking recorded sales" : `${overview.salesTodayCount} recorded sale${overview.salesTodayCount === 1 ? "" : "s"}`}</p>
+              </Link>
+              <Link href="/sales" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
+                <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Sales this week</span><span className="grid size-8 place-items-center rounded-xl bg-[#eaf0fb] text-[#365d9b]"><TrendingUp className="size-4" /></span></div>
+                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.salesWeek.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+                <p className="mt-1 text-xs text-[#7b8a82]">Monday to today · recorded sales</p>
+              </Link>
+            </>
+          )}
+          {hasPermission(role, "inventory") && (
+            <Link href="/inventory" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
+              <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Low-stock items</span><span className="grid size-8 place-items-center rounded-xl bg-[#fff3dd] text-[#9b6612]"><AlertTriangle className="size-4" /></span></div>
+              <p className="mt-3 text-2xl font-bold tracking-tight text-[#182a28]">{overview.loading ? "…" : overview.lowStock}</p>
+              <p className="mt-1 text-xs text-[#7b8a82]">At or below reorder level</p>
+            </Link>
+          )}
+          {hasPermission(role, "outstanding") && (
+            <Link href="/owed-owing" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
+              <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Customer balances</span><span className="grid size-8 place-items-center rounded-xl bg-[#f0eafb] text-[#6e4aa1]"><HandCoins className="size-4" /></span></div>
+              <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.customerOutstanding.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+              <p className="mt-1 text-xs text-[#7b8a82]">Outstanding customer balances</p>
+            </Link>
+          )}
         </section>
 
         <section aria-labelledby="quick-actions-heading">
