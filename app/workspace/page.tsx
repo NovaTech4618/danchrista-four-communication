@@ -36,7 +36,7 @@ export default function WorkspacePage() {
   const [search, setSearch] = useState("");
   const [welcome, setWelcome] = useState("Welcome back");
   const [today, setToday] = useState("");
-  const [overview, setOverview] = useState({ salesToday: 0, salesTodayCount: 0, salesWeek: 0, lowStock: 0, customerOutstanding: 0, loading: true });
+  const [overview, setOverview] = useState({ salesToday: 0, salesTodayCount: 0, salesWeek: 0, lowStock: 0, customerOutstanding: 0, loading: true, failed: false });
 
   useEffect(() => {
     let active = true;
@@ -60,6 +60,7 @@ export default function WorkspacePage() {
         hasPermission(role, "outstanding") ? businessOperationsService.getCustomerBalances() : Promise.resolve(null),
       ]);
       if (!active) return;
+      const failed = Boolean(salesResult?.error || stockResult?.error || balancesResult?.error);
 
       const now = new Date();
       const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -85,6 +86,7 @@ export default function WorkspacePage() {
         lowStock: stock.filter((item) => Number(item.quantity) <= Number(item.minimum_stock)).length,
         customerOutstanding: balances.reduce((sum, item) => sum + Math.max(0, Number(item.balance || 0)), 0),
         loading: false,
+        failed,
       });
     }
     void loadOverview();
@@ -142,12 +144,12 @@ export default function WorkspacePage() {
             <>
               <Link href="/sales" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
                 <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Sales today</span><span className="grid size-8 place-items-center rounded-xl bg-[#e8f5ec] text-[#187044]"><TrendingUp className="size-4" /></span></div>
-                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.salesToday.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
-                <p className="mt-1 text-xs text-[#7b8a82]">{overview.loading ? "Checking recorded sales" : `${overview.salesTodayCount} recorded sale${overview.salesTodayCount === 1 ? "" : "s"}`}</p>
+                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : overview.failed ? "Unavailable" : `₦${overview.salesToday.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+                <p className="mt-1 text-xs text-[#7b8a82]">{overview.loading ? "Checking recorded sales" : overview.failed ? "Could not load business records" : `${overview.salesTodayCount} recorded sale${overview.salesTodayCount === 1 ? "" : "s"}`}</p>
               </Link>
               <Link href="/sales" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
                 <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Sales this week</span><span className="grid size-8 place-items-center rounded-xl bg-[#eaf0fb] text-[#365d9b]"><TrendingUp className="size-4" /></span></div>
-                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.salesWeek.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+                <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : overview.failed ? "Unavailable" : `₦${overview.salesWeek.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
                 <p className="mt-1 text-xs text-[#7b8a82]">Monday to today · recorded sales</p>
               </Link>
             </>
@@ -155,14 +157,14 @@ export default function WorkspacePage() {
           {hasPermission(role, "inventory") && (
             <Link href="/inventory" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
               <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Low-stock items</span><span className="grid size-8 place-items-center rounded-xl bg-[#fff3dd] text-[#9b6612]"><AlertTriangle className="size-4" /></span></div>
-              <p className="mt-3 text-2xl font-bold tracking-tight text-[#182a28]">{overview.loading ? "…" : overview.lowStock}</p>
+              <p className="mt-3 text-2xl font-bold tracking-tight text-[#182a28]">{overview.loading ? "…" : overview.failed ? "Unavailable" : overview.lowStock}</p>
               <p className="mt-1 text-xs text-[#7b8a82]">At or below reorder level</p>
             </Link>
           )}
           {hasPermission(role, "outstanding") && (
             <Link href="/owed-owing" className="group rounded-2xl border border-[#dfe6df] bg-white p-4 shadow-[0_3px_12px_rgba(18,59,52,0.035)] transition hover:border-[#b8d1c4] hover:shadow-md sm:p-5">
               <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-[#718078]">Customer balances</span><span className="grid size-8 place-items-center rounded-xl bg-[#f0eafb] text-[#6e4aa1]"><HandCoins className="size-4" /></span></div>
-              <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : `₦${overview.customerOutstanding.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
+              <p className="mt-3 break-words text-xl font-bold tracking-tight text-[#182a28] sm:text-2xl">{overview.loading ? "Loading…" : overview.failed ? "Unavailable" : `₦${overview.customerOutstanding.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`}</p>
               <p className="mt-1 text-xs text-[#7b8a82]">Outstanding customer balances</p>
             </Link>
           )}
