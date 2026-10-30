@@ -45,6 +45,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   const [showCustomer, setShowCustomer] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [paymentAccount, setPaymentAccount] = useState<string>(CASH_ACCOUNT);
+  const [cashReceived, setCashReceived] = useState("");
   const [discount, setDiscount] = useState("0");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [loading, setLoading] = useState(false);
@@ -96,6 +97,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
   function handlePaymentMethod(value: string) {
     setPaymentMethod(value);
     setPaymentAccount(value === "Cash" ? CASH_ACCOUNT : TRANSFER_ACCOUNTS[0]);
+    if (value !== "Cash") setCashReceived("");
   }
 
   function chooseBrand(brand: string) {
@@ -155,8 +157,10 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Boss approval requested. The sale has not been recorded yet.");
-      setCart([]); setCustomerId(""); setDiscount("0"); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted(); return;
+      setCart([]); setCustomerId(""); setDiscount("0"); setCashReceived(""); setShowCustomer(false); setSaleAttemptKey(null); setSaleAttemptSignature(null); void loadOptions(); onSaleCompleted(); return;
     }
+
+    if (paymentMethod === "Cash" && (!Number.isFinite(Number(cashReceived)) || Number(cashReceived) < total)) return toast.error("Enter the cash received. It must cover the sale total.");
 
     const attemptSignature = JSON.stringify({ customerId: customerId || null, paymentMethod, paymentAccount, discount: discountAmount, items: cart.map((line) => ({ inventory_id: line.inventory_id, quantity: line.quantity, unit_price: line.unit_price, price_override: line.price_override })) });
     const idempotencyKey = saleAttemptKey && saleAttemptSignature === attemptSignature ? saleAttemptKey : crypto.randomUUID();
@@ -265,9 +269,10 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
           </div>
         ) : <div className="rounded-2xl border border-dashed border-[#d6dfda] px-5 py-10 text-center"><p className="text-sm font-semibold text-[#394b45]">Nothing added yet</p><p className="mt-1 text-xs text-[#87958f]">Tap a product above, choose quantity, then add it.</p></div>}
 
-        <div className="grid gap-3 md:grid-cols-[1fr_180px]">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label className="text-xs font-semibold text-[#687974]">Payment method<select className={`${selectClass} mt-1`} value={paymentMethod} onChange={(e) => handlePaymentMethod(e.target.value)}>{PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}</select></label>
-          <label className="text-xs font-semibold text-[#687974]">{paymentMethod === "Cash" ? "Money received" : "Transfer to"}<select className={`${selectClass} mt-1`} value={paymentAccount} onChange={(e) => setPaymentAccount(e.target.value)}>{paymentMethod === "Cash" ? <option value="Cash">Cash</option> : TRANSFER_ACCOUNTS.map((account) => <option key={account} value={account}>{account}</option>)}</select></label>
+          <label className="text-xs font-semibold text-[#687974]">Payment account<select className={`${selectClass} mt-1`} value={paymentAccount} onChange={(e) => setPaymentAccount(e.target.value)}>{paymentMethod === "Cash" ? <option value="Cash">Cash</option> : TRANSFER_ACCOUNTS.map((account) => <option key={account} value={account}>{account}</option>)}</select></label>
+          {paymentMethod === "Cash" && <label className="text-xs font-semibold text-[#687974]">Cash received (₦)<Input className={`${selectClass} mt-1`} type="number" min={total} step="0.01" inputMode="decimal" value={cashReceived} onChange={(e) => setCashReceived(e.target.value)} placeholder={String(total)} /></label>}
           <label className="text-xs font-semibold text-[#687974]">Discount<select className={`${selectClass} mt-1`} value={discount} onChange={(e) => setDiscount(e.target.value)}><option value="0">No discount</option><option value="500">₦500</option><option value="1000">₦1,000</option><option value="2000">₦2,000</option></select></label>
         </div>
 
@@ -277,7 +282,7 @@ export default function SaleForm({ onSaleCompleted }: SaleFormProps) {
         </div>
 
         <div className="flex flex-col gap-4 rounded-2xl bg-[#123b34] p-4 text-white sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div><p className="text-xs text-[#c7d8d2]">{cart.length} item{cart.length === 1 ? "" : "s"} · Subtotal {money(subtotal)}</p><p className="mt-1 font-heading text-2xl font-bold">{money(total)}</p></div>
+          <div><p className="text-xs text-[#c7d8d2]">{cart.length} item{cart.length === 1 ? "" : "s"} · Subtotal {money(subtotal)}</p><p className="mt-1 font-heading text-2xl font-bold">{money(total)}</p>{paymentMethod === "Cash" && Number(cashReceived) >= total && total > 0 && <p className="mt-1 text-sm font-semibold text-[#8fe0b4]">Change due: {money(Number(cashReceived) - total)}</p>}</div>
           <Button onClick={complete} disabled={loading || !cart.length} className="h-12 rounded-xl bg-[#d7a95a] px-7 font-bold text-[#123b34] hover:bg-[#e5bc75]">{loading ? "Processing…" : cart.some((line) => line.unit_price < line.minimum_selling_price) || total < cart.reduce((sum, line) => sum + line.quantity * line.minimum_selling_price, 0) ? "Request Boss approval" : "Complete sale"}</Button>
         </div>
       </div>
