@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, History, Plus, Package, HandCoins, ShoppingCart, Wrench, ArrowLeftRight, Wallet, UserRound, X } from "lucide-react";
+import { Home, Plus, Package, HandCoins, ShoppingCart, Wrench, ArrowLeftRight, Wallet, UserRound, X } from "lucide-react";
 import { hasPermission } from "@/lib/permissions";
 import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
