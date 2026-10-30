@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Plus, Package, HandCoins, ShoppingCart, Wrench, ArrowLeftRight, Wallet, UserRound, X } from "lucide-react";
+import { Home, Plus, Package, HandCoins, ShoppingCart, Wrench, ArrowLeftRight, Wallet, UserRound, X, History } from "lucide-react";
 import { hasPermission } from "@/lib/permissions";
 import { staffService } from "@/services/staffService";
 import type { StaffRole } from "@/types/staff";
 
 const items = [
   { label: "Home", href: "/workspace", permission: null, icon: Home },
+  { label: "History", href: "/activity", permission: "staff" as const, icon: History },
   { label: "Sales", href: "/sales", permission: "sales" as const, icon: ShoppingCart },
-  { label: "Parts", href: "/inventory", permission: "inventory" as const, icon: Package },
+  { label: "Stock", href: "/inventory", permission: "inventory" as const, icon: Package },
   { label: "Debts", href: "/owed-owing", permission: "outstanding" as const, icon: HandCoins },
 ];
 
@@ -42,6 +43,10 @@ export default function MobileNav() {
     item.permission === null || (role !== null && hasPermission(role, item.permission))
   );
   const visibleActions = actions.filter((item) => role !== null && hasPermission(role, item.permission));
+  const leftItems = visibleItems.filter((item) => item.label === "Home");
+  const secondItem = role && hasPermission(role, "staff") ? visibleItems.find((item) => item.label === "History") : visibleItems.find((item) => item.label === "Sales");
+  const stockItem = visibleItems.find((item) => item.label === "Stock") || (role && hasPermission(role, "repairs") ? { label: "Repairs", href: "/repairs", permission: "repairs" as const, icon: Wrench } : undefined);
+  const debtsItem = visibleItems.find((item) => item.label === "Debts") || (role && hasPermission(role, "daily_closing") ? { label: "Close", href: "/reports/daily-closing", permission: "daily_closing" as const, icon: Wallet } : undefined);
 
   return (
     <>
@@ -65,12 +70,12 @@ export default function MobileNav() {
         </>
       )}
       <nav aria-label="Main mobile navigation" className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 items-center gap-1 rounded-2xl border border-[#28463b] bg-[#0c211b]/95 px-2 py-2 shadow-[0_12px_36px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:hidden">
-        {visibleItems.slice(0, 2).map(({ label, href, icon: Icon }) => {
+        {[...leftItems, ...(secondItem ? [secondItem] : [])].map(({ label, href, icon: Icon }) => {
           const active = href === "/workspace" ? pathname === "/workspace" || pathname === "/dashboard" : pathname === href || pathname.startsWith(href + "/");
           return <Link key={label} href={href} aria-current={active ? "page" : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${active ? "bg-[#174a37] text-[#91e2b5]" : "text-[#b5c8be] hover:bg-white/5 hover:text-white"}`}><Icon className="size-[18px]" strokeWidth={1.9} /><span>{label}</span></Link>;
         })}
         <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label={menuOpen ? "Close quick actions" : "Open quick actions"} className={`mx-auto grid size-12 -translate-y-2 place-items-center rounded-2xl border border-[#8be0b0]/30 shadow-[0_8px_22px_rgba(0,0,0,0.22)] transition ${menuOpen ? "rotate-45 bg-[#285c43] text-white" : "bg-[#42c978] text-[#08271a] hover:bg-[#6ce093]"}`}><Plus className="size-6" strokeWidth={2.5} /></button>
-        {visibleItems.slice(2).map(({ label, href, icon: Icon }) => {
+        {[stockItem, debtsItem].filter((item): item is NonNullable<typeof item> => Boolean(item)).map(({ label, href, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return <Link key={label} href={href} aria-current={active ? "page" : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${active ? "bg-[#174a37] text-[#91e2b5]" : "text-[#b5c8be] hover:bg-white/5 hover:text-white"}`}><Icon className="size-[18px]" strokeWidth={1.9} /><span>{label}</span></Link>;
         })}
