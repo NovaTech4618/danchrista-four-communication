@@ -8,9 +8,8 @@ import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, Bell, Boxes, CalendarDays,
-  CircleHelp, ClipboardList, Home, Package, Plus, Search, ShoppingCart,
-  Smartphone, Sparkles, UserRound, Wrench, X,
+  ArrowRight, ArrowUpRight, Boxes, CalendarDays, CircleHelp, Home, Package,
+  Search, ShoppingCart, UserRound, Wrench, X,
 } from "lucide-react";
 
 const quickLinks = [
