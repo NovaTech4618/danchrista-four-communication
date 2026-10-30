@@ -13,7 +13,7 @@ import { businessOperationsService } from "@/services/businessOperationsService"
 import type { Sale } from "@/types/sale";
 import type { InventoryItem } from "@/types/inventory";
 import {
-  ArrowRight, Boxes, CalendarDays, CircleHelp, TrendingUp, Package, HandCoins, AlertTriangle,
+  ArrowRight, Boxes, CalendarDays, CircleHelp, TrendingUp, HandCoins, AlertTriangle,
   Search, ShoppingCart, UserRound, Wrench, X,
 } from "lucide-react";
 
