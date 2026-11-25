@@ -48,7 +48,7 @@ export const repairService = {
   },
 
   async getAllRepairs() {
-    return await supabase.from("repairs").select("*, devices(brand, model, customers(full_name)), repair_tickets(id, ticket_number)").order("created_at", { ascending: false });
+    return await supabase.from("repairs").select("*, devices(brand, model, customers(full_name, phone)), repair_tickets(id, ticket_number)").order("created_at", { ascending: false });
   },
 
   async getAllRepairBalances() {
