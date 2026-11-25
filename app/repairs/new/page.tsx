@@ -31,6 +31,7 @@ export default function NewRepairPage() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [deviceType, setDeviceType] = useState("Phone");
+  const [serviceType, setServiceType] = useState("Standard Repair");
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [serial, setSerial] = useState("");
@@ -84,6 +85,7 @@ export default function NewRepairPage() {
         p_payment_method: paymentMethod,
         p_priority: priority,
         p_expected_completion_date: expectedDate || null,
+        p_service_type: serviceType,
       });
       if (error) throw new Error(error.message);
       const created = Array.isArray(data) ? data[0] : data;
@@ -188,10 +190,11 @@ export default function NewRepairPage() {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader><CardTitle className="text-base">4. Job and payment</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
+              <Field label="Service type"><select className={selectClass} value={serviceType} onChange={e => { setServiceType(e.target.value); if (e.target.value === "Network Unlock") setExpectedDate(""); else if (!expectedDate) setExpectedDate(suggestedDate()); }}><option>Standard Repair</option><option>Network Unlock</option></select></Field>
               <Field label="Assigned technician (optional)"><Input className={inputClass} value={technician} onChange={e => setTechnician(e.target.value)} placeholder="Name of technician" /></Field>
               <Field label="Priority"><select className={selectClass} value={priority} onChange={e => setPriority(e.target.value)}>{REPAIR_PRIORITIES.map(item => <option key={item}>{item}</option>)}</select></Field>
               <Field label="Target completion date"><Input className={inputClass} type="date" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} /></Field>
-              <p className="self-end text-xs leading-5 text-slate-500">Suggested target is three days for standard repairs. Change or clear it when the job needs a different timeframe.</p>
+              <p className="self-end text-xs leading-5 text-slate-500">Standard repairs are limited to a three-day target by the shop workflow. Network unlock jobs have no automatic three-day limit.</p>
               <Field label="Estimated cost (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={estimated} onChange={e => setEstimated(e.target.value)} placeholder="Leave blank if not yet known" /></Field>
               <Field label="Deposit received (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={deposit} onChange={e => setDeposit(e.target.value)} placeholder="0" /></Field>
               <Field label="Deposit payment method"><select className={selectClass} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="pos">POS</option><option value="other">Other</option></select></Field>
