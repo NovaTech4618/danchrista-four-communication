@@ -60,6 +60,7 @@ export default function NewRepairPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!customerName.trim()) return void toast.error("Enter the customer's name.");
+    if (phone.replace(/\\D/g, "").length < 7) return void toast.error("Enter a valid customer phone number.");
     if (!brand.trim() || !model.trim()) return void toast.error("Enter the device brand and model.");
     if (!issue.trim()) return void toast.error("Record the problem reported by the customer.");
     if (serviceType === "Standard Repair" && !expectedDate) return void toast.error("Choose a target date for this standard repair.");
@@ -154,7 +155,7 @@ export default function NewRepairPage() {
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><UserRound className="size-4 text-teal-700" /> 1. Customer</CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <Field label="Customer name" required><Input className={inputClass} value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Name of the person bringing the device" autoComplete="name" required /></Field>
-              <Field label="Phone number"><div className="relative"><Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input className={`${inputClass} pl-10`} value={phone} onChange={e => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" /></div></Field>
+              <Field label="Phone number" required><div className="relative"><Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><Input className={`${inputClass} pl-10`} value={phone} onChange={e => setPhone(e.target.value)} placeholder="080..." inputMode="tel" autoComplete="tel" required /></div></Field>
             </CardContent>
           </Card>
 
