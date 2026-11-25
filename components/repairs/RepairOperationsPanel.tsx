@@ -47,7 +47,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     if (!q.error) { setQuote(q.data); setQuoteAmount(q.data?.amount == null ? "" : String(q.data.amount)); setQuoteNotes(q.data?.notes ?? ""); }
     if (!h.error) setHistory(h.data ?? []);
     if (!o.error) setOutcome(o.data);
-    if (!w.error) setWarranty(w.data);
+    if (!w.error) { setWarranty(w.data); setWarrantyDays(String(w.data?.warranty_days ?? 30)); setWarrantyTerms(w.data?.terms ?? ""); }
     if (!ho.error) { setHandover(ho.data); setRecipientName(ho.data?.recipient_name ?? ""); setRecipientPhone(ho.data?.recipient_phone ?? ""); setHandoverCondition(ho.data?.device_condition ?? ""); setHandoverNotes(""); }
     if (!rl.error) setRepeatLinks(rl.data ?? []);
   }
@@ -66,9 +66,16 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   }, [expectedCompletionDate, status]);
 
   async function saveIntake() {
-    if (!intake) return;
+    const current = intake ?? defaultIntake;
     setBusy(true);
-    const { error } = await repairOperationsService.saveIntake({ ...intake, company_id: companyId, branch_id: branchId, repair_id: repairId });
+    const { error } = await repairOperationsService.saveIntake({
+      ...current,
+      company_id: companyId,
+      branch_id: branchId,
+      repair_id: repairId,
+      customer_password_provided: false,
+      acknowledged_at: current.customer_acknowledged ? current.acknowledged_at || new Date().toISOString() : null,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Device intake saved.");
@@ -78,7 +85,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   async function sendQuote() {
     const amount = Number(quoteAmount);
     const notes = quoteNotes.trim();
-    if (!Number.isFinite(amount) || amount < 0) return toast.error("Enter a valid quote amount.");
+    if (!quoteAmount.trim() || !Number.isFinite(amount) || amount < 0) return toast.error("Enter a valid quote amount.");
     setBusy(true);
     const { error } = await repairOperationsService.sendQuote(repairId, amount, notes || null);
     setBusy(false);
@@ -144,7 +151,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><ClipboardCheck className="size-5 text-teal-700"/>Repair operations <Badge variant={sla.tone} className="ml-auto">{sla.label}</Badge></CardTitle></CardHeader><CardContent className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3"><Field label="Device condition" value={defaultIntake.device_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, device_condition: v })}/><Field label="Screen condition" value={defaultIntake.screen_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, screen_condition: v })}/><Field label="Body condition" value={defaultIntake.body_condition ?? ""} onChange={(v) => setIntake({ ...defaultIntake, body_condition: v })}/></div>
       <div><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Functional intake checks</p><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">{checks.map((check) => <label key={check.key} className="rounded-xl border border-slate-200 p-3 text-sm"><span className="font-medium text-slate-700">{check.label}</span><select value={defaultIntake[check.key] ?? "untested"} onChange={(e) => setIntake({ ...defaultIntake, [check.key]: e.target.value as RepairIntake[CheckKey] })} className="mt-2 h-9 w-full rounded-lg border border-slate-200 bg-white px-2 text-xs"><option value="untested">Untested</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="na">N/A</option></select></label>)}</div></div>
-      <div className="grid gap-2 sm:grid-cols-3"><label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" checked={defaultIntake.water_damage} onChange={(e) => setIntake({ ...defaultIntake, water_damage: e.target.checked })}/>Water damage</label><label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" checked={defaultIntake.physical_damage} onChange={(e) => setIntake({ ...defaultIntake, physical_damage: e.target.checked })}/>Physical damage</label><label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" checked={defaultIntake.customer_password_provided} onChange={(e) => setIntake({ ...defaultIntake, customer_password_provided: e.target.checked })}/>Password provided</label></div>
+      <div className="grid gap-2 sm:grid-cols-3"><label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" checked={defaultIntake.water_damage} onChange={(e) => setIntake({ ...defaultIntake, water_damage: e.target.checked })}/>Water damage</label><label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm"><input type="checkbox" checked={defaultIntake.physical_damage} onChange={(e) => setIntake({ ...defaultIntake, physical_damage: e.target.checked })}/>Physical damage</label></div>
       <div className="grid gap-3 sm:grid-cols-2"><Field label="Accessories received" value={defaultIntake.accessories_received ?? ""} onChange={(v) => setIntake({ ...defaultIntake, accessories_received: v })}/><Field label="Missing items" value={defaultIntake.missing_items ?? ""} onChange={(v) => setIntake({ ...defaultIntake, missing_items: v })}/></div>
       <div className="flex items-center justify-between gap-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={defaultIntake.customer_acknowledged} onChange={(e) => setIntake({ ...defaultIntake, customer_acknowledged: e.target.checked })}/>Customer acknowledged intake condition</label><Button onClick={saveIntake} disabled={busy}>{busy ? "Saving..." : "Save intake"}</Button></div>
     </CardContent></Card>
