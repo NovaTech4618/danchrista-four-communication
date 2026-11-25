@@ -13,6 +13,7 @@ type RepairRow = {
   device_id: string;
   issue: string;
   status: string;
+  service_type?: string | null;
   created_at: string;
   deposit: number | null;
   estimated_cost: number | null;
@@ -23,7 +24,7 @@ type RepairRow = {
   outstanding?: number | null;
 };
 type RepairBalance = { repair_id: string; outstanding: number | null };
-type QueueFilter = "all" | "active" | "ready" | "closed";
+type QueueFilter = "all" | "active" | "ready" | "closed" | "attention" | "overdue";
 const closedStatuses = ["Collected", "Cancelled", "No Fix", "Failed Repair", "Returned Unrepaired"];
 const statusList = ["Received", "Diagnosis", "Estimate Sent", "Customer Approved", "Repairing", "Testing", "Completed", ...closedStatuses];
 const money = (value: number) => `₦${Number(value || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
@@ -94,7 +95,10 @@ export default function RepairsPage() {
     const ticket = repair.repair_tickets?.[0]?.ticket_number ?? "";
     const matchesSearch = !q || [repair.issue, device?.brand, device?.model, customer?.full_name, customer?.phone, ticket, repair.id].some(value => String(value ?? "").toLowerCase().includes(q));
     const matchesStatus = statusFilter === "all" || repair.status === statusFilter;
-    const matchesQueue = queue === "all" || (queue === "active" && !closedStatuses.includes(repair.status) && repair.status !== "Completed") || (queue === "ready" && repair.status === "Completed") || (queue === "closed" && closedStatuses.includes(repair.status));
+    const isActive = !closedStatuses.includes(repair.status) && repair.status !== "Completed";
+    const isOverdue = isActive && Boolean(repair.expected_completion_date) && new Date(String(repair.expected_completion_date) + "T23:59:59").getTime() < Date.now();
+    const needsAttention = ["Received", "Diagnosis", "Estimate Sent"].includes(repair.status);
+    const matchesQueue = queue === "all" || (queue === "active" && isActive) || (queue === "ready" && repair.status === "Completed") || (queue === "closed" && closedStatuses.includes(repair.status)) || (queue === "attention" && needsAttention) || (queue === "overdue" && isOverdue);
     return matchesSearch && matchesStatus && matchesQueue;
   }), [repairs, search, statusFilter, queue]);
 
@@ -109,8 +113,8 @@ export default function RepairsPage() {
     <section aria-label="Repair queue summary" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <button onClick={() => { setQueue("active"); setStatusFilter("all"); }} className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-teal-300 ${queue === "active" ? "border-teal-500 ring-2 ring-teal-100" : "border-[#dfe6df]"}`}><p className="text-xs font-semibold text-[#74837e]">Active jobs</p><p className="mt-2 font-heading text-2xl font-bold text-[#182a28] tabular-nums">{counts.active}</p><p className="mt-1 text-xs text-[#74837e]">Being handled</p></button>
       <button onClick={() => { setQueue("ready"); setStatusFilter("all"); }} className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-teal-300 ${queue === "ready" ? "border-teal-500 ring-2 ring-teal-100" : "border-[#dfe6df]"}`}><p className="text-xs font-semibold text-[#74837e]">Ready for pickup</p><p className="mt-2 font-heading text-2xl font-bold text-emerald-700 tabular-nums">{counts.ready}</p><p className="mt-1 text-xs text-[#74837e]">Customer to collect</p></button>
-      <button onClick={() => { setQueue("all"); setStatusFilter("Estimate Sent"); }} className="rounded-2xl border border-[#dfe6df] bg-white p-4 text-left shadow-sm transition hover:border-teal-300"><p className="text-xs font-semibold text-[#74837e]">Needs attention</p><p className="mt-2 font-heading text-2xl font-bold text-amber-700 tabular-nums">{counts.awaiting}</p><p className="mt-1 text-xs text-[#74837e]">New, diagnosis or approval</p></button>
-      <button onClick={() => { setQueue("active"); setStatusFilter("all"); }} className="rounded-2xl border border-[#dfe6df] bg-white p-4 text-left shadow-sm transition hover:border-teal-300"><p className="text-xs font-semibold text-[#74837e]">Overdue jobs</p><p className="mt-2 font-heading text-2xl font-bold text-rose-700 tabular-nums">{counts.overdue}</p><p className="mt-1 text-xs text-[#74837e]">Past target date</p></button>
+      <button onClick={() => { setQueue("attention"); setStatusFilter("all"); }} className="rounded-2xl border border-[#dfe6df] bg-white p-4 text-left shadow-sm transition hover:border-teal-300"><p className="text-xs font-semibold text-[#74837e]">Needs attention</p><p className="mt-2 font-heading text-2xl font-bold text-amber-700 tabular-nums">{counts.awaiting}</p><p className="mt-1 text-xs text-[#74837e]">New, diagnosis or approval</p></button>
+      <button onClick={() => { setQueue("overdue"); setStatusFilter("all"); }} className="rounded-2xl border border-[#dfe6df] bg-white p-4 text-left shadow-sm transition hover:border-teal-300"><p className="text-xs font-semibold text-[#74837e]">Overdue jobs</p><p className="mt-2 font-heading text-2xl font-bold text-rose-700 tabular-nums">{counts.overdue}</p><p className="mt-1 text-xs text-[#74837e]">Past target date</p></button>
     </section>
 
     <section className="rounded-2xl border border-[#dfe6df] bg-white shadow-[0_10px_28px_rgba(18,59,52,0.05)]">
@@ -133,7 +137,7 @@ export default function RepairsPage() {
         <div className="hidden overflow-x-auto sm:block"><table className="w-full min-w-[900px] text-left"><thead className="bg-[#f7f8f5]"><tr>{["Customer / device", "Reported problem", "Status", "Payment", "Target", ""].map(label => <th key={label} className="px-5 py-3 text-[10px] font-bold uppercase tracking-wide text-[#74837e]">{label}</th>)}</tr></thead><tbody>{filtered.map(repair => {
           const customer = repair.devices?.customers; const balance = repair.outstanding; const ticket = repair.repair_tickets?.[0]?.ticket_number;
           return <tr key={repair.id} className="border-t border-[#edf0ed] hover:bg-[#fbfcfa]">
-            <td className="px-5 py-4"><Link href={`/repairs/${repair.id}`} className="block"><p className="font-semibold text-[#182a28]">{customer?.full_name || "Customer not named"}</p><p className="mt-0.5 text-xs text-[#74837e]">{repair.devices?.brand} {repair.devices?.model}{ticket ? ` · ${ticket}` : ""}</p><p className="text-xs text-[#74837e]">{customer?.phone || "No phone recorded"}</p></Link></td>
+            <td className="px-5 py-4"><Link href={`/repairs/${repair.id}`} className="block"><p className="font-semibold text-[#182a28]">{customer?.full_name || "Customer not named"}</p><p className="mt-0.5 text-xs text-[#74837e]">{repair.devices?.brand} {repair.devices?.model}{repair.service_type === "Network Unlock" ? " · Network Unlock" : ""}{ticket ? ` · ${ticket}` : ""}</p><p className="text-xs text-[#74837e]">{customer?.phone || "No phone recorded"}</p></Link></td>
             <td className="max-w-[260px] px-5 py-4 text-sm text-[#53635d]"><span className="line-clamp-2">{repair.issue || "No problem recorded"}</span></td>
             <td className="px-5 py-4"><span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusClass(repair.status)}`}>{repair.status}</span></td>
             <td className="px-5 py-4 text-sm">{balance === null || balance === undefined ? <span className="text-xs text-slate-500">Unavailable</span> : balance > 0 ? <span className="font-bold text-amber-700">{money(balance)} due</span> : <span className="text-emerald-700">Paid</span>}</td>
@@ -149,7 +153,7 @@ export default function RepairsPage() {
 function RepairCard({ repair }: { repair: RepairRow }) {
   const customer = repair.devices?.customers; const balance = repair.outstanding; const ticket = repair.repair_tickets?.[0]?.ticket_number;
   return <Link href={`/repairs/${repair.id}`} className="block rounded-2xl border border-[#e3e9e3] bg-white p-4 shadow-sm transition hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-600">
-    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold text-[#182a28]">{customer?.full_name || "Customer not named"}</p><p className="mt-1 flex items-center gap-1.5 text-xs text-[#74837e]"><Smartphone className="size-3.5 shrink-0" />{repair.devices?.brand} {repair.devices?.model}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusClass(repair.status)}`}>{repair.status}</span></div>
+    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold text-[#182a28]">{customer?.full_name || "Customer not named"}</p><p className="mt-1 flex items-center gap-1.5 text-xs text-[#74837e]"><Smartphone className="size-3.5 shrink-0" />{repair.devices?.brand} {repair.devices?.model}{repair.service_type === "Network Unlock" ? " · Network Unlock" : ""}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusClass(repair.status)}`}>{repair.status}</span></div>
     <p className="mt-3 line-clamp-2 text-sm text-[#53635d]">{repair.issue || "No problem recorded"}</p>
     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#edf0ed] pt-3 text-xs"><span className="font-semibold text-[#53635d]">{ticket || "Repair record"}</span><span className="text-[#74837e]">{deadline(repair)}</span></div>
     <div className="mt-2 flex items-center justify-between gap-2"><span className={balance === null || balance === undefined ? "text-xs text-slate-500" : balance > 0 ? "text-xs font-bold text-amber-700" : "text-xs font-semibold text-emerald-700"}>{balance === null || balance === undefined ? "Balance unavailable" : balance > 0 ? `${money(balance)} outstanding` : "No balance due"}</span><span className="inline-flex items-center gap-1 text-xs font-bold text-teal-800">{nextAction(repair.status)} <ArrowRight className="size-3.5" /></span></div>
