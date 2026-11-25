@@ -78,8 +78,8 @@ export const repairOperationsService = {
   async getHandover(repairId: string) {
     return await supabase.from("repair_handovers").select("*").eq("repair_id", repairId).maybeSingle<RepairHandover>();
   },
-  async recordHandover(input: { repairId: string; recipientName: string; recipientPhone?: string | null; idType?: string | null; idReference?: string | null; deviceCondition?: string | null; notes?: string | null }) {
-    return await supabase.rpc("record_repair_handover", { p_repair_id: input.repairId, p_recipient_name: input.recipientName, p_recipient_phone: input.recipientPhone ?? null, p_id_type: input.idType ?? null, p_id_reference: input.idReference ?? null, p_device_condition: input.deviceCondition ?? null, p_customer_confirmed: true, p_notes: input.notes ?? null });
+  async recordHandover(input: { repairId: string; recipientName: string; recipientPhone?: string | null; idType?: string | null; idReference?: string | null; deviceCondition?: string | null; customerConfirmed: boolean; notes?: string | null }) {
+    return await supabase.rpc("record_repair_handover", { p_repair_id: input.repairId, p_recipient_name: input.recipientName, p_recipient_phone: input.recipientPhone ?? null, p_id_type: input.idType ?? null, p_id_reference: input.idReference ?? null, p_device_condition: input.deviceCondition ?? null, p_customer_confirmed: input.customerConfirmed, p_notes: input.notes ?? null });
   },
   async getRepeatLinks(repairId: string) {
     return await supabase.from("repair_repeat_links").select("*").or(`original_repair_id.eq.${repairId},repeat_repair_id.eq.${repairId}`).order("created_at", { ascending: false }).returns<RepairRepeatLink[]>();
