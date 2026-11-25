@@ -54,8 +54,9 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   useEffect(() => { void load(); }, [repairId]);
 
   const sla = useMemo(() => {
+    if (status === "Completed") return { label: "Ready for pickup", tone: "default" as const };
     if (!expectedCompletionDate) return { label: "No deadline", tone: "secondary" as const };
-    if (["Completed", "Collected", "No Fix", "Failed Repair", "Returned Unrepaired", "Cancelled"].includes(status)) return { label: "Closed", tone: "secondary" as const };
+    if (["Collected", "No Fix", "Failed Repair", "Returned Unrepaired", "Cancelled"].includes(status)) return { label: "Closed", tone: "secondary" as const };
     const due = new Date(`${expectedCompletionDate}T23:59:59`);
     const today = new Date();
     const delta = Math.ceil((due.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86400000);
