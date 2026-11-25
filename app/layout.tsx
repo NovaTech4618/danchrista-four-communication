@@ -1,15 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Manrope, Space_Mono } from "next/font/google";
 import "./globals.css";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import { RoleRouteGuard } from "@/components/auth/RoleRouteGuard";
 import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
-
-const sora = Sora({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", weight: ["400", "500", "600", "700"] });
-const spaceMono = Space_Mono({ subsets: ["latin"], variable: "--font-data", weight: ["400", "700"] });
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 const siteUrl = configuredSiteUrl || "https://danchrista-four-communication.vercel.app";
@@ -58,7 +53,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={sora.variable + " " + manrope.variable + " " + spaceMono.variable}>
+    <html lang="en">
       <body className="min-w-0 overflow-x-hidden">
         <a
           href="#main-content"
