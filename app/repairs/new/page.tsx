@@ -60,7 +60,7 @@ export default function NewRepairPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!customerName.trim()) return void toast.error("Enter the customer's name.");
-    if (phone.replace(/\\D/g, "").length < 7) return void toast.error("Enter a valid customer phone number.");
+    if (phone.split("").filter(character => character >= "0" && character <= "9").length < 7) return void toast.error("Enter a valid customer phone number.");
     if (!brand.trim() || !model.trim()) return void toast.error("Enter the device brand and model.");
     if (!issue.trim()) return void toast.error("Record the problem reported by the customer.");
     if (serviceType === "Standard Repair" && !expectedDate) return void toast.error("Choose a target date for this standard repair.");
