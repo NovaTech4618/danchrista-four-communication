@@ -7,77 +7,77 @@ import { staffService } from "@/services/staffService";
 import { hasPermission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/staff";
 import { workspaceGroups } from "@/lib/workspaceSections";
+import { HandCoins, Package, ShoppingCart, Wrench, ClipboardList, Users, Search, ChevronDown } from "lucide-react";
+
+const mainTasks = [
+  { title: "Repair a phone", hint: "Take in a phone and follow the repair", href: "/repairs", permission: "repairs" as const, icon: Wrench },
+  { title: "Sell something", hint: "Sell an item and collect payment", href: "/sales", permission: "sales" as const, icon: ShoppingCart },
+  { title: "Find or add stock", hint: "Check parts, accessories and quantities", href: "/inventory", permission: "inventory" as const, icon: Package },
+  { title: "Money people owe", hint: "See who has not paid and record payments", href: "/owed-owing", permission: "outstanding" as const, icon: HandCoins },
+  { title: "Close today's shop", hint: "Enter expenses and check today's totals", href: "/reports/daily-closing", permission: "daily_closing" as const, icon: ClipboardList },
+  { title: "Find a customer", hint: "Look up a name or phone number", href: "/customers", permission: "customers" as const, icon: Users },
+];
 
 export default function WorkspacePage() {
   const [role, setRole] = useState<StaffRole | null>(null);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     let active = true;
-    void staffService.getMyRole().then((result) => {
-      if (active && result.data) setRole(result.data);
-    });
+    void staffService.getMyRole().then((result) => { if (active && result.data) setRole(result.data); });
     return () => { active = false; };
   }, []);
 
+  const extraGroups = workspaceGroups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => item.showOnHome !== false && hasPermission(role, item.permission) && !mainTasks.some((task) => task.href === item.href)),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <AppLayout>
-      <main className="mx-auto max-w-7xl space-y-8 pb-8">
-        <header className="rounded-3xl border border-[#dfe6df] bg-white px-5 py-7 text-center shadow-sm sm:px-8 sm:py-9">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#1d6a54]">Amezing Limited</p>
-          <h1 className="mt-2 font-heading text-3xl font-extrabold tracking-tight text-[#182a28] sm:text-4xl">Shop workspace</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#65766f]">
-            Choose the section that matches the job. Each card explains what it records and when to use it. Finish a task, then use Home to return here.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs text-[#52675e]">
-            <span className="rounded-full border border-[#dfe6df] px-3 py-1.5">Real shop records only</span>
-            <span className="rounded-full border border-[#dfe6df] px-3 py-1.5">Stock and money remain traceable</span>
-            <Link href="/help" className="rounded-full border border-[#dfe6df] px-3 py-1.5 font-semibold text-[#1d6a54] hover:bg-[#f5f8f5]">Read the section guide →</Link>
-          </div>
+      <main className="mx-auto max-w-5xl space-y-6 pb-10">
+        <header className="space-y-2 px-1 pt-1">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#1d6a54]">Amezing Limited</p>
+          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-[#182a28] sm:text-4xl">What do you want to do?</h1>
+          <p className="text-sm text-[#65766f]">Choose a job to get started. We’ll guide you from there.</p>
         </header>
 
         {role === null ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading workspace" aria-busy="true">
-            {Array.from({ length: 6 }, (_, index) => <div key={index} className="h-36 animate-pulse rounded-2xl border border-[#e5ebe6] bg-white" />)}
+          <div className="grid gap-3 sm:grid-cols-2" aria-label="Loading shop actions" aria-busy="true">
+            {Array.from({ length: 4 }, (_, index) => <div key={index} className="h-28 animate-pulse rounded-2xl border border-[#e5ebe6] bg-white" />)}
           </div>
         ) : (
-          <div className="space-y-8">
-            {workspaceGroups.map((group) => {
-              const items = group.items.filter((item) => item.showOnHome !== false && hasPermission(role, item.permission));
-              if (!items.length) return null;
-              const headingId = group.title.replaceAll(" ", "-").toLowerCase();
-              return (
-                <section key={group.title} aria-labelledby={headingId}>
-                  <header className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                    <h2 id={headingId} className="font-heading text-xl font-bold text-[#182a28] sm:text-2xl">{group.title}</h2>
-                    <p className="text-sm text-[#74837e]">{group.description}</p>
-                  </header>
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map(({ title, href, description, icon: Icon }) => (
-                      <Link
-                        key={title}
-                        href={href}
-                        className="group flex min-h-36 min-w-0 gap-3 rounded-2xl border border-[#e3e9e4] bg-white p-4 shadow-[0_2px_6px_rgba(24,42,40,0.04)] transition hover:-translate-y-0.5 hover:border-[#bfd2c8] hover:shadow-[0_8px_18px_rgba(18,59,52,0.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54] sm:p-5"
-                      >
-                        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#eef4f1] text-[#1d6a54] transition group-hover:bg-[#123b34] group-hover:text-[#d7a95a]">
-                          <Icon className="size-5" strokeWidth={1.8} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-bold text-[#263a35] sm:text-base">{title}</span>
-                          <span className="mt-1.5 block text-xs leading-5 text-[#74837e] sm:text-sm sm:leading-5">{description}</span>
-                          <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#1d6a54]">Open section <span aria-hidden="true">→</span></span>
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        )}
+          <>
+            <section aria-label="Common shop jobs" className="grid gap-3 sm:grid-cols-2">
+              {mainTasks.filter((task) => hasPermission(role, task.permission)).map(({ title, hint, href, icon: Icon }) => (
+                <Link key={href} href={href} className="group flex min-h-28 items-center gap-4 rounded-2xl border border-[#dfe7e1] bg-white p-4 shadow-sm transition hover:border-[#a9c6b8] hover:bg-[#f8fbf8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d6a54] sm:min-h-32 sm:p-5">
+                  <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#eaf3ee] text-[#1d6a54] group-hover:bg-[#123b34] group-hover:text-white"><Icon className="size-7" strokeWidth={2} aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-lg font-bold text-[#203a31]">{title}</span><span className="mt-1 block text-sm leading-5 text-[#718078]">{hint}</span></span>
+                  <span className="text-2xl font-semibold text-[#8aa397]" aria-hidden="true">›</span>
+                </Link>
+              ))}
+            </section>
 
-        <p className="text-center text-xs leading-5 text-[#89958f]">
-          Only sections allowed for your account are shown. If a task does not match these descriptions, stop and check the guide before entering the same transaction in a different book.
-        </p>
+            <section className="overflow-hidden rounded-2xl border border-[#dfe7e1] bg-white">
+              <button type="button" onClick={() => setShowMore((value) => !value)} aria-expanded={showMore} className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-4 text-left focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#1d6a54] sm:px-5">
+                <span><span className="block font-bold text-[#203a31]">More shop tools</span><span className="mt-1 block text-xs text-[#718078]">Engineers, reports, suppliers and settings</span></span>
+                <ChevronDown className={`size-5 text-[#557468] transition-transform ${showMore ? "rotate-180" : ""}`} aria-hidden="true" />
+              </button>
+              {showMore && <div className="space-y-5 border-t border-[#e8eee9] p-4 sm:p-5">
+                {extraGroups.map((group) => <section key={group.title} aria-label={group.title}>
+                  <h2 className="mb-2 text-sm font-bold text-[#52675e]">{group.title}</h2>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {group.items.map(({ title, href, icon: Icon }) => <Link key={href} href={href} className="flex min-h-12 items-center gap-3 rounded-xl border border-[#e8eee9] px-3 py-2.5 text-sm font-semibold text-[#30483e] hover:bg-[#f5f8f5] focus-visible:outline-2 focus-visible:outline-[#1d6a54]">
+                      <Icon className="size-4 shrink-0 text-[#1d6a54]" aria-hidden="true" /><span>{title}</span><span className="ml-auto text-lg text-[#8aa397]" aria-hidden="true">›</span>
+                    </Link>)}
+                  </div>
+                </section>)}
+                {hasPermission(role, "search") && <Link href="/search" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#eef4f1] px-4 text-sm font-bold text-[#1d6a54] hover:bg-[#e1eee7]"><Search className="size-4" aria-hidden="true" /> Search all records</Link>}
+              </div>}
+            </section>
+          </>
+        )}
+        <p className="px-2 text-center text-xs leading-5 text-[#89958f]">Only the jobs your account can do are shown. If you are unsure, ask the shop manager before saving a record.</p>
       </main>
     </AppLayout>
   );
