@@ -12,14 +12,14 @@ import type { RepairApprovalHistory, RepairIntake, RepairQuote } from "@/types/r
 import type { RepairHandover, RepairRepeatLink } from "@/types/repairHandover";
 import RepairInvoiceWorkflow from "@/components/repairs/RepairInvoiceWorkflow";
 
-type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number; repairFinalCost?: number | null; onOutcomeRecorded?: (status: string) => void };
+type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number; repairFinalCost?: number | null; onOutcomeRecorded?: (status: string) => void; onFinalChargeSaved?: (amount: number) => void };
 type CheckKey = "power_test" | "charging_test" | "camera_test" | "speaker_test" | "microphone_test" | "buttons_test" | "biometric_test" | "network_test";
 const checks: { key: CheckKey; label: string }[] = [
   { key: "power_test", label: "Power" }, { key: "charging_test", label: "Charging" }, { key: "camera_test", label: "Camera" }, { key: "speaker_test", label: "Speaker" },
   { key: "microphone_test", label: "Microphone" }, { key: "buttons_test", label: "Buttons" }, { key: "biometric_test", label: "Biometric" }, { key: "network_test", label: "Network" },
 ];
 
-export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0, repairFinalCost = null, onOutcomeRecorded }: Props) {
+export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0, repairFinalCost = null, onOutcomeRecorded, onFinalChargeSaved }: Props) {
   const [intake, setIntake] = useState<RepairIntake | null>(null);
   const [quote, setQuote] = useState<RepairQuote | null>(null);
   const [history, setHistory] = useState<RepairApprovalHistory[]>([]);
@@ -139,6 +139,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     setBusy(false);
     if (error) return toast.error(error.message);
     setFinalAgreedSaved(true);
+    onFinalChargeSaved?.(amount);
     toast.success("Final agreed charge saved.");
   }
 
