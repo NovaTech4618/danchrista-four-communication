@@ -41,8 +41,11 @@ export const repairOperationsService = {
   async saveIntake(input: Omit<RepairIntake, "id" | "created_at" | "updated_at">) {
     // Never send UI placeholder strings to timestamptz columns. The intake form
     // uses empty strings for text inputs, but timestamps must be null or omitted.
+    const fields = Object.fromEntries(
+      Object.entries(input).filter(([key]) => !["id", "created_at", "updated_at"].includes(key)),
+    ) as Omit<RepairIntake, "id" | "created_at" | "updated_at">;
     const payload = {
-      ...input,
+      ...fields,
       acknowledged_at: input.acknowledged_at || null,
       acknowledged_by: input.acknowledged_by || null,
     };
