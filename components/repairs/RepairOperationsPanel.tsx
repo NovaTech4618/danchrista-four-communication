@@ -12,14 +12,14 @@ import type { RepairApprovalHistory, RepairIntake, RepairQuote } from "@/types/r
 import type { RepairHandover, RepairRepeatLink } from "@/types/repairHandover";
 import RepairInvoiceWorkflow from "@/components/repairs/RepairInvoiceWorkflow";
 
-type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number };
+type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number; repairFinalCost?: number | null };
 type CheckKey = "power_test" | "charging_test" | "camera_test" | "speaker_test" | "microphone_test" | "buttons_test" | "biometric_test" | "network_test";
 const checks: { key: CheckKey; label: string }[] = [
   { key: "power_test", label: "Power" }, { key: "charging_test", label: "Charging" }, { key: "camera_test", label: "Camera" }, { key: "speaker_test", label: "Speaker" },
   { key: "microphone_test", label: "Microphone" }, { key: "buttons_test", label: "Buttons" }, { key: "biometric_test", label: "Biometric" }, { key: "network_test", label: "Network" },
 ];
 
-export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0 }: Props) {
+export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0, repairFinalCost = null }: Props) {
   const [intake, setIntake] = useState<RepairIntake | null>(null);
   const [quote, setQuote] = useState<RepairQuote | null>(null);
   const [history, setHistory] = useState<RepairApprovalHistory[]>([]);
@@ -37,6 +37,8 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
   const [handoverConfirmed, setHandoverConfirmed] = useState(false);
   const [handoverCondition, setHandoverCondition] = useState("");
   const [handoverNotes, setHandoverNotes] = useState("");
+  const [finalAgreedAmount, setFinalAgreedAmount] = useState(repairFinalCost == null ? "" : String(repairFinalCost));
+  const [finalAgreedSaved, setFinalAgreedSaved] = useState(repairFinalCost != null);
   const [busy, setBusy] = useState(false);
 
   async function load() {
@@ -50,6 +52,8 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     if (!o.error) setOutcome(o.data);
     if (!w.error) { setWarranty(w.data); setWarrantyDays(String(w.data?.warranty_days ?? 30)); setWarrantyTerms(w.data?.terms ?? ""); }
     if (!ho.error) { setHandover(ho.data); setRecipientName(ho.data?.recipient_name ?? ""); setRecipientPhone(ho.data?.recipient_phone ?? ""); setHandoverCondition(ho.data?.device_condition ?? ""); setHandoverConfirmed(Boolean(ho.data?.customer_confirmed)); setHandoverNotes(""); }
+    setFinalAgreedAmount(repairFinalCost == null ? "" : String(repairFinalCost));
+    setFinalAgreedSaved(repairFinalCost != null);
     if (!rl.error) setRepeatLinks(rl.data ?? []);
   }
   useEffect(() => { void load(); }, [repairId]);
@@ -127,6 +131,17 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     await load();
   }
 
+  async function saveFinalAgreedCharge() {
+    const amount = Number(finalAgreedAmount);
+    if (!finalAgreedAmount.trim() || !Number.isFinite(amount) || amount < 0) return toast.error("Enter the final amount agreed with the customer. Use 0 if no charge applies.");
+    setBusy(true);
+    const { error } = await repairOperationsService.setFinalAgreedCharge(repairId, amount);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setFinalAgreedSaved(true);
+    toast.success("Final agreed charge saved.");
+  }
+
   async function collect() {
     if (!recipientName.trim()) return toast.error("Enter the name of the person collecting the device.");
     if (!handoverConfirmed) return toast.error("Confirm that the customer or recipient has acknowledged the handover.");
@@ -134,7 +149,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     const { error } = await repairOperationsService.recordHandover({ repairId, recipientName: recipientName.trim(), recipientPhone: recipientPhone.trim() || null, deviceCondition: handoverCondition.trim() || null, customerConfirmed: true, notes: handoverNotes.trim() || null });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Device collected and handover recorded.");
+    toast.success(["No Fix", "Failed Repair"].includes(status) ? "Device handover recorded. The unsuccessful outcome was preserved." : "Device collected and handover recorded.");
     await load();
   }
 
@@ -163,7 +178,7 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
 
     <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><XCircle className="size-5 text-teal-700"/>Repair outcome & warranty</CardTitle></CardHeader><CardContent className="space-y-4"><p className="text-xs leading-5 text-slate-500">Use the Testing step and the Mark Completed action above when the repair is successful. Record an outcome here only when the job cannot be completed normally.</p><Input aria-label="Repair outcome note" value={outcomeReason} onChange={e => setOutcomeReason(e.target.value)} placeholder="Reason or outcome note (optional)"/><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => recordOutcome("no_fix")} disabled={busy}>No fix</Button><Button variant="outline" onClick={() => recordOutcome("failed_repair")} disabled={busy}>Failed repair</Button><Button variant="outline" onClick={() => recordOutcome("returned_unrepaired")} disabled={busy}>Returned unrepaired</Button><Button variant="outline" onClick={() => recordOutcome("cancelled")} disabled={busy}>Cancelled</Button></div>{outcome && <div className="rounded-xl bg-slate-50 p-4 text-sm"><strong>{outcome.outcome}</strong>{outcome.reason && <p className="mt-1 text-slate-600">{outcome.reason}</p>}</div>}<div className="grid gap-2 sm:grid-cols-[140px_1fr]"><Input aria-label="Warranty period in days" type="number" min="0" step="1" value={warrantyDays} onChange={e => setWarrantyDays(e.target.value)} placeholder="Days"/><Input aria-label="Warranty terms" value={warrantyTerms} onChange={e => setWarrantyTerms(e.target.value)} placeholder="Warranty terms (optional)"/></div><div className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Warranty</p>{warranty ? <p className="text-sm text-slate-500">{warranty.warranty_days} days · expires {new Date(warranty.expires_at).toLocaleDateString("en-NG")} · {warranty.status}</p> : <p className="text-sm text-slate-500">No warranty recorded.</p>}</div>{status === "Completed" && <Button onClick={createWarranty} disabled={busy}><ShieldCheck className="mr-2 size-4"/>{warranty ? "Update warranty" : "Issue warranty"}</Button>}</div></CardContent></Card>
 
-    <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><HandCoins className="size-5 text-teal-700"/>Collection & repeat repair</CardTitle></CardHeader><CardContent className="space-y-4"><div className="grid gap-2 sm:grid-cols-2"><Input aria-label="Recipient name" value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Name of person collecting"/><Input aria-label="Recipient phone" value={recipientPhone} onChange={e => setRecipientPhone(e.target.value)} placeholder="Recipient phone (optional)"/><Input aria-label="Device condition at handover" value={handoverCondition} onChange={e => setHandoverCondition(e.target.value)} placeholder="Condition at handover (optional)"/><Input aria-label="Approval note for unpaid collection" value={handoverNotes} onChange={e => setHandoverNotes(e.target.value)} placeholder="Boss approval note, only if balance remains"/></div><label className="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" className="mt-1 size-4 accent-teal-700" checked={handoverConfirmed} onChange={e => setHandoverConfirmed(e.target.checked)}/><span>The customer or named recipient has confirmed that the device was handed over.</span></label><div className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Device handover</p>{handover ? <p className="text-sm text-slate-500">Collected by {handover.recipient_name} · {new Date(handover.handed_over_at).toLocaleString("en-NG")}</p> : <p className="text-sm text-slate-500">Customer confirmation is required before collection.</p>}</div>{["Completed", "Ready for Collection", "Collected"].includes(status) && <Button onClick={collect} disabled={busy}>{handover ? "Update handover" : "Collect device"}</Button>}</div><RepeatLinkForm repairId={repairId} warrantyId={warranty?.id ?? null} existing={repeatLinks} busy={busy} reload={load}/></CardContent></Card>
+    <Card><CardHeader><CardTitle className="flex items-center gap-2 font-heading text-lg"><HandCoins className="size-5 text-teal-700"/>Collection & repeat repair</CardTitle></CardHeader><CardContent className="space-y-4">{["No Fix", "Failed Repair"].includes(status) && <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4"><div><p className="font-semibold text-slate-900">Final agreed charge</p><p className="mt-1 text-sm text-slate-600">Record what the customer agreed to pay for diagnosis or work attempted. Enter 0 if no charge applies. The original failed outcome will remain on the repair record.</p></div><div className="mt-3 flex gap-2"><Input aria-label="Final agreed charge in naira" type="number" min="0" step="0.01" value={finalAgreedAmount} onChange={e => { setFinalAgreedAmount(e.target.value); setFinalAgreedSaved(false); }} placeholder="Final agreed amount"/><Button variant="outline" onClick={saveFinalAgreedCharge} disabled={busy}>{busy ? "Saving..." : "Save agreed charge"}</Button></div></div>}<div className="grid gap-2 sm:grid-cols-2"><Input aria-label="Recipient name" value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="Name of person collecting"/><Input aria-label="Recipient phone" value={recipientPhone} onChange={e => setRecipientPhone(e.target.value)} placeholder="Recipient phone (optional)"/><Input aria-label="Device condition at handover" value={handoverCondition} onChange={e => setHandoverCondition(e.target.value)} placeholder="Condition at handover (optional)"/><Input aria-label="Approval note for unpaid collection" value={handoverNotes} onChange={e => setHandoverNotes(e.target.value)} placeholder="Boss approval note, only if balance remains"/></div><label className="flex items-start gap-2 text-sm text-slate-700"><input type="checkbox" className="mt-1 size-4 accent-teal-700" checked={handoverConfirmed} onChange={e => setHandoverConfirmed(e.target.checked)}/><span>The customer or named recipient has confirmed that the device was handed over.</span></label><div className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold text-slate-900">Device handover</p>{handover ? <p className="text-sm text-slate-500">Collected by {handover.recipient_name} · {new Date(handover.handed_over_at).toLocaleString("en-NG")}</p> : <p className="text-sm text-slate-500">Customer confirmation is required before collection.</p>}</div>{(["Completed", "Ready for Collection", "Collected"].includes(status) || (["No Fix", "Failed Repair"].includes(status) && finalAgreedSaved)) && <Button onClick={collect} disabled={busy}>{handover ? "Update handover" : "Collect device"}</Button>}</div><RepeatLinkForm repairId={repairId} warrantyId={warranty?.id ?? null} existing={repeatLinks} busy={busy} reload={load}/></CardContent></Card>
 
     <div className="sr-only">{customerId}</div>
   </section>;
