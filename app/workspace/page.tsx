@@ -64,7 +64,6 @@ export default function WorkspacePage() {
   const query = search.trim().toLowerCase();
   const searchResults = useMemo(
     () => allowedGroups.flatMap((group) => group.items)
-      .filter((item) => !QUICK_TASKS.some((task) => task.href === item.href))
       .filter((item) => query && `${item.title} ${item.description}`.toLowerCase().includes(query)),
     [allowedGroups, query],
   );
