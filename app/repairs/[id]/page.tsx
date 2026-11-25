@@ -53,7 +53,7 @@ type RepairData = {
 };
 
 const money = (value: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(value);
-const terminalStatuses = ["Collected", "Cancelled"];
+const terminalStatuses = ["Collected", "Cancelled", "No Fix", "Failed Repair", "Returned Unrepaired"];
 const outcomeStatuses = ["No Fix", "Failed Repair", "Returned Unrepaired"];
 
 function statusVariant(status: string) {
@@ -64,6 +64,7 @@ function statusVariant(status: string) {
 }
 
 function slaLabel(repair: RepairData) {
+  if (repair.status === "Completed") return "Ready for pickup";
   if (terminalStatuses.includes(repair.status)) return "Closed";
   if (!repair.expected_completion_date) return "No deadline";
   const due = new Date(`${repair.expected_completion_date}T23:59:59`);
