@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Bell, Home, LogOut, Search, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase, getCurrentSession } from "@/lib/supabase";
+import { staffService } from "@/services/staffService";
+import { hasPermission } from "@/lib/permissions";
+import type { StaffRole } from "@/types/staff";
 
 const PAGE_TITLES: Record<string, string> = {
   "/workspace": "Home", "/dashboard": "Home", "/customers": "Customers", "/devices": "Devices",
@@ -36,12 +39,18 @@ export default function Header() {
   const [fullName, setFullName] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
+  const [role, setRole] = useState<StaffRole | null>(null);
   const isHome = pathname === "/workspace" || pathname === "/dashboard";
 
   useEffect(() => {
     let active = true;
+    void staffService.getMyRole().then(({ data }) => { if (active && data) setRole(data); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     void fetchProfile();
-    void loadAlerts();
     return () => { active = false; };
 
     async function fetchProfile() {
@@ -53,12 +62,20 @@ export default function Header() {
       setFullName(data.full_name);
       setCompanyName(company?.name ?? null);
     }
-    async function loadAlerts() {
-      const { data } = await supabase.rpc("get_operational_alerts", { p_limit: 100 });
-      if (!active) return;
-      setUnread(((data ?? []) as Array<{ is_read: boolean }>).filter((a) => !a.is_read).length);
-    }
   }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    if (!hasPermission(role, "profit")) {
+      setUnread(0);
+      return () => { active = false; };
+    }
+    void supabase.rpc("get_operational_alerts", { p_limit: 100 }).then(({ data }) => {
+      if (!active) return;
+      setUnread(((data ?? []) as Array<{ is_read: boolean }>).filter((alert) => !alert.is_read).length);
+    });
+    return () => { active = false; };
+  }, [role, pathname]);
 
   async function handleLogout() { await supabase.auth.signOut(); router.replace("/login"); }
   const displayName = fullName || "Staff member";
@@ -79,10 +96,10 @@ export default function Header() {
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <button type="button" onClick={() => router.push("/search")} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Search"><Search className="size-4" /></button>
-        <button type="button" onClick={() => router.push("/alerts")} className={`${iconButtonClass} relative`} aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}><Bell className="size-4" />{unread > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#c84b4b] px-1 text-[9px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}</button>
+        {hasPermission(role, "search") && <button type="button" onClick={() => router.push("/search")} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Search"><Search className="size-4" /></button>}
+        {hasPermission(role, "profit") && <button type="button" onClick={() => router.push("/alerts")} className={`${iconButtonClass} relative`} aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}><Bell className="size-4" />{unread > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#c84b4b] px-1 text-[9px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}</button>}
         <div className="hidden items-center gap-2 rounded-xl border border-[#dfe6df] bg-white px-2 py-1.5 sm:flex"><div className="flex size-7 items-center justify-center rounded-lg bg-[#123b34] font-heading text-sm font-bold text-[#d7a95a]">{initial}</div><div className="min-w-0 text-left"><p className="max-w-32 truncate text-xs font-bold text-[#182a28]">{displayName}</p><p className="max-w-32 truncate text-[10px] text-[#74837e]">{companyName || "Account"}</p></div></div>
-        <button type="button" onClick={() => router.push("/settings")} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Settings"><Settings className="size-4" /></button>
+        {hasPermission(role, "settings") && <button type="button" onClick={() => router.push("/settings")} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Settings"><Settings className="size-4" /></button>}
         <button type="button" onClick={handleLogout} className={`${iconButtonClass} hidden sm:inline-flex`} aria-label="Log out"><LogOut className="size-4" /></button>
       </div>
     </header>
