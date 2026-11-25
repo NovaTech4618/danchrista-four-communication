@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, AlertCircle, Clock3, Plus, Search, Smartphone, Wrench, CheckCircle2, ClipboardList } from "lucide-react";
+import { ArrowRight, AlertCircle, Clock3, Plus, Search, Smartphone, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { repairService } from "@/services/repairService";
 import AppLayout from "@/components/layout/AppLayout";
