@@ -41,8 +41,11 @@ export const repairOperationsService = {
   async saveIntake(input: Omit<RepairIntake, "id" | "created_at" | "updated_at">) {
     // Never send UI placeholder strings to timestamptz columns. The intake form
     // uses empty strings for text inputs, but timestamps must be null or omitted.
+    const fields = Object.fromEntries(
+      Object.entries(input).filter(([key]) => !["id", "created_at", "updated_at"].includes(key)),
+    ) as Omit<RepairIntake, "id" | "created_at" | "updated_at">;
     const payload = {
-      ...input,
+      ...fields,
       acknowledged_at: input.acknowledged_at || null,
       acknowledged_by: input.acknowledged_by || null,
     };
@@ -72,11 +75,14 @@ export const repairOperationsService = {
   async createWarranty(repairId: string, days: number, terms?: string | null) {
     return await supabase.rpc("create_repair_warranty", { p_repair_id: repairId, p_warranty_days: days, p_terms: terms ?? null });
   },
+  async setFinalAgreedCharge(repairId: string, amount: number) {
+    return await supabase.rpc("set_repair_final_agreed_charge", { p_repair_id: repairId, p_amount: amount });
+  },
   async getHandover(repairId: string) {
     return await supabase.from("repair_handovers").select("*").eq("repair_id", repairId).maybeSingle<RepairHandover>();
   },
-  async recordHandover(input: { repairId: string; recipientName: string; recipientPhone?: string | null; idType?: string | null; idReference?: string | null; deviceCondition?: string | null; notes?: string | null }) {
-    return await supabase.rpc("record_repair_handover", { p_repair_id: input.repairId, p_recipient_name: input.recipientName, p_recipient_phone: input.recipientPhone ?? null, p_id_type: input.idType ?? null, p_id_reference: input.idReference ?? null, p_device_condition: input.deviceCondition ?? null, p_customer_confirmed: true, p_notes: input.notes ?? null });
+  async recordHandover(input: { repairId: string; recipientName: string; recipientPhone?: string | null; idType?: string | null; idReference?: string | null; deviceCondition?: string | null; customerConfirmed: boolean; notes?: string | null }) {
+    return await supabase.rpc("record_repair_handover", { p_repair_id: input.repairId, p_recipient_name: input.recipientName, p_recipient_phone: input.recipientPhone ?? null, p_id_type: input.idType ?? null, p_id_reference: input.idReference ?? null, p_device_condition: input.deviceCondition ?? null, p_customer_confirmed: input.customerConfirmed, p_notes: input.notes ?? null });
   },
   async getRepeatLinks(repairId: string) {
     return await supabase.from("repair_repeat_links").select("*").or(`original_repair_id.eq.${repairId},repeat_repair_id.eq.${repairId}`).order("created_at", { ascending: false }).returns<RepairRepeatLink[]>();

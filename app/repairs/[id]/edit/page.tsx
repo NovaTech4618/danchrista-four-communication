@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { repairService } from "@/services/repairService";
-import { MANUAL_REPAIR_STATUSES, REPAIR_PRIORITIES } from "@/types/repair";
+import { REPAIR_PRIORITIES } from "@/types/repair";
 
 type RepairForm = {
   technician: string;
@@ -20,11 +20,10 @@ type RepairForm = {
   repair_notes: string;
   solution: string;
   priority: string;
-  deposit: string;
   expected_completion_date: string;
   estimated_cost: string;
   final_cost: string;
-  status: string;
+  service_type: string;
 };
 
 const input = "h-11 rounded-xl border-slate-200 bg-white";
@@ -58,11 +57,10 @@ export default function EditRepairPage() {
       repair_notes: data.repair_notes ?? "",
       solution: data.solution ?? "",
       priority: data.priority ?? "Normal",
-      deposit: data.deposit == null ? "" : String(data.deposit),
       expected_completion_date: data.expected_completion_date ?? "",
       estimated_cost: data.estimated_cost == null ? "" : String(data.estimated_cost),
       final_cost: data.final_cost == null ? "" : String(data.final_cost),
-      status: data.status ?? "Received",
+      service_type: data.service_type ?? "Standard Repair",
     });
   }
 
@@ -75,7 +73,7 @@ export default function EditRepairPage() {
     if (!form) return;
     if (!form.issue.trim()) return void toast.error("The repair problem is required.");
 
-    const numeric = ["deposit", "estimated_cost", "final_cost"] as const;
+    const numeric = ["estimated_cost", "final_cost"] as const;
     for (const key of numeric) {
       if (form[key] && (!Number.isFinite(Number(form[key])) || Number(form[key]) < 0)) {
         return void toast.error(`${key.replaceAll("_", " ")} is invalid.`);
@@ -84,11 +82,6 @@ export default function EditRepairPage() {
 
     const estimated = form.estimated_cost ? Number(form.estimated_cost) : null;
     const finalCost = form.final_cost ? Number(form.final_cost) : null;
-    const deposit = form.deposit ? Number(form.deposit) : 0;
-    if (estimated !== null && deposit > estimated && finalCost === null) {
-      return void toast.error("Deposit cannot be greater than the estimated cost.");
-    }
-
     setSaving(true);
     const { error } = await repairService.updateRepair(params.id, {
       technician: form.technician.trim() || null,
@@ -97,11 +90,10 @@ export default function EditRepairPage() {
       repair_notes: form.repair_notes.trim() || null,
       solution: form.solution.trim() || null,
       priority: form.priority,
-      deposit,
       expected_completion_date: form.expected_completion_date || null,
       estimated_cost: estimated,
       final_cost: finalCost,
-      status: form.status,
+      service_type: form.service_type,
     });
     setSaving(false);
 
@@ -124,7 +116,7 @@ export default function EditRepairPage() {
         <Card><CardHeader><CardTitle className="text-base">Job details</CardTitle></CardHeader><CardContent className="space-y-4">
           <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Customer complaint / problem</label><textarea className="min-h-28 w-full rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100" value={form.issue} onChange={(e) => update("issue", e.target.value)} required /></div>
           <div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Technician</label><Input className={input} value={form.technician} onChange={(e) => update("technician", e.target.value)} /></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Expected completion</label><Input className={input} type="date" value={form.expected_completion_date} onChange={(e) => update("expected_completion_date", e.target.value)} /></div></div>
-          <div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Priority</label><select className={select} value={form.priority} onChange={(e) => update("priority", e.target.value)}>{REPAIR_PRIORITIES.map((item) => <option key={item}>{item}</option>)}</select></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Status</label><select className={select} value={form.status} onChange={(e) => update("status", e.target.value)}>{MANUAL_REPAIR_STATUSES.map((item) => <option key={item}>{item}</option>)}</select></div></div>
+          <div className="grid gap-4 sm:grid-cols-2"><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Priority</label><select className={select} value={form.priority} onChange={(e) => update("priority", e.target.value)}>{REPAIR_PRIORITIES.map((item) => <option key={item}>{item}</option>)}</select></div><div><label className="mb-1.5 block text-sm font-medium text-slate-700">Service type</label><select className={select} value={form.service_type} onChange={(e) => update("service_type", e.target.value)}><option>Standard Repair</option><option>Network Unlock</option></select></div></div>
         </CardContent></Card>
 
         <Card><CardHeader><CardTitle className="text-base">Diagnosis & work</CardTitle></CardHeader><CardContent className="space-y-4">
@@ -133,10 +125,10 @@ export default function EditRepairPage() {
           <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Repair notes</label><textarea className="min-h-24 w-full rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100" value={form.repair_notes} onChange={(e) => update("repair_notes", e.target.value)} /></div>
         </CardContent></Card>
 
-        <Card><CardHeader><CardTitle className="text-base">Money</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-3">
+        <Card><CardHeader><CardTitle className="text-base">Repair pricing</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">
           <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Estimated cost</label><Input className={input} type="number" min="0" step="0.01" value={form.estimated_cost} onChange={(e) => update("estimated_cost", e.target.value)} /></div>
           <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Final cost</label><Input className={input} type="number" min="0" step="0.01" value={form.final_cost} onChange={(e) => update("final_cost", e.target.value)} /></div>
-          <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Deposit</label><Input className={input} type="number" min="0" step="0.01" value={form.deposit} onChange={(e) => update("deposit", e.target.value)} /></div>
+          
         </CardContent></Card>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><Link href={`/repairs/${params.id}`} className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700">Cancel</Link><Button type="submit" className="h-11 rounded-xl bg-slate-950 px-6 hover:bg-slate-800" disabled={saving}>{saving ? "Saving..." : "Save repair"}</Button></div>
