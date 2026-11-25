@@ -69,10 +69,9 @@ export const repairService = {
     solution: string | null;
     priority: string;
     expected_completion_date: string | null;
-    deposit?: number;
-    estimated_cost?: number | null;
-    final_cost?: number | null;
-    status?: string;
+    service_type: string;
+    estimated_cost: number | null;
+    final_cost: number | null;
   }) {
     const { data, error } = await supabase
       .from("repairs")
@@ -84,6 +83,9 @@ export const repairService = {
         solution: repair.solution,
         priority: repair.priority,
         expected_completion_date: repair.expected_completion_date,
+        service_type: repair.service_type,
+        estimated_cost: repair.estimated_cost,
+        final_cost: repair.final_cost,
       })
       .eq("id", id)
       .select("*")
