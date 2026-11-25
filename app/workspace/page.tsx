@@ -82,10 +82,10 @@ export default function WorkspacePage() {
             </div>
           </div>
           <div className="border-t border-[#edf0eb] bg-[#fbfcfa] px-5 py-4 sm:px-8">
-            <label htmlFor="workspace-search" className="sr-only">Search shop tools</label>
+            <label htmlFor="workspace-search" className="sr-only">Find a shop tool</label>
             <div className="relative max-w-2xl">
               <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#74837e]" aria-hidden="true" />
-              <input id="workspace-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search repairs, customers, stock, reports..." className="h-12 w-full rounded-xl border border-[#dfe6df] bg-white pl-11 pr-4 text-sm text-[#182a28] outline-none transition placeholder:text-[#89958f] focus:border-[#1d6a54] focus:ring-4 focus:ring-[#1d6a54]/10" />
+              <input id="workspace-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a tool: repairs, stock, reports..." className="h-12 w-full rounded-xl border border-[#dfe6df] bg-white pl-11 pr-4 text-sm text-[#182a28] outline-none transition placeholder:text-[#89958f] focus:border-[#1d6a54] focus:ring-4 focus:ring-[#1d6a54]/10" />
             </div>
             {query && <div className="mt-3 max-w-2xl rounded-xl border border-[#e3e9e4] bg-white p-3" aria-live="polite">
               <p className="mb-2 text-xs font-semibold text-[#74837e]">{searchResults.length} matching {searchResults.length === 1 ? "tool" : "tools"}</p>
