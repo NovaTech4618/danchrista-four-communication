@@ -75,6 +75,9 @@ export const repairOperationsService = {
   async createWarranty(repairId: string, days: number, terms?: string | null) {
     return await supabase.rpc("create_repair_warranty", { p_repair_id: repairId, p_warranty_days: days, p_terms: terms ?? null });
   },
+  async setFinalAgreedCharge(repairId: string, amount: number) {
+    return await supabase.rpc("set_repair_final_agreed_charge", { p_repair_id: repairId, p_amount: amount });
+  },
   async getHandover(repairId: string) {
     return await supabase.from("repair_handovers").select("*").eq("repair_id", repairId).maybeSingle<RepairHandover>();
   },
