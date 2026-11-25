@@ -12,14 +12,14 @@ import type { RepairApprovalHistory, RepairIntake, RepairQuote } from "@/types/r
 import type { RepairHandover, RepairRepeatLink } from "@/types/repairHandover";
 import RepairInvoiceWorkflow from "@/components/repairs/RepairInvoiceWorkflow";
 
-type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number; repairFinalCost?: number | null };
+type Props = { repairId: string; companyId: string; branchId: string | null; customerId: string | null; status: string; expectedCompletionDate: string | null; repairTotal?: number; repairFinalCost?: number | null; onOutcomeRecorded?: (status: string) => void };
 type CheckKey = "power_test" | "charging_test" | "camera_test" | "speaker_test" | "microphone_test" | "buttons_test" | "biometric_test" | "network_test";
 const checks: { key: CheckKey; label: string }[] = [
   { key: "power_test", label: "Power" }, { key: "charging_test", label: "Charging" }, { key: "camera_test", label: "Camera" }, { key: "speaker_test", label: "Speaker" },
   { key: "microphone_test", label: "Microphone" }, { key: "buttons_test", label: "Buttons" }, { key: "biometric_test", label: "Biometric" }, { key: "network_test", label: "Network" },
 ];
 
-export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0, repairFinalCost = null }: Props) {
+export default function RepairOperationsPanel({ repairId, companyId, branchId, customerId, status, expectedCompletionDate, repairTotal = 0, repairFinalCost = null, onOutcomeRecorded }: Props) {
   const [intake, setIntake] = useState<RepairIntake | null>(null);
   const [quote, setQuote] = useState<RepairQuote | null>(null);
   const [history, setHistory] = useState<RepairApprovalHistory[]>([]);
@@ -52,8 +52,6 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     if (!o.error) setOutcome(o.data);
     if (!w.error) { setWarranty(w.data); setWarrantyDays(String(w.data?.warranty_days ?? 30)); setWarrantyTerms(w.data?.terms ?? ""); }
     if (!ho.error) { setHandover(ho.data); setRecipientName(ho.data?.recipient_name ?? ""); setRecipientPhone(ho.data?.recipient_phone ?? ""); setHandoverCondition(ho.data?.device_condition ?? ""); setHandoverConfirmed(Boolean(ho.data?.customer_confirmed)); setHandoverNotes(""); }
-    setFinalAgreedAmount(repairFinalCost == null ? "" : String(repairFinalCost));
-    setFinalAgreedSaved(repairFinalCost != null);
     if (!rl.error) setRepeatLinks(rl.data ?? []);
   }
   useEffect(() => { void load(); }, [repairId]);
@@ -115,6 +113,8 @@ export default function RepairOperationsPanel({ repairId, companyId, branchId, c
     const { error } = await repairOperationsService.recordOutcome(repairId, nextOutcome, outcomeReason.trim() || null);
     setBusy(false);
     if (error) return toast.error(error.message);
+    const nextStatus = nextOutcome === "no_fix" ? "No Fix" : nextOutcome === "failed_repair" ? "Failed Repair" : nextOutcome === "cancelled" ? "Cancelled" : nextOutcome === "returned_unrepaired" ? "Returned Unrepaired" : "Completed";
+    onOutcomeRecorded?.(nextStatus);
     toast.success("Repair outcome recorded.");
     setOutcomeReason("");
     await load();
