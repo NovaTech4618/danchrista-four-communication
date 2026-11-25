@@ -19,11 +19,14 @@ const inputClass = "h-11 rounded-xl border-slate-200 bg-white";
 const selectClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100";
 const brands = ["Apple", "Samsung", "Tecno", "Infinix", "itel", "Redmi", "Xiaomi", "Nokia", "Huawei", "Oppo", "Vivo", "Realme", "Google", "OnePlus", "Other"];
 
+function localDate(date: Date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
 function suggestedDate() {
   const date = new Date();
   date.setDate(date.getDate() + 3);
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
+  return localDate(date);
 }
 
 export default function NewRepairPage() {
@@ -195,7 +198,7 @@ export default function NewRepairPage() {
               <Field label="Service type"><select className={selectClass} value={serviceType} onChange={e => { setServiceType(e.target.value); if (e.target.value === "Network Unlock") setExpectedDate(""); else if (!expectedDate) setExpectedDate(suggestedDate()); }}><option>Standard Repair</option><option>Network Unlock</option></select></Field>
               <Field label="Assigned technician (optional)"><Input className={inputClass} value={technician} onChange={e => setTechnician(e.target.value)} placeholder="Name of technician" /></Field>
               <Field label="Priority"><select className={selectClass} value={priority} onChange={e => setPriority(e.target.value)}>{REPAIR_PRIORITIES.map(item => <option key={item}>{item}</option>)}</select></Field>
-              <Field label="Target completion date"><Input className={inputClass} type="date" min={new Date().toISOString().slice(0, 10)} max={serviceType === "Standard Repair" ? suggestedDate() : undefined} required={serviceType === "Standard Repair"} value={expectedDate} onChange={e => setExpectedDate(e.target.value)} /></Field>
+              <Field label="Target completion date"><Input className={inputClass} type="date" min={localDate(new Date())} max={serviceType === "Standard Repair" ? suggestedDate() : undefined} required={serviceType === "Standard Repair"} value={expectedDate} onChange={e => setExpectedDate(e.target.value)} /></Field>
               <p className="self-end text-xs leading-5 text-slate-500">Standard repairs are limited to a three-day target by the shop workflow. Network unlock jobs have no automatic three-day limit.</p>
               <Field label="Estimated cost (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={estimated} onChange={e => setEstimated(e.target.value)} placeholder="Leave blank if not yet known" /></Field>
               <Field label="Deposit received (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={deposit} onChange={e => setDeposit(e.target.value)} placeholder="0" /></Field>
