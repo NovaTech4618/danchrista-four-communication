@@ -6,7 +6,6 @@ import { ArrowRight, AlertCircle, Clock3, Plus, Search, Smartphone, Wrench } fro
 import { toast } from "sonner";
 import { repairService } from "@/services/repairService";
 import AppLayout from "@/components/layout/AppLayout";
-import ReturnApprovalPanel from "@/components/sales/ReturnApprovalPanel";
 
 type RepairRow = {
   id: string;
@@ -107,8 +106,6 @@ export default function RepairsPage() {
       <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1d6a54]">Amezing · Workshop</p><h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-[#182a28]">Repairs</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-[#74837e]">Every device has one repair record. Follow it from check-in to diagnosis, repair, testing and collection.</p></div>
       <Link href="/repairs/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#123b34] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#0d302a]"><Plus className="size-4" /> Receive a device</Link>
     </header>
-
-    <ReturnApprovalPanel />
 
     <section aria-label="Repair queue summary" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <button onClick={() => { setQueue("active"); setStatusFilter("all"); }} className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-teal-300 ${queue === "active" ? "border-teal-500 ring-2 ring-teal-100" : "border-[#dfe6df]"}`}><p className="text-xs font-semibold text-[#74837e]">Active jobs</p><p className="mt-2 font-heading text-2xl font-bold text-[#182a28] tabular-nums">{counts.active}</p><p className="mt-1 text-xs text-[#74837e]">Being handled</p></button>
