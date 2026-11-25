@@ -51,7 +51,6 @@ export default function Header() {
   useEffect(() => {
     let active = true;
     void fetchProfile();
-    void loadAlerts();
     return () => { active = false; };
 
     async function fetchProfile() {
@@ -63,12 +62,20 @@ export default function Header() {
       setFullName(data.full_name);
       setCompanyName(company?.name ?? null);
     }
-    async function loadAlerts() {
-      const { data } = await supabase.rpc("get_operational_alerts", { p_limit: 100 });
-      if (!active) return;
-      setUnread(((data ?? []) as Array<{ is_read: boolean }>).filter((a) => !a.is_read).length);
-    }
   }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    if (!hasPermission(role, "profit")) {
+      setUnread(0);
+      return () => { active = false; };
+    }
+    void supabase.rpc("get_operational_alerts", { p_limit: 100 }).then(({ data }) => {
+      if (!active) return;
+      setUnread(((data ?? []) as Array<{ is_read: boolean }>).filter((alert) => !alert.is_read).length);
+    });
+    return () => { active = false; };
+  }, [role, pathname]);
 
   async function handleLogout() { await supabase.auth.signOut(); router.replace("/login"); }
   const displayName = fullName || "Staff member";
