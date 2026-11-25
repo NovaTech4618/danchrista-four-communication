@@ -59,6 +59,8 @@ export default function NewRepairPage() {
     if (!customerName.trim()) return void toast.error("Enter the customer's name.");
     if (!brand.trim() || !model.trim()) return void toast.error("Enter the device brand and model.");
     if (!issue.trim()) return void toast.error("Record the problem reported by the customer.");
+    if (serviceType === "Standard Repair" && !expectedDate) return void toast.error("Choose a target date for this standard repair.");
+    if (serviceType === "Standard Repair" && expectedDate > suggestedDate()) return void toast.error("Standard repairs must have a target within three days. Use Network Unlock for jobs with a different timeframe.");
 
     const estimatedCost = estimated.trim() ? Number(estimated) : null;
     const paid = deposit.trim() ? Number(deposit) : 0;
@@ -193,7 +195,7 @@ export default function NewRepairPage() {
               <Field label="Service type"><select className={selectClass} value={serviceType} onChange={e => { setServiceType(e.target.value); if (e.target.value === "Network Unlock") setExpectedDate(""); else if (!expectedDate) setExpectedDate(suggestedDate()); }}><option>Standard Repair</option><option>Network Unlock</option></select></Field>
               <Field label="Assigned technician (optional)"><Input className={inputClass} value={technician} onChange={e => setTechnician(e.target.value)} placeholder="Name of technician" /></Field>
               <Field label="Priority"><select className={selectClass} value={priority} onChange={e => setPriority(e.target.value)}>{REPAIR_PRIORITIES.map(item => <option key={item}>{item}</option>)}</select></Field>
-              <Field label="Target completion date"><Input className={inputClass} type="date" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} /></Field>
+              <Field label="Target completion date"><Input className={inputClass} type="date" min={new Date().toISOString().slice(0, 10)} max={serviceType === "Standard Repair" ? suggestedDate() : undefined} required={serviceType === "Standard Repair"} value={expectedDate} onChange={e => setExpectedDate(e.target.value)} /></Field>
               <p className="self-end text-xs leading-5 text-slate-500">Standard repairs are limited to a three-day target by the shop workflow. Network unlock jobs have no automatic three-day limit.</p>
               <Field label="Estimated cost (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={estimated} onChange={e => setEstimated(e.target.value)} placeholder="Leave blank if not yet known" /></Field>
               <Field label="Deposit received (₦)"><Input className={inputClass} type="number" min="0" step="0.01" value={deposit} onChange={e => setDeposit(e.target.value)} placeholder="0" /></Field>
