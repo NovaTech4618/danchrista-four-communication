@@ -128,7 +128,7 @@ export default function WorkspacePage() {
           <div className="relative mt-6 flex flex-wrap gap-2">
             <Link href="/sales" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#42c978] px-4 py-2.5 text-sm font-bold text-[#08271a] transition hover:bg-[#6ce093]"><Plus className="size-4" /> New sale</Link>
             <Link href="/repairs/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.12]"><Wrench className="size-4" /> Receive repair</Link>
-            <Link href="/search" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.12]"><Search className="size-4" /> Find a record</Link>
+            {hasPermission(role, "search") && <Link href="/search" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.12]"><Search className="size-4" /> Find a record</Link>}
           </div>
         </section>
 
