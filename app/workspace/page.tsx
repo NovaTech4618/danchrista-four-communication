@@ -69,16 +69,10 @@ export default function WorkspacePage() {
       const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const tomorrow = new Date(startToday);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const startWeek = new Date(startToday);
-      startWeek.setDate(startWeek.getDate() - ((startWeek.getDay() + 6) % 7));
       const sales = (salesResult?.data ?? []) as Sale[];
       const todaySales = sales.filter((sale) => {
         const date = new Date(sale.sale_date);
         return date >= startToday && date < tomorrow;
-      });
-      const weekSales = sales.filter((sale) => {
-        const date = new Date(sale.sale_date);
-        return date >= startWeek && date < tomorrow;
       });
       const stock = (stockResult?.data ?? []) as InventoryItem[];
       const balances = (balancesResult?.data ?? []) as Array<{ balance?: number | string | null }>;
@@ -87,7 +81,6 @@ export default function WorkspacePage() {
       setOverview({
         salesToday: todaySales.reduce((sum, sale) => sum + Number(sale.total || 0), 0),
         salesTodayCount: todaySales.length,
-        phonesSoldToday: todaySales.reduce((sum, sale) => sum + Number((sale as any).items?.filter?.((item: any) => item.category === "Phone" || item.item_type === "phone").reduce?.((n: number, item: any) => n + Number(item.quantity || 1), 0) || 0), 0),
         lowStock: stock.filter((item) => Number(item.quantity) <= Number(item.minimum_stock)).length,
         customerOutstanding: balances.reduce((sum, item) => sum + Math.max(0, Number(item.balance || 0)), 0),
         loading: false, failed, repairsFailed,
