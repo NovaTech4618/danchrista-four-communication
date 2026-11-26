@@ -36,7 +36,7 @@ export default function WorkspacePage() {
   const [today, setToday] = useState("");
   const [repairs, setRepairs] = useState<RepairSummary[]>([]);
   const [overview, setOverview] = useState({
-    salesToday: 0, salesTodayCount: 0, phonesSoldToday: 0, lowStock: 0,
+    salesToday: 0, salesTodayCount: 0, lowStock: 0,
     customerOutstanding: 0, loading: true, failed: false, repairsFailed: false,
   });
 
@@ -102,8 +102,8 @@ export default function WorkspacePage() {
   const actions = [
     { title: "New sale", detail: "Sell a phone or accessory", href: "/sales", permission: "sales" as const, icon: ShoppingBag, featured: true },
     { title: "Log phone / repair", detail: "Register a device and its issue", href: "/repairs/new", permission: "repairs" as const, icon: Wrench },
-    { title: "Find IMEI / receipt", detail: "Search a phone or transaction", href: "/search", permission: "staff" as const, icon: Search },
-    { title: "Phone records", detail: "Open device history", href: "/devices", permission: "devices" as const, icon: Smartphone },
+    { title: "Find IMEI / receipt", detail: "Search a phone or transaction", href: "/search", permission: "search" as const, icon: Search },
+    { title: "Phone records", detail: "Open device history", href: "/devices", permission: "repairs" as const, icon: Smartphone },
   ].filter((item) => role && hasPermission(role, item.permission));
 
   const metric = (value: number) => overview.loading ? "…" : overview.failed ? "Unavailable" : money(value);
